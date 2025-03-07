@@ -64,8 +64,9 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Expires:  session.Expires,
 		HttpOnly: true,
 		Secure:   false,
-		SameSite: http.SameSiteStrictMode,
-		Path:     "/auth",
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+		Domain:   "localhost",
 	}
 	http.SetCookie(w, cookie)
 

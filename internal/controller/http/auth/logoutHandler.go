@@ -24,9 +24,10 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		Expires:  expires,
 		HttpOnly: true,
 		Secure:   false,
-		SameSite: http.SameSiteStrictMode,
-		Path:     "/auth",
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
 		MaxAge:   -1,
+		Domain:   "localhost",
 	})
 
 	err = c.usecase.Logout(cookie.Value)
