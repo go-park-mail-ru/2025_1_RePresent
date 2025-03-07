@@ -44,7 +44,7 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		Balance:  user.Balance,
 		Role:     user.Role,
 	}
-	w.Header().Set("Cache-Control", "private, max-age=60, must-revalidate")
+	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userResponse)
 }
