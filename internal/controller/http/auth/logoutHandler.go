@@ -24,6 +24,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		Expires:  expires,
 		HttpOnly: true,
 		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
 		Path:     "/auth",
 		MaxAge:   -1,
 	})

@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type ResponseUser struct {
+type UserResponse struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Avatar   string `json:"avatar"`
@@ -33,7 +33,7 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	responseUser := ResponseUser{
+	userResponse := UserResponse{
 		Username: user.Username,
 		Email:    user.Email,
 		Avatar:   user.Avatar,
@@ -41,5 +41,5 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		Role:     user.Role,
 	}
 	w.Header().Set("Cache-Control", "private, max-age=60, must-revalidate")
-	json.NewEncoder(w).Encode(responseUser)
+	json.NewEncoder(w).Encode(userResponse)
 }

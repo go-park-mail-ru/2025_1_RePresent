@@ -13,5 +13,6 @@ func SetupRoutes(usecase *usecaseAuth.AuthUsecase) *http.ServeMux {
 	authRoutes := handlerAuth.SetupAuthRoutes(usecase)
 	mux.Handle("/auth/", authRoutes)
 	// mux.Handle("/auth/", http.StripPrefix("/auth", authRoutes)) ТАК НЕ ДЕЛАТЬ !!!
+
 	return mux
 }
