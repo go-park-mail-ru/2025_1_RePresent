@@ -1,9 +1,20 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
+	"RE/configs"
 	"RE/internal/app"
 )
 
 func main() {
-	app.Run()
+	cfg, err := configs.LoadConfig("configs/database.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(cfg)
+
+	app.Run(cfg)
 }
