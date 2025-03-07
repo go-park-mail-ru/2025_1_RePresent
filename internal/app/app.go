@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"log"
 
 	"net/http"
 
@@ -13,12 +14,12 @@ import (
 )
 
 func Run() {
-	db, err := sql.Open("postgres", "user=postgres password=123456 dbname=testdb sslmode=disable")
+	db, err := sql.Open("postgres", "user=postgres password=123456 dbname=test host=localhost port=5432 sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
 	userRepository := repo.NewUserRepository(db)
 	authUsecase := auth.NewAuthUsecase(userRepository)
 	mux := appHttp.SetupRoutes(authUsecase)
-	http.ListenAndServe(":8080", middleware.CORS(mux))
+	log.Fatal(http.ListenAndServe(":8080", middleware.CORS(mux)))
 }

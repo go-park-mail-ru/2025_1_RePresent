@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	handlerAuth "RE/internal/controller/http/auth"
@@ -10,8 +9,9 @@ import (
 
 func SetupRoutes(usecase *usecaseAuth.AuthUsecase) *http.ServeMux {
 	mux := http.NewServeMux()
+
 	authRoutes := handlerAuth.SetupAuthRoutes(usecase)
-	fmt.Println("authRouter успешно подключен")
-	mux.Handle("/auth", authRoutes)
+	mux.Handle("/auth/", authRoutes)
+	// mux.Handle("/auth/", http.StripPrefix("/auth", authRoutes)) ТАК НЕ ДЕЛАТЬ !!!
 	return mux
 }
