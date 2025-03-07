@@ -13,7 +13,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		http.Error(w, "Cookie not found", http.StatusUnauthorized)
+		http.Error(w, "Cookie not found", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -35,5 +35,6 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Logout successful"))
 }

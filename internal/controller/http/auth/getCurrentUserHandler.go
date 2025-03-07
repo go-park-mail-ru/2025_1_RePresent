@@ -21,15 +21,19 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		http.Error(w, "Cookie not found", http.StatusUnauthorized)
+		http.Error(w, "Cookie not found", http.StatusUnprocessableEntity)
 		return
 	}
 
 	sessionID := cookie.Value
+	if sessionID == "" {
+		http.Error(w, "Invalid session ID", http.StatusUnprocessableEntity)
+		return
+	}
 
 	user, err := c.usecase.GetUserBySessionID(sessionID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
 	}
 
@@ -41,5 +45,6 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		Role:     user.Role,
 	}
 	w.Header().Set("Cache-Control", "private, max-age=60, must-revalidate")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userResponse)
 }

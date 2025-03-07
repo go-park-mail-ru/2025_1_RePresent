@@ -27,7 +27,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	var req RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, "Invalid JSON", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -53,7 +53,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	}
 	err = auth.AddSession(session)
 	if err != nil {
-		http.Error(w, "Invalid adding user session", http.StatusBadRequest)
+		http.Error(w, "Invalid adding user session", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -68,6 +68,6 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	}
 	http.SetCookie(w, cookie)
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Registration successful"))
 }

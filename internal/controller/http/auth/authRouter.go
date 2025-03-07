@@ -19,7 +19,7 @@ func SetupAuthRoutes(usecase *auth.AuthUsecase) http.Handler {
 	authController := NewAuthController(usecase)
 
 	mux.HandleFunc("/auth/login", authController.LoginHandler)
-	mux.HandleFunc("/auth/register", authController.RegisterHandler)
+	mux.HandleFunc("/auth/signup", authController.RegisterHandler)
 	mux.HandleFunc("/auth/logout", authController.LogoutHandler)
 	mux.HandleFunc("/auth/me", authController.getCurrentUserHandler)
 

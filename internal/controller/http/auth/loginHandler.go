@@ -27,7 +27,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, "Invalid JSON", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = auth.AddSession(session)
 	if err != nil {
-		http.Error(w, "Invalid adding user session", http.StatusBadRequest)
+		http.Error(w, "Invalid adding user session", http.StatusUnprocessableEntity)
 		return
 	}
 

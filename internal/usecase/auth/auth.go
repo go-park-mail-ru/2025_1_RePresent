@@ -50,7 +50,7 @@ func (a *AuthUsecase) GetUserBySessionID(sessionId string) (*entity.User, error)
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("SQL: пользователь с таким id не существует")
+		return nil, errors.New("Пользователь с таким id не существует")
 	}
 	return user, nil
 }
@@ -61,7 +61,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, err
 	}
 	if user != nil {
-		return nil, errors.New("SQL: пользователь с таким email уже существует")
+		return nil, errors.New("Пользователь с таким email уже существует")
 	}
 
 	user, err = a.userRepository.GetUserByUsername(username)
@@ -69,7 +69,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, err
 	}
 	if user != nil {
-		return nil, errors.New("SQL: пользователь с таким username уже существует")
+		return nil, errors.New("Пользователь с таким username уже существует")
 	}
 
 	hashedPassword, err := hashPassword(password)
