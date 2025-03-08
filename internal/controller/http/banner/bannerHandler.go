@@ -1,6 +1,7 @@
 package banner
 
 import (
+	"RE/internal/entity"
 	"encoding/json"
 	"net/http"
 
@@ -16,7 +17,6 @@ func (h *BannerController) GetBannersByUserId(w http.ResponseWriter, r *http.Req
 
 	// Получаем user_id из URL
 	vars := mux.Vars(r)
-	println(vars)
 	userID := vars["user_id"]
 
 	// Получаем баннеры из usecase
@@ -26,10 +26,17 @@ func (h *BannerController) GetBannersByUserId(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Отправляем ответ в формате JSON
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(banners); err != nil {
+
+	if banners == nil {
+		banners = []*entity.Banner{}
+	}
+
+	err = json.NewEncoder(w).Encode(banners)
+	if err != nil {
 		http.Error(w, "Error encoding banners: "+err.Error(), http.StatusInternalServerError)
 	}
+
+	w.WriteHeader(http.StatusOK)
+
 }
