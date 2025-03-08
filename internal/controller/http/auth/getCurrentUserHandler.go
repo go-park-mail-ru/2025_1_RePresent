@@ -6,6 +6,7 @@ import (
 )
 
 type UserResponse struct {
+	Id       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Avatar   string `json:"avatar"`
@@ -32,6 +33,7 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	userResponse := UserResponse{
+		Id:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
 		Avatar:   user.Avatar,
