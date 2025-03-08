@@ -18,7 +18,7 @@ func SetupAuthRoutes(usecase *auth.AuthUsecase) http.Handler {
 	mux := http.NewServeMux()
 	authController := NewAuthController(usecase)
 
-	mux.Handle("/auth/me", middleware.AuthMiddleware(usecase)(http.HandlerFunc(authController.getCurrentUserHandler)))
+	mux.Handle("/auth/me", http.HandlerFunc(authController.getCurrentUserHandler))
 	mux.Handle("/auth/logout", middleware.AuthMiddleware(usecase)(http.HandlerFunc(authController.LogoutHandler)))
 
 	mux.HandleFunc("/auth/login", authController.LoginHandler)
