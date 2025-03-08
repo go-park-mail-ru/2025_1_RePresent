@@ -30,7 +30,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		Domain:   "localhost",
 	})
 
-	err = c.usecase.Logout(cookie.Value)
+	err = c.authUsecase.Logout(cookie.Value)
 	if err != nil {
 		http.Error(w, "Logout failed", http.StatusInternalServerError)
 		return

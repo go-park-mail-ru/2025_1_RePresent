@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func AuthMiddleware(usecase *auth.AuthUsecase) func(http.Handler) http.Handler {
+func AuthMiddleware(authUsecase *auth.AuthUsecase) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("session_id")
@@ -14,7 +14,7 @@ func AuthMiddleware(usecase *auth.AuthUsecase) func(http.Handler) http.Handler {
 				return
 			}
 
-			_, err = usecase.GetUserBySessionID(cookie.Value)
+			_, err = authUsecase.GetUserBySessionID(cookie.Value)
 			if err != nil {
 				http.Error(w, "Unauthorized: User not found", http.StatusUnauthorized)
 				return

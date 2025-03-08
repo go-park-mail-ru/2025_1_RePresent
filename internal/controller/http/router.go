@@ -11,15 +11,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func SetupRoutes(usecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBanner.BannerUsecase) *mux.Router {
+func SetupRoutes(authUsecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBanner.BannerUsecase) *mux.Router {
 	r := mux.NewRouter()
 
 	r.Use(logs.ErrorMiddleware)
 
-	authRoutes := handlerAuth.SetupAuthRoutes(usecase)
+	authRoutes := handlerAuth.SetupAuthRoutes(authUsecase)
 	r.PathPrefix("/auth/").Handler(authRoutes)
 
-	bannerRoutes := handlerBanner.SetupBannerRoutes(usecase, bannerUsecase)
+	bannerRoutes := handlerBanner.SetupBannerRoutes(authUsecase, bannerUsecase)
 	r.PathPrefix("/banner/").Handler(bannerRoutes)
 
 	return r
