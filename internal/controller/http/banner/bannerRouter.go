@@ -11,17 +11,18 @@ import (
 
 type BannerController struct {
 	BannerUsecase *banner.BannerUsecase
+	AuthUsecase   *auth.AuthUsecase
 }
 
-func NewBannerController(bannerUsecase *banner.BannerUsecase) *BannerController {
-	return &BannerController{BannerUsecase: bannerUsecase}
+func NewBannerController(usecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) *BannerController {
+	return &BannerController{AuthUsecase: usecase, BannerUsecase: bannerUsecase}
 }
 
 func SetupBannerRoutes(usecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
-	bannerController := NewBannerController(bannerUsecase)
+	bannerController := NewBannerController(usecase, bannerUsecase)
 
-	muxRouter.Handle("/banner/user/{user_id}/all", middleware.AuthMiddleware(usecase)(http.HandlerFunc(bannerController.GetBannersByUserId)))
+	muxRouter.Handle("/banner/user/{user_id}/all", middleware.AuthMiddleware(usecase)(http.HandlerFunc(bannerController.GetBannersByUserCookie)))
 
 	return muxRouter
 }

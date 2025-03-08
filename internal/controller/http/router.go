@@ -1,24 +1,26 @@
 package http
 
 import (
-	"net/http"
-
 	handlerAuth "RE/internal/controller/http/auth"
 
 	handlerBanner "RE/internal/controller/http/banner"
+	logs "RE/internal/controller/http/middleware"
 	usecaseAuth "RE/internal/usecase/auth"
 	usecaseBanner "RE/internal/usecase/banner"
+
+	"github.com/gorilla/mux"
 )
 
-func SetupRoutes(usecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBanner.BannerUsecase) *http.ServeMux {
-	mux := http.NewServeMux()
+func SetupRoutes(usecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBanner.BannerUsecase) *mux.Router {
+	r := mux.NewRouter()
+
+	r.Use(logs.ErrorMiddleware)
 
 	authRoutes := handlerAuth.SetupAuthRoutes(usecase)
-	mux.Handle("/auth/", authRoutes)
-	// mux.Handle("/auth/", http.StripPrefix("/auth", authRoutes)) ТАК НЕ ДЕЛАТЬ !!!
+	r.PathPrefix("/auth/").Handler(authRoutes)
 
 	bannerRoutes := handlerBanner.SetupBannerRoutes(usecase, bannerUsecase)
-	mux.Handle("/banner/", bannerRoutes)
+	r.PathPrefix("/banner/").Handler(bannerRoutes)
 
-	return mux
+	return r
 }
