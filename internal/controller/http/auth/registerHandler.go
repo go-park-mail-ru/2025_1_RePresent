@@ -38,7 +38,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := c.usecase.Register(req.Username, req.Email, req.Password, req.Role)
+	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, req.Role)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

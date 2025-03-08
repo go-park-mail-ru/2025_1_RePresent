@@ -14,15 +14,15 @@ type BannerController struct {
 	AuthUsecase   *auth.AuthUsecase
 }
 
-func NewBannerController(usecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) *BannerController {
-	return &BannerController{AuthUsecase: usecase, BannerUsecase: bannerUsecase}
+func NewBannerController(authUsecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) *BannerController {
+	return &BannerController{AuthUsecase: authUsecase, BannerUsecase: bannerUsecase}
 }
 
-func SetupBannerRoutes(usecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) http.Handler {
+func SetupBannerRoutes(authUsecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
-	bannerController := NewBannerController(usecase, bannerUsecase)
+	bannerController := NewBannerController(authUsecase, bannerUsecase)
 
-	muxRouter.Handle("/banner/user/{user_id}/all", middleware.AuthMiddleware(usecase)(http.HandlerFunc(bannerController.GetBannersByUserCookie)))
+	muxRouter.Handle("/banner/user/{user_id}/all", middleware.AuthMiddleware(authUsecase)(http.HandlerFunc(bannerController.GetBannersByUserCookie)))
 
 	return muxRouter
 }

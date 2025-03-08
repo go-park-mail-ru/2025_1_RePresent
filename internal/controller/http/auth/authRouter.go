@@ -9,19 +9,19 @@ import (
 )
 
 type AuthController struct {
-	usecase *auth.AuthUsecase
+	authUsecase *auth.AuthUsecase
 }
 
-func NewAuthController(usecase *auth.AuthUsecase) *AuthController {
-	return &AuthController{usecase: usecase}
+func NewAuthController(authUsecase *auth.AuthUsecase) *AuthController {
+	return &AuthController{authUsecase: authUsecase}
 }
 
-func SetupAuthRoutes(usecase *auth.AuthUsecase) http.Handler {
+func SetupAuthRoutes(authUsecase *auth.AuthUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
-	authController := NewAuthController(usecase)
+	authController := NewAuthController(authUsecase)
 
 	muxRouter.Handle("/auth/me", http.HandlerFunc(authController.getCurrentUserHandler))
-	muxRouter.Handle("/auth/logout", middleware.AuthMiddleware(usecase)(http.HandlerFunc(authController.LogoutHandler)))
+	muxRouter.Handle("/auth/logout", middleware.AuthMiddleware(authUsecase)(http.HandlerFunc(authController.LogoutHandler)))
 
 	muxRouter.HandleFunc("/auth/login", authController.LoginHandler)
 	muxRouter.HandleFunc("/auth/signup", authController.RegisterHandler)

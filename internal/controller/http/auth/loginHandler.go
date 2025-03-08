@@ -38,7 +38,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.usecase.Login(req.Email, req.Password, req.Role)
+	user, err := c.authUsecase.Login(req.Email, req.Password, req.Role)
 
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusBadRequest)

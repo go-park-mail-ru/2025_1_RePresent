@@ -26,7 +26,7 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	user, err := c.usecase.GetUserBySessionID(cookie.Value)
+	user, err := c.authUsecase.GetUserBySessionID(cookie.Value)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
