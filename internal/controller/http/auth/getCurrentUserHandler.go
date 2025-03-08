@@ -20,18 +20,12 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		http.Error(w, "Cookie not found", http.StatusUnprocessableEntity)
+	if err != nil || cookie.Value == "" {
+		http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
 		return
 	}
 
-	sessionID := cookie.Value
-	if sessionID == "" {
-		http.Error(w, "Invalid session ID", http.StatusUnprocessableEntity)
-		return
-	}
-
-	user, err := c.usecase.GetUserBySessionID(sessionID)
+	user, err := c.usecase.GetUserBySessionID(cookie.Value)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusUnauthorized)
 		return

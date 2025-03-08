@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: testDB
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: test
+    ports:
+      - "0.0.0.0:5432:5432"
+    command: [
+      "postgres",
+      "-c", "listen_addresses=*",
+      "-c", "max_connections=200",
+      "-c", "log_statement=all"
+    ]
+    networks:
+      - pg_network
+
+volumes:
+  pg_data:
+
+networks:
+  pg_network:
+    driver: bridge

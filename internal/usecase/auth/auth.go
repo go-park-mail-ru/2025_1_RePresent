@@ -23,7 +23,7 @@ func (a *AuthUsecase) Login(email string, password string, role int) (*entity.Us
 		return nil, err
 	}
 	if user.Role != role {
-		return nil, errors.New("SQL: Неверные данные пользователя")
+		return nil, errors.New("Неверные данные пользователя")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
