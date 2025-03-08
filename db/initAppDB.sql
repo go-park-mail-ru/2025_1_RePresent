@@ -10,6 +10,16 @@ CREATE TABLE auth_user (
     role INT
 );
 
+CREATE TABLE banners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    owner_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    content TEXT NOT NULL,
+    status INT NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -22,4 +32,3 @@ CREATE TRIGGER update_updated_at_trigger
 BEFORE UPDATE ON auth_user
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
-

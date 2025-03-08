@@ -7,12 +7,12 @@ import (
 
 	"net/http"
 
+	"RE/configs"
 	appHttp "RE/internal/controller/http"
 	"RE/internal/controller/http/middleware"
 	"RE/internal/repo"
 	"RE/internal/usecase/auth"
-
-	"RE/configs"
+	"RE/internal/usecase/banner"
 )
 
 func Run(cfg *configs.Config) {
@@ -24,6 +24,10 @@ func Run(cfg *configs.Config) {
 
 	userRepository := repo.NewUserRepository(db)
 	authUsecase := auth.NewAuthUsecase(userRepository)
-	mux := appHttp.SetupRoutes(authUsecase)
+
+	bannerRepository := repo.NewBannerRepository(db)
+	bannerUsecase := banner.NewBannerUsecase(bannerRepository)
+
+	mux := appHttp.SetupRoutes(authUsecase, bannerUsecase)
 	log.Fatal(http.ListenAndServe(":8080", middleware.CORS(mux)))
 }
