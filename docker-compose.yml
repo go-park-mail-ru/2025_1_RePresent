@@ -4,8 +4,8 @@ services:
     container_name: testDB
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456RePresent
-      POSTGRES_DB: testDB
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: test
     ports:
       - "0.0.0.0:5432:5432"
     command: [
