@@ -4,6 +4,8 @@ import (
 	"RE/internal/controller/http/middleware"
 	"RE/internal/usecase/auth"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type AuthController struct {
@@ -15,14 +17,14 @@ func NewAuthController(usecase *auth.AuthUsecase) *AuthController {
 }
 
 func SetupAuthRoutes(usecase *auth.AuthUsecase) http.Handler {
-	mux := http.NewServeMux()
+	muxRouter := mux.NewRouter()
 	authController := NewAuthController(usecase)
 
-	mux.Handle("/auth/me", http.HandlerFunc(authController.getCurrentUserHandler))
-	mux.Handle("/auth/logout", middleware.AuthMiddleware(usecase)(http.HandlerFunc(authController.LogoutHandler)))
+	muxRouter.Handle("/auth/me", http.HandlerFunc(authController.getCurrentUserHandler))
+	muxRouter.Handle("/auth/logout", middleware.AuthMiddleware(usecase)(http.HandlerFunc(authController.LogoutHandler)))
 
-	mux.HandleFunc("/auth/login", authController.LoginHandler)
-	mux.HandleFunc("/auth/signup", authController.RegisterHandler)
+	muxRouter.HandleFunc("/auth/login", authController.LoginHandler)
+	muxRouter.HandleFunc("/auth/signup", authController.RegisterHandler)
 
-	return mux
+	return muxRouter
 }

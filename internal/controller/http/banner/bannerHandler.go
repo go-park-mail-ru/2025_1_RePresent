@@ -32,11 +32,9 @@ func (h *BannerController) GetBannersByUserId(w http.ResponseWriter, r *http.Req
 		banners = []*entity.Banner{}
 	}
 
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(banners)
 	if err != nil {
 		http.Error(w, "Error encoding banners: "+err.Error(), http.StatusInternalServerError)
 	}
-
-	w.WriteHeader(http.StatusOK)
-
 }
