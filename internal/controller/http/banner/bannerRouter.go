@@ -1,19 +1,27 @@
 package banner
 
 import (
+	"RE/internal/controller/http/middleware"
+	"RE/internal/usecase/auth"
 	"RE/internal/usecase/banner"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-// SetupBannerRoutes настраивает маршруты для работы с баннерами
-func SetupBannerRoutes(bannerUsecase *banner.BannerUsecase) http.Handler {
-	mux := http.NewServeMux()
+type BannerController struct {
+	BannerUsecase *banner.BannerUsecase
+}
 
-	// Создаем обработчик
-	bannerHandler := NewBannerHandler(bannerUsecase)
+func NewBannerController(bannerUsecase *banner.BannerUsecase) *BannerController {
+	return &BannerController{BannerUsecase: bannerUsecase}
+}
 
-	// Настроим маршрут для получения баннеров пользователя по user_id
-	mux.HandleFunc("/user/{user_id}/banners", bannerHandler.GetBannersByUserID) //.Methods("GET")
+func SetupBannerRoutes(usecase *auth.AuthUsecase, bannerUsecase *banner.BannerUsecase) http.Handler {
+	muxRouter := mux.NewRouter()
+	bannerController := NewBannerController(bannerUsecase)
 
-	return mux
+	muxRouter.Handle("/banner/user/{user_id}/all", middleware.AuthMiddleware(usecase)(http.HandlerFunc(bannerController.GetBannersByUserId)))
+
+	return muxRouter
 }

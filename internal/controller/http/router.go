@@ -17,7 +17,7 @@ func SetupRoutes(usecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBanner.
 	mux.Handle("/auth/", authRoutes)
 	// mux.Handle("/auth/", http.StripPrefix("/auth", authRoutes)) ТАК НЕ ДЕЛАТЬ !!!
 
-	bannerRoutes := handlerBanner.SetupBannerRoutes(bannerUsecase)
+	bannerRoutes := handlerBanner.SetupBannerRoutes(usecase, bannerUsecase)
 	mux.Handle("/banner/", bannerRoutes)
 
 	return mux

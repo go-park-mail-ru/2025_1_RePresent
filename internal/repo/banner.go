@@ -17,7 +17,7 @@ func NewBannerRepository(db *sql.DB) *BannerRepository {
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) {
-	rows, err := r.db.Query("SELECT id, title, description, content, status, FROM banner WHERE owner_id = $1", id)
+	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status FROM banner WHERE owner_id = $1", id)
 	if err != nil {
 		return nil, err
 	}
