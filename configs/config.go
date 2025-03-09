@@ -7,12 +7,12 @@ import (
 )
 
 type DatabaseConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Dbname   string `yaml:"dbname"`
-	Sslmode  string `yaml:"sslmode"`
+	Host     string `yaml:"HOST"`
+	Port     int    `yaml:"INSIDE_PORT"`
+	Username string `yaml:"POSTGRES_USER"`
+	Password string `yaml:"HASH_PASSWORD"`
+	Dbname   string `yaml:"POSTGRES_DB"`
+	Sslmode  string `yaml:"SSLMODE"`
 }
 
 type Config struct {

@@ -27,3 +27,6 @@ go.work.sum
 # sensitive configs
 configs/*.yml
 db/*.sql
+deploy/*.txt
+deploy/requests/*.sql
+__pycache__
