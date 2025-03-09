@@ -1,3 +1,7 @@
+import utils.config as config
+
+config.configurate()
+
 import yaml
 
 with open("../configs/database.yml", "r") as f:

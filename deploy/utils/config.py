@@ -12,20 +12,15 @@ def install_pip_tools():
 
 
 def generate_requirements():
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pipreqs"])
-
     try:
-        subprocess.check_call(["pipreqs", ".", "--force", "--encoding=utf-8"])
-        subprocess.check_call(
-            ["pip-compile", "requirements.txt", "-o", "requirements-compiled.txt"]
-        )
+        subprocess.check_call([sys.executable, "-m", "pip", "freeze", ">", "requirements.txt"])
     except subprocess.CalledProcessError as e:
         print(f"Произошла ошибка при генерации файла требований: {e}")
         exit(1)
 
 
 def install_requirements():
-    requirements_file = "./requirements-compiled.txt"
+    requirements_file = "./requirements.txt"
     if not os.path.exists(requirements_file):
         print(f"Файл {requirements_file}, необходимо вызвать generate_requirements().")
         return
