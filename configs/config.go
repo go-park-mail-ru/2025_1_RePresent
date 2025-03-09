@@ -10,7 +10,7 @@ type DatabaseConfig struct {
 	Host     string `yaml:"HOST"`
 	Port     int    `yaml:"INSIDE_PORT"`
 	Username string `yaml:"POSTGRES_USER"`
-	Password string `yaml:"HASH_PASSWORD"`
+	Password string `yaml:"POSTGRES_PASSWORD"`
 	Dbname   string `yaml:"POSTGRES_DB"`
 	Sslmode  string `yaml:"SSLMODE"`
 }
