@@ -1,12 +1,12 @@
 import os
 import subprocess
 import time
-import psycopg2
-import yaml
 import utils.config as config
 
 
 def start_containers():
+    import yaml
+
     with open("../configs/database.yml", "r") as f:
         database_config = yaml.safe_load(f)
 
@@ -20,12 +20,15 @@ def start_containers():
         f.write(f'PORT={database_config["database"]["PORT"]}\n')
         f.write(f'INSIDE_PORT={database_config["database"]["INSIDE_PORT"]}\n')
 
-    subprocess.run(["docker-compose", "up", "-d"])
+    subprocess.run(["docker compose", "up", "-d"])
     print("Containers starting...")
     time.sleep(1)
 
 
 def init_database_tables(drop_tables=False):
+    import psycopg2
+    import yaml
+
     with open("../configs/database.yml", "r") as f:
         database_config = yaml.safe_load(f)
     conn = psycopg2.connect(
@@ -60,8 +63,10 @@ def init_database_tables(drop_tables=False):
 
 
 if __name__ == "__main__":
-    config.configurate()
+    # config.configurate()
 
     start_containers()
-    if input("Init tables? Yes/No : ").lower() == "yes":
-        init_database_tables(input("Drop tables if its exists? Yes/No : ").lower() == "yes")
+    #if input("Init tables? Yes/No : ").lower() == "yes":
+    #    init_database_tables(
+    #        input("Drop tables if its exists? Yes/No : ").lower() == "yes"
+    #    )

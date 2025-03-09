@@ -21,6 +21,7 @@ def generate_requirements():
         )
     except subprocess.CalledProcessError as e:
         print(f"Произошла ошибка при генерации файла требований: {e}")
+        exit(1)
 
 
 def install_requirements():
@@ -35,6 +36,7 @@ def install_requirements():
         )
     except subprocess.CalledProcessError as e:
         print(f"Произошла ошибка при установке требований: {e}")
+        exit(1)
 
 
 def configurate():
