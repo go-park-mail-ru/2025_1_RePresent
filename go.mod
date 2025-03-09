@@ -1,4 +1,4 @@
-module RE
+module retarget
 
 go 1.24
 

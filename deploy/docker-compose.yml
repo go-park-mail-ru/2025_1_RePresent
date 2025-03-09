@@ -7,7 +7,7 @@
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         POSTGRES_DB: ${POSTGRES_DB}
       ports:
-        - "127.0.0.1:${PORT}:${INSIDE_PORT}"
+        - "${PORT}:${INSIDE_PORT}"
       command: [
         "postgres",
         "-c", "password_encryption=md5",
@@ -19,6 +19,12 @@
         - api_network
       volumes:
         - pg_data:/var/lib/postgresql/data
+        - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
       restart: always
 
     api:
@@ -27,7 +33,7 @@
         dockerfile: deploy/Dockerfile
       container_name: ReTargetApi
       ports:
-        - "127.0.0.1:8080:8080"
+        - 8080:8080
       depends_on:
         - postgresdb
       networks:

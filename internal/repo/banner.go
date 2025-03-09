@@ -3,7 +3,7 @@ package repo
 import (
 	"database/sql"
 
-	"RE/internal/entity"
+	"retarget/internal/entity"
 
 	_ "github.com/lib/pq"
 )

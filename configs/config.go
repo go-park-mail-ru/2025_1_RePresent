@@ -8,7 +8,7 @@ import (
 
 type DatabaseConfig struct {
 	Host     string `yaml:"HOST"`
-	Port     int    `yaml:"INSIDE_PORT"`
+	Port     int    `yaml:"PORT"`
 	Username string `yaml:"POSTGRES_USER"`
 	Password string `yaml:"POSTGRES_PASSWORD"`
 	Dbname   string `yaml:"POSTGRES_DB"`
@@ -16,7 +16,7 @@ type DatabaseConfig struct {
 }
 
 type Config struct {
-	Database DatabaseConfig `yaml:"database"`
+	Database DatabaseConfig `yaml:"connect_database_in_container"`
 }
 
 func LoadConfig(path string) (*Config, error) {

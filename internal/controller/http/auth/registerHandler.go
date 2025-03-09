@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"RE/internal/entity"
-	"RE/internal/usecase/auth"
 	"encoding/json"
 	"net/http"
+	"retarget/internal/entity"
+	"retarget/internal/usecase/auth"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -65,7 +65,6 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
-		Domain:   "localhost",
 	}
 	http.SetCookie(w, cookie)
 

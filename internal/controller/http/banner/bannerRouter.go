@@ -1,10 +1,10 @@
 package banner
 
 import (
-	"RE/internal/controller/http/middleware"
-	"RE/internal/usecase/auth"
-	"RE/internal/usecase/banner"
 	"net/http"
+	"retarget/internal/controller/http/middleware"
+	"retarget/internal/usecase/auth"
+	"retarget/internal/usecase/banner"
 
 	"github.com/gorilla/mux"
 )
@@ -22,7 +22,7 @@ func SetupBannerRoutes(authUsecase *auth.AuthUsecase, bannerUsecase *banner.Bann
 	muxRouter := mux.NewRouter()
 	bannerController := NewBannerController(authUsecase, bannerUsecase)
 
-	muxRouter.Handle("/banner/user/{user_id}/all", middleware.AuthMiddleware(authUsecase)(http.HandlerFunc(bannerController.GetBannersByUserCookie)))
+	muxRouter.Handle("/api/v1/banner/user/{user_id}/all", middleware.AuthMiddleware(authUsecase)(http.HandlerFunc(bannerController.GetBannersByUserCookie)))
 
 	return muxRouter
 }

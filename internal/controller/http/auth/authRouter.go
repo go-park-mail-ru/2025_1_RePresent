@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"RE/internal/controller/http/middleware"
-	"RE/internal/usecase/auth"
 	"net/http"
+	"retarget/internal/controller/http/middleware"
+	"retarget/internal/usecase/auth"
 
 	"github.com/gorilla/mux"
 )
@@ -20,11 +20,11 @@ func SetupAuthRoutes(authUsecase *auth.AuthUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
 	authController := NewAuthController(authUsecase)
 
-	muxRouter.Handle("/auth/me", http.HandlerFunc(authController.getCurrentUserHandler))
-	muxRouter.Handle("/auth/logout", middleware.AuthMiddleware(authUsecase)(http.HandlerFunc(authController.LogoutHandler)))
+	muxRouter.Handle("/api/v1/auth/me", http.HandlerFunc(authController.getCurrentUserHandler))
+	muxRouter.Handle("/api/v1/auth/logout", middleware.AuthMiddleware(authUsecase)(http.HandlerFunc(authController.LogoutHandler)))
 
-	muxRouter.HandleFunc("/auth/login", authController.LoginHandler)
-	muxRouter.HandleFunc("/auth/signup", authController.RegisterHandler)
+	muxRouter.HandleFunc("/api/v1/auth/login", authController.LoginHandler)
+	muxRouter.HandleFunc("/api/v1/auth/signup", authController.RegisterHandler)
 
 	return muxRouter
 }
