@@ -7,12 +7,12 @@ import (
 
 	"net/http"
 
-	"RE/configs"
-	appHttp "RE/internal/controller/http"
-	"RE/internal/controller/http/middleware"
-	"RE/internal/repo"
-	"RE/internal/usecase/auth"
-	"RE/internal/usecase/banner"
+	"retarget/configs"
+	appHttp "retarget/internal/controller/http"
+	"retarget/internal/controller/http/middleware"
+	"retarget/internal/repo"
+	"retarget/internal/usecase/auth"
+	"retarget/internal/usecase/banner"
 )
 
 func Run(cfg *configs.Config) {

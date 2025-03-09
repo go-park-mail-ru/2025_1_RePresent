@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"RE/internal/entity"
-	"RE/internal/repo"
 	"database/sql"
 	"errors"
+	"retarget/internal/entity"
+	"retarget/internal/repo"
 
 	"golang.org/x/crypto/bcrypt"
 )

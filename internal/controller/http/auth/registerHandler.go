@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"RE/internal/entity"
-	"RE/internal/usecase/auth"
 	"encoding/json"
 	"net/http"
+	"retarget/internal/entity"
+	"retarget/internal/usecase/auth"
 	"time"
 
 	"github.com/go-playground/validator/v10"

@@ -1,10 +1,10 @@
 package banner
 
 import (
-	"RE/internal/controller/http/middleware"
-	"RE/internal/usecase/auth"
-	"RE/internal/usecase/banner"
 	"net/http"
+	"retarget/internal/controller/http/middleware"
+	"retarget/internal/usecase/auth"
+	"retarget/internal/usecase/banner"
 
 	"github.com/gorilla/mux"
 )

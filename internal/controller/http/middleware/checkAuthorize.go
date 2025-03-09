@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"RE/internal/usecase/auth"
 	"net/http"
+	"retarget/internal/usecase/auth"
 )
 
 func AuthMiddleware(authUsecase *auth.AuthUsecase) func(http.Handler) http.Handler {

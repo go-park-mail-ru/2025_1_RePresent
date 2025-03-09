@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"RE/internal/controller/http/middleware"
-	"RE/internal/usecase/auth"
 	"net/http"
+	"retarget/internal/controller/http/middleware"
+	"retarget/internal/usecase/auth"
 
 	"github.com/gorilla/mux"
 )

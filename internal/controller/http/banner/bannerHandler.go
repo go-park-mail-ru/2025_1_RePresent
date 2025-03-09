@@ -1,9 +1,9 @@
 package banner
 
 import (
-	"RE/internal/entity"
 	"encoding/json"
 	"net/http"
+	"retarget/internal/entity"
 	"strconv"
 
 	"github.com/gorilla/mux"

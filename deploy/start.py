@@ -16,6 +16,7 @@ def start_containers():
             f'POSTGRES_PASSWORD={database_config["database"]["POSTGRES_PASSWORD"]}\n'
         )
         f.write(f'POSTGRES_DB={database_config["database"]["POSTGRES_DB"]}\n')
+        f.write(f'HOST={database_config["database"]["HOST"]}\n')
         f.write(f'PORT={database_config["database"]["PORT"]}\n')
         f.write(f'INSIDE_PORT={database_config["database"]["INSIDE_PORT"]}\n')
 

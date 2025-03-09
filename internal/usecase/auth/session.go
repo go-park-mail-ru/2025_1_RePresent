@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"RE/internal/entity"
+	"retarget/internal/entity"
 	"sync"
 )
 

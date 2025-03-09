@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"RE/configs"
-	"RE/internal/app"
+	"retarget/configs"
+	"retarget/internal/app"
 )
 
 func main() {

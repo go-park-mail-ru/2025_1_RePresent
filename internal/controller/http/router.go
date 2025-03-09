@@ -1,12 +1,12 @@
 package http
 
 import (
-	handlerAuth "RE/internal/controller/http/auth"
+	handlerAuth "retarget/internal/controller/http/auth"
 
-	handlerBanner "RE/internal/controller/http/banner"
-	logs "RE/internal/controller/http/middleware"
-	usecaseAuth "RE/internal/usecase/auth"
-	usecaseBanner "RE/internal/usecase/banner"
+	handlerBanner "retarget/internal/controller/http/banner"
+	logs "retarget/internal/controller/http/middleware"
+	usecaseAuth "retarget/internal/usecase/auth"
+	usecaseBanner "retarget/internal/usecase/banner"
 
 	"github.com/gorilla/mux"
 )
@@ -17,10 +17,10 @@ func SetupRoutes(authUsecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBan
 	r.Use(logs.ErrorMiddleware)
 
 	authRoutes := handlerAuth.SetupAuthRoutes(authUsecase)
-	r.PathPrefix("/auth/").Handler(authRoutes)
+	r.PathPrefix("/api/v1/auth/").Handler(authRoutes)
 
 	bannerRoutes := handlerBanner.SetupBannerRoutes(authUsecase, bannerUsecase)
-	r.PathPrefix("/banner/").Handler(bannerRoutes)
+	r.PathPrefix("/api/v1/banner/").Handler(bannerRoutes)
 
 	return r
 }
