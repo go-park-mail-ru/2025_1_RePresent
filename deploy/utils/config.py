@@ -13,7 +13,9 @@ def install_pip_tools():
 
 def generate_requirements():
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "freeze", ">", "requirements.txt"])
+        subprocess.check_call(
+            f"{sys.executable} -m pip freeze > requirements.txt", shell=True
+        )
     except subprocess.CalledProcessError as e:
         print(f"Произошла ошибка при генерации файла требований: {e}")
         exit(1)
