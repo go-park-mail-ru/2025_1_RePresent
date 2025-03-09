@@ -30,3 +30,4 @@ db/*.sql
 deploy/*.txt
 deploy/requests/*.sql
 __pycache__
+sensitive
