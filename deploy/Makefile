@@ -31,7 +31,7 @@ deploy_backend:
         git clone https://github.com/go-park-mail-ru/2025_1_RePresent.git && \
         mv 2025_1_RePresent backend_2025_1_RePresent && \
         cd backend_2025_1_RePresent && \
-        git switch RE-26-add-Задеплоить-сервер && \
+        git switch dev && \
         cd .. && \
         make copy_sensitive && \
         cd backend_2025_1_RePresent/deploy && \
