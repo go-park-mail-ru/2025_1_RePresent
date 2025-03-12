@@ -7,13 +7,13 @@ import (
 
 func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		http.Error(w, "Cookie not found", http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = c.authUsecase.Logout(cookie.Value)
 	if err != nil {
-		http.Error(w, "Logout failed", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

@@ -17,18 +17,21 @@ type UserResponse struct {
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
-		http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
 		return
 	}
 	user, err := c.authUsecase.GetUserBySessionID(cookie.Value)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		// http.Error(w, "User not found", http.StatusUnauthorized)
 		return
 	}
 
