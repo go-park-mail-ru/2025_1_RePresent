@@ -9,12 +9,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthUsecase struct {
-	userRepository *repo.UserRepository
+type AuthUsecaseInterface interface {
+	Login(email string, password string, role int) (*entity.User, error)
+	Logout(sessionId string) error
+	GetUserBySessionID(sessionId string) (*entity.User, error)
+	Register(username string, email string, password string, role int) (*entity.User, error)
 }
 
-func NewAuthUsecase(userRepository *repo.UserRepository) *AuthUsecase {
-	return &AuthUsecase{userRepository: userRepository}
+type AuthUsecase struct {
+	userRepository repo.UserRepositoryInterface
+}
+
+func NewAuthUsecase(userRepo repo.UserRepositoryInterface) AuthUsecaseInterface {
+	return &AuthUsecase{userRepository: userRepo}
 }
 
 func (a *AuthUsecase) Login(email string, password string, role int) (*entity.User, error) {

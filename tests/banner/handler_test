@@ -1,0 +1,106 @@
+package banner
+
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	bnController "retarget/internal/controller/http/banner"
+	"retarget/internal/entity"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestGetBannersByUserCookie(t *testing.T) {
+	mockAuthUsecase := &MockAuthUsecase{}
+	mockBannerUsecase := &MockBannerUsecase{}
+
+	bannerController := bnController.BannerController{
+		AuthUsecase:   mockAuthUsecase,
+		BannerUsecase: mockBannerUsecase,
+	}
+
+	// Подменяем зависимости в хендлере
+
+	t.Run("Unauthorized when no session cookie", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/banners/1", nil)
+		w := httptest.NewRecorder()
+
+		bannerController.GetBannersByUserCookie(w, r)
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("Unauthorized when invalid session", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/banners/1", nil)
+		r.AddCookie(&http.Cookie{Name: "session_id", Value: "invalid"})
+		w := httptest.NewRecorder()
+
+		mockAuthUsecase.GetUserBySessionIDFunc = func(sessionID string) (*entity.User, error) {
+			return nil, errors.New("user not found")
+		}
+
+		bannerController.GetBannersByUserCookie(w, r)
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("Bad request when invalid user_id", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/banners/invalid", nil)
+		r.AddCookie(&http.Cookie{Name: "session_id", Value: "valid"})
+		w := httptest.NewRecorder()
+
+		bannerController.GetUserBySessionIDFunc = func(sessionID string) (*entity.User, error) {
+			return &entity.User{ID: 1}, nil
+		}
+
+		vars := map[string]string{"user_id": "invalid"}
+		r = mux.SetURLVars(r, vars)
+
+		bannerController.GetBannersByUserCookie(w, r)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("Unauthorized when user ID does not match", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/banners/2", nil)
+		r.AddCookie(&http.Cookie{Name: "session_id", Value: "valid"})
+		w := httptest.NewRecorder()
+
+		bannerController.GetUserBySessionIDFunc = func(sessionID string) (*entity.User, error) {
+			return &entity.User{ID: 1}, nil
+		}
+
+		vars := map[string]string{"user_id": "2"}
+		r = mux.SetURLVars(r, vars)
+
+		bannerController.GetBannersByUserCookie(w, r)
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("Success with banners", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/banners/1", nil)
+		r.AddCookie(&http.Cookie{Name: "session_id", Value: "valid"})
+		w := httptest.NewRecorder()
+
+		bannerController.GetUserBySessionIDFunc = func(sessionID string) (*entity.User, error) {
+			return &entity.User{ID: 1}, nil
+		}
+
+		bannerController.GetBannersByUserIDFunc = func(userID int) ([]*entity.Banner, error) {
+			return []*entity.Banner{{ID: 1, Title: "Banner 1"}}, nil
+		}
+
+		vars := map[string]string{"user_id": "1"}
+		r = mux.SetURLVars(r, vars)
+
+		bannerController.GetBannersByUserCookie(w, r)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		var banners []*entity.Banner
+		err := json.NewDecoder(w.Body).Decode(&banners)
+		assert.NoError(t, err)
+		assert.Len(t, banners, 1)
+		assert.Equal(t, "Banner 1", banners[0].Title)
+	})
+}

@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func SetupRoutes(authUsecase *usecaseAuth.AuthUsecase, bannerUsecase *usecaseBanner.BannerUsecase) *mux.Router {
+func SetupRoutes(authUsecase usecaseAuth.AuthUsecaseInterface, bannerUsecase *usecaseBanner.BannerUsecase) *mux.Router {
 	r := mux.NewRouter()
 
 	r.Use(logs.ErrorMiddleware)
