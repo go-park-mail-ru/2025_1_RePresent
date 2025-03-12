@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	// "fmt"
 	"net/http"
+	"retarget/internal/entity"
 )
 
 type UserResponse struct {
@@ -17,18 +18,21 @@ type UserResponse struct {
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
-		http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
 		return
 	}
 	user, err := c.authUsecase.GetUserBySessionID(cookie.Value)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "User Not Found"))
 		return
 	}
 
@@ -42,5 +46,5 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userResponse)
+	json.NewEncoder(w).Encode(userResponse) // тут тоже надо решить как поменять структуру
 }

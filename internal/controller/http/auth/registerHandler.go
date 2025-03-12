@@ -20,27 +20,35 @@ type RegisterRequest struct {
 
 func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// http.Error(w, "Invalid JSON", http.StatusUnprocessableEntity)
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, req.Role)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -53,7 +61,8 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	}
 	err = auth.AddSession(session)
 	if err != nil {
-		http.Error(w, "Invalid adding user session", http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
 
@@ -69,5 +78,5 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	http.SetCookie(w, cookie)
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Registration successful"))
+	w.Write([]byte("{response: Registration successful}")) // пока костылём
 }
