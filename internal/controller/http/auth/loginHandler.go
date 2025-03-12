@@ -21,6 +21,7 @@ type LoginRequest struct {
 func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Method Not Allowed"})
 		return
 	}
 
@@ -28,6 +29,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: err.Error()})
 		return
 	}
 
@@ -35,6 +37,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = validate.Struct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: err.Error()})
 		return
 	}
 
@@ -42,6 +45,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: err.Error()})
 		return
 	}
 
@@ -55,6 +59,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = auth.AddSession(session)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: err.Error()})
 		return
 	}
 

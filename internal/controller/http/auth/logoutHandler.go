@@ -1,19 +1,23 @@
 package auth
 
 import (
+	"encoding/json"
 	"net/http"
+	"retarget/internal/entity"
 	"time"
 )
 
 func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Method Not Allowed"})
 		return
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: err.Error()})
 		return
 	}
 
@@ -32,6 +36,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = c.authUsecase.Logout(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: err.Error()})
 		return
 	}
 

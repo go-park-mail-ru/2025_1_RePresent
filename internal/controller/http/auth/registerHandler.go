@@ -78,5 +78,5 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	http.SetCookie(w, cookie)
 
 	w.WriteHeader(http.StatusCreated)
-	// w.Write([]byte("Registration successful"))
+	w.Write([]byte("{response: Registration successful}")) // пока костылём
 }

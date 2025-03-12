@@ -12,6 +12,7 @@ import (
 func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Method Not Allowed"})
 		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -19,6 +20,7 @@ func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Invalid Cookie"})
 		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
 		return
 	}
@@ -26,6 +28,7 @@ func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http
 	user, err := h.AuthUsecase.GetUserBySessionID(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "User Not Found"})
 		// http.Error(w, "User not found", http.StatusUnauthorized)
 		return
 	}
@@ -36,12 +39,15 @@ func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http
 	userID, err := strconv.Atoi(userIdStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Invalid User ID"})
 		// http.Error(w, "Invalid user_id", http.StatusBadRequest)
 		return
 	}
 
 	if userID != user.ID {
 		w.WriteHeader(http.StatusUnauthorized)
+
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "This user haven`t root on getting this content"})
 		// http.Error(w, "This user haven`t root on getting this content", http.StatusUnauthorized)
 		return
 	} // ЧТОБЫ НЕ ПЕРЕПИСЫВАТЬ FETCH
@@ -49,6 +55,8 @@ func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http
 	banners, err := h.BannerUsecase.GetBannersByUserID(user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Error fetching banners: " + err.Error()})
 		// http.Error(w, "Error fetching banners: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -63,6 +71,7 @@ func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http
 	err = json.NewEncoder(w).Encode(banners)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(entity.ResponceError{Error: "Error encoding banners: " + err.Error()})
 		// http.Error(w, "Error encoding banners: "+err.Error(), http.StatusInternalServerError)
 	}
 }
