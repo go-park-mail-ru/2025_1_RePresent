@@ -8,11 +8,18 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type UserRepositoryInterface interface {
+	GetUserByID(id int) (*entity.User, error)
+	GetUserByEmail(email string) (*entity.User, error)
+	GetUserByUsername(email string) (*entity.User, error)
+	CreateNewUser(user *entity.User) error
+}
+
 type UserRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
+func NewUserRepository(db *sql.DB) UserRepositoryInterface {
 	return &UserRepository{db: db}
 }
 
@@ -21,9 +28,6 @@ func (r *UserRepository) GetUserByID(id int) (*entity.User, error) {
 	user := &entity.User{}
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.Balance, &user.Role)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
 		return nil, err
 	}
 	return user, nil
@@ -34,9 +38,6 @@ func (r *UserRepository) GetUserByEmail(email string) (*entity.User, error) {
 	user := &entity.User{}
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.Balance, &user.Role)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
 		return nil, err
 	}
 	return user, nil
@@ -47,9 +48,6 @@ func (r *UserRepository) GetUserByUsername(username string) (*entity.User, error
 	user := &entity.User{}
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.Balance, &user.Role)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
 		return nil, err
 	}
 	return user, nil

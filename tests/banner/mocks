@@ -1,0 +1,28 @@
+package banner
+
+import (
+	"retarget/internal/entity"
+)
+
+type MockAuthUsecase struct {
+	GetUserBySessionIDFunc func(sessionID string) (*entity.User, error)
+}
+
+func (m *MockAuthUsecase) GetUserBySessionID(sessionID string) (*entity.User, error) {
+	if m.GetUserBySessionIDFunc != nil {
+		return m.GetUserBySessionIDFunc(sessionID)
+	}
+	return nil, nil
+}
+
+// MockBannerUsecase is a mock implementation of the BannerUsecase interface
+type MockBannerUsecase struct {
+	GetBannersByUserIDFunc func(userID int) ([]*entity.Banner, error)
+}
+
+func (m *MockBannerUsecase) GetBannersByUserID(userID int) ([]*entity.Banner, error) {
+	if m.GetBannersByUserIDFunc != nil {
+		return m.GetBannersByUserIDFunc(userID)
+	}
+	return nil, nil
+}

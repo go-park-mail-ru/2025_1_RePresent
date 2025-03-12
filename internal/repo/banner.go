@@ -8,6 +8,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type BannerRepositoryInterface interface {
+	GerBannerByUserId(id int) ([]*entity.Banner, error)
+}
+
 type BannerRepository struct {
 	db *sql.DB
 }

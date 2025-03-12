@@ -5,7 +5,7 @@ import (
 	"retarget/internal/usecase/auth"
 )
 
-func AuthMiddleware(authUsecase *auth.AuthUsecase) func(http.Handler) http.Handler {
+func AuthMiddleware(authUsecase auth.AuthUsecaseInterface) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("session_id")

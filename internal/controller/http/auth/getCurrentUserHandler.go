@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	// "fmt"
 	"net/http"
 )
 
@@ -14,7 +15,7 @@ type UserResponse struct {
 	Role     int    `json:"role"`
 }
 
-func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -25,7 +26,6 @@ func (c *AuthController) getCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
 		return
 	}
-
 	user, err := c.authUsecase.GetUserBySessionID(cookie.Value)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusUnauthorized)
