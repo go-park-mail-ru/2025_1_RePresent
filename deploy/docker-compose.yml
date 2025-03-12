@@ -1,0 +1,47 @@
+  services:
+    postgresdb:
+      image: postgres:17
+      container_name: ReTargetDataBase
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
+      ports:
+        - "${PORT}:${INSIDE_PORT}"
+      command: [
+        "postgres",
+        "-c", "password_encryption=md5",
+        "-c", "max_connections=200",
+        "-c", "log_statement=all",
+        "-c", "ssl=off"
+      ]
+      networks:
+        - api_network
+      volumes:
+        - pg_data:/var/lib/postgresql/data
+        - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+      restart: always
+
+    api:
+      build:
+        context: ..
+        dockerfile: deploy/Dockerfile
+      container_name: ReTargetApi
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgresdb
+      networks:
+        - api_network
+
+  volumes:
+    pg_data:
+
+  networks:
+    api_network:
+      driver: bridge
