@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"retarget/configs"
-	"retarget/internal/app"
+	authApp "retarget/internal/auth-service/app"
 	mailApp "retarget/internal/mail-service/app"
 )
 
@@ -17,7 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go app.Run(cfg)
+	go authApp.Run(cfg)
 	go mailApp.Run(cfg)
 
 	stop := make(chan os.Signal, 1)

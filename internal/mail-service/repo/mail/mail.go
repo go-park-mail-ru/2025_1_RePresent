@@ -8,6 +8,7 @@ import (
 
 type MailRepositoryInterface interface {
 	Send(to, msg string) error
+
 	OpenConnection(smtpServer, smtpPort, username, password string) (*smtp.Client, error)
 	CloseConnection() error
 }
