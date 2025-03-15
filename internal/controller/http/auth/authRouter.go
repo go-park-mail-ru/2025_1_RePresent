@@ -9,14 +9,14 @@ import (
 )
 
 type AuthController struct {
-	authUsecase auth.AuthUsecaseInterface
+	authUsecase *auth.AuthUsecase
 }
 
-func NewAuthController(authUsecase auth.AuthUsecaseInterface) AuthController {
+func NewAuthController(authUsecase *auth.AuthUsecase) AuthController {
 	return AuthController{authUsecase: authUsecase}
 }
 
-func SetupAuthRoutes(authUsecase auth.AuthUsecaseInterface) http.Handler {
+func SetupAuthRoutes(authUsecase *auth.AuthUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
 	authController := NewAuthController(authUsecase)
 

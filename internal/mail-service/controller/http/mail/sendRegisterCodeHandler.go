@@ -1,0 +1,54 @@
+package mail
+
+import (
+	"encoding/json"
+	"net/http"
+	"retarget/internal/entity"
+	entityMail "retarget/internal/mail-service/entity/mail"
+	"retarget/internal/utils/validator"
+	"strings"
+)
+
+type RegisterCodeRequest struct {
+	Email string `json:"email" validate:"email,required"`
+	Code  string `json:"code" validate:"required,len=6"`
+}
+
+func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		return
+	}
+
+	var registerCodeRequest RegisterCodeRequest
+	err := json.NewDecoder(r.Body).Decode(&registerCodeRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
+		return
+	}
+
+	errorMessages, err := validator.ValidateStruct(registerCodeRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
+		return
+	}
+
+	err = c.mailUsecase.SendCodeMail(entityMail.REGISTER, registerCodeRequest.Email, registerCodeRequest.Code)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "5") {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(entity.NewResponse(true, "Такой почты не существует"))
+			return
+		}
+
+		w.WriteHeader(http.StatusServiceUnavailable)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Ошибка, повторите отправку позже"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(entity.NewResponse(false, "Sent"))
+}

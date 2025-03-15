@@ -15,21 +15,43 @@ type DatabaseConfig struct {
 	Sslmode  string `yaml:"SSLMODE"`
 }
 
-type Config struct {
-	Database DatabaseConfig `yaml:"connect_database_in_container"`
+type MailConfig struct {
+	SmtpServer string `yaml:"SMTP_SERVER"`
+	Port       string `yaml:"PORT"`
+	Username   string `yaml:"USERNAME"`
+	Password   string `yaml:"PASSWORD"`
+	Sender     string `yaml:"SENDER"`
 }
 
-func LoadConfig(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
+type Config struct {
+	Database DatabaseConfig `yaml:"connect_database_in_container"`
+	Email    MailConfig     `yaml:"connect_smtp_server"`
+}
 
+func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var aux struct {
+		Database DatabaseConfig `yaml:"connect_database_in_container"`
+		Email    MailConfig     `yaml:"connect_smtp_server"`
+	}
+	if err := unmarshal(&aux); err != nil {
+		return err
+	}
+	c.Database = aux.Database
+	c.Email = aux.Email
+	return nil
+}
+
+func LoadConfigs(paths ...string) (*Config, error) {
 	var cfg Config
-	err = yaml.Unmarshal(data, &cfg)
-	if err != nil {
-		return nil, err
+	for _, path := range paths {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		err = yaml.Unmarshal(data, &cfg)
+		if err != nil {
+			return nil, err
+		}
 	}
-
 	return &cfg, nil
 }

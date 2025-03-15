@@ -13,6 +13,11 @@ require (
 )
 
 require (
+	github.com/aymerick/raymond v2.0.2+incompatible
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
+
+require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/assert v1.2.1

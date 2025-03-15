@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: Mail Service
+  description: API для отправки Email со служебной почты по протоколу SMTP
+  version: 1.0.0
+
+servers:
+  - url: http://re-target.ru/api/v1/mail
+
+tags:
+  - name: Mail
+    description: Отправка Email писем
+
+paths:
+  /send-register-code:
+    post:
+      tags:
+        - Mail
+      summary: Отправка кода для регистрации
+      description: Отправляет письмо на "email" с кодом "code" по шаблону
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCodeRequest'
+      responses:
+        200:
+          description: Письмо успешно отправлено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: Sent
+        400:
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: Invalid request body
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        422:
+          description: Ошибка валидации запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: 'Email: email \n Code: len \n '
+        500:
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: Такой почты не существует
+        503:
+          description: Ошибка отправки письма
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: Ошибка, повторите отправку позже
+
+components:
+  schemas:
+    RegisterCodeRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Почта пользователя (существующая)
+        code:
+          type: string
+          description: Отправляемый код (6 символов)
+      required:
+        - email
+        - code
