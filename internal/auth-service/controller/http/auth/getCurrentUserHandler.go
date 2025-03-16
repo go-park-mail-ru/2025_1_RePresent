@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+
 	"net/http"
 	entity "retarget/internal/auth-service/entity"
 )

@@ -22,5 +22,5 @@ func Run(cfg *configs.Config) {
 
 	mux := authAppHttp.SetupRoutes(authUsecase)
 
-	log.Fatal(http.ListenAndServe(":8080", authMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8020", authMiddleware.CORS(mux)))
 }

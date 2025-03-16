@@ -22,5 +22,5 @@ func Run(cfg *configs.Config) {
 
 	mux := mailAppHttp.SetupRoutes(mailUsecase)
 
-	log.Fatal(http.ListenAndServe(":8083", mailMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8025", mailMiddleware.CORS(mux)))
 }
