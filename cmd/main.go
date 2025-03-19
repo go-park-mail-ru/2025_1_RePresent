@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"retarget/configs"
-	authApp "retarget/internal/auth-service/app"
 
 	// profileApp "retarget/internal/profile-service/app"
 	mailApp "retarget/internal/mail-service/app"
@@ -19,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go authApp.Run(cfg)
+	// go authApp.Run(cfg)
 	go mailApp.Run(cfg)
 	// go advApp.Run(cfg)
 	// go profileApp.Run(cfg)
