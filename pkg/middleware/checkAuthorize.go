@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"net/http"
-	"retarget/internal/usecase/auth"
+	"retarget/internal/auth-service/usecase/auth"
 )
 
-func AuthMiddleware(authUsecase *auth.AuthUsecase) func(http.Handler) http.Handler {
+func Auth(authUsecase *auth.AuthUsecase) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("session_id")

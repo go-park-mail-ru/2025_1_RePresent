@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	entity "retarget/internal/auth-service/entity"
 	entityAuth "retarget/internal/auth-service/entity/auth"
+	entity "retarget/pkg/entity"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"

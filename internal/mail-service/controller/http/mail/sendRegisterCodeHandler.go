@@ -3,9 +3,9 @@ package mail
 import (
 	"encoding/json"
 	"net/http"
-	"retarget/internal/entity"
 	entityMail "retarget/internal/mail-service/entity/mail"
-	"retarget/internal/utils/validator"
+	entity "retarget/pkg/entity"
+	"retarget/pkg/utils/validator"
 	"strings"
 )
 

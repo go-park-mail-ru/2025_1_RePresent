@@ -20,7 +20,7 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return rw.ResponseWriter.Write(b)
 }
 
-func ErrorMiddleware(next http.Handler) http.Handler {
+func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var written bool
 		mw := &responseWriter{w, &written}

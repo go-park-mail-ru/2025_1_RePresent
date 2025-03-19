@@ -3,8 +3,8 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
-	entity "retarget/internal/auth-service/entity"
 	entityAuth "retarget/internal/auth-service/entity/auth"
+	entity "retarget/pkg/entity"
 	"time"
 
 	"github.com/go-playground/validator/v10"
