@@ -5,6 +5,8 @@ import (
 	"net/http"
 	sess "retarget/internal/auth-service/entity/auth" // Хардкод
 	entity "retarget/internal/banner-service/entity"
+	"strconv"
+	"strings"
 
 	// pkg "retarget/internal/pkg/entity"
 	response "retarget/pkg/entity"
@@ -16,7 +18,8 @@ type CreateBannerRequest struct {
 	OwnerID     int    `json:"owner"`
 	Title       string `json:"title" validate:"required,min=3,max=30"`
 	Description string `json:"description" validate:"required"`
-	Content     string `json:"content_link" validate:"required,min=8"`
+	Content     string `json:"content_link"`
+	Link        string `json:"link" validate:"required"`
 }
 
 func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http.Request) {
@@ -106,6 +109,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Хардкожу вытаскивание юзверя
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -113,16 +117,16 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
 		return
 	}
-
 	user, err := sess.GetSession(cookie.Value)
 	UserID := user.UserID
+	//Хардкод закончился
 
-	//Валидацию не забыть
 	banner := entity.Banner{
 		OwnerID:     UserID,
 		Title:       req.Title,
 		Description: req.Description,
 		Content:     req.Content,
+		Link:        req.Link,
 		Balance:     0,
 		Status:      0,
 	}
@@ -137,5 +141,48 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("{response: Banner created}")) // пока костылём
+
+}
+
+func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
+		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Хардкожу вытаскивание юзверя
+	cookie, err := r.Cookie("session_id")
+	if err != nil || cookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
+		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := sess.GetSession(cookie.Value)
+	UserID := user.UserID
+	//Хардкод закончился
+	// Извлекаем banner_id из URL
+	segments := strings.Split(r.URL.Path, "/")
+	if len(segments) < 2 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Missing banner ID"))
+		return
+	}
+	bannerIDStr := segments[1] // Получаем второй сегмент, это будет ID баннера
+
+	// Преобразуем bannerID в int
+	bannerID, err := strconv.Atoi(bannerIDStr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid banner ID"))
+		return
+	}
+	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, UserID)
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 
 }
