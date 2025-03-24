@@ -43,3 +43,21 @@ func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) 
 
 	return banners, nil
 }
+
+func (r *BannerRepository) CreateNewBanner(banner entity.Banner) error {
+
+	stmt, err := r.db.Prepare("INSERT INTO banner (owner, title, description, content, status, balance) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	var id int64
+	err = stmt.QueryRow(banner.OwnerID, banner.Title, banner.Description, banner.Content, banner.Status, 0).Scan(&id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
