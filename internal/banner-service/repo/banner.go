@@ -74,18 +74,18 @@ func (r *BannerRepository) GetBannerByID(id int) (*entity.Banner, error) {
 	return banner, nil
 }
 
-func (r *BannerRepository) DeleteBannerByID(id, owner int) error {
+func (r *BannerRepository) DeleteBannerByID(owner, id int) error {
 	var deleted bool
 	err := r.db.QueryRow("SELECT deleted FROM banner WHERE id = $1 AND owner = $2", id, owner).Scan(&deleted)
 
 	if err == sql.ErrNoRows {
-		return errors.New("Banner not found")
+		return errors.New("banner not found")
 	}
 	if err != nil {
 		return err
 	}
 	if deleted {
-		return errors.New("Banner not found")
+		return errors.New("banner not found")
 	}
 
 	_, err = r.db.Exec("UPDATE banner SET deleted = TRUE WHERE id = $1", id)
