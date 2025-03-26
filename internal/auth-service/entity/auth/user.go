@@ -14,11 +14,11 @@ func ValidateUser(user *User) error {
 }
 
 type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username" validate:"required,min=3,max=20"`
-	Email    string `json:"email" validate:"email,required"`
-	Password []byte `json:"password" validate:"required,min=8"`
-	Avatar   string `json:"avatar"` // TODO: Сделать валидацию ссылки на Аватарку
-	Balance  int    `json:"balance" validate:"gte=0"`
-	Role     int    `json:"role" validate:"required,gte=1,lte=2"`
+	ID          int    `json:"id"`
+	Username    string `json:"username" validate:"required,min=3,max=20"`
+	Email       string `json:"email" validate:"email,required"`
+	Password    []byte `json:"password" validate:"required,min=8"`
+	Description string `json:"description" validate:"required"`
+	Balance     int    `json:"balance" validate:"gte=0"`
+	Role        int    `json:"role" validate:"required,gte=1,lte=2"`
 }

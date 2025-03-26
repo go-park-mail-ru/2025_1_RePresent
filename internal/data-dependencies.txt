@@ -1,0 +1,116 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table user { // PostgreSQL
+  id int [primary key]
+  username string
+  email string
+  password bytea
+  description string
+  balance int
+  role int
+  created_at timestamp 
+  updated_at timestamp 
+}
+
+Table avatar { // MinIO(bucket)
+  file_name string [primary key] // (name_file = hash(id))
+  avatar image
+}
+
+Ref: user.id - avatar.file_name
+
+Table link { // ScyllaSB (key-values)
+  link string [primary key] // (uuid random generate)
+  platform_id int // have search index
+  height int // высота объявлений
+  width int // ширина объявлений
+  accept_deviation int // допустимое отклонение
+}
+
+Ref: user.id < link.platform_id
+
+Table session { // Redis (key-values)
+  session_id int [primary key] // (uuid random generate)
+  user_id int
+  role int
+  expires time // время окончания длительности
+  created_at timestamp 
+}
+
+Ref: user.id < session.user_id
+
+Table banner { // PostgreSQL
+  id int [primary key]
+  user_id int
+  active bool
+  others string
+}
+
+Ref: user.id < banner.user_id
+
+Table contract { // PostgreSQL
+  id int [primary key]
+  user_id int
+  user_approve bool
+  platform_id int
+  platform_approve bool
+  platform_active bool
+  banner_id int
+  price_per_click int
+  price_per_second_view int
+}
+
+Ref: user.id < contract.user_id
+Ref: user.id < contract.platform_id
+Ref: banner.id < contract.banner_id
+
+Table auto_approve { // Redis SET
+  user_id int [primary key]
+}
+
+Ref: user.id - auto_approve.user_id
+Ref: contract.platform_id - auto_approve.user_id
+
+Table transaction { // PostgreSQL
+  id int [primary key]
+  sender_id int
+  receiver_id int
+  contract_id int
+  amount int
+  created_at timestamp
+}
+
+Ref: user.id < transaction.sender_id
+Ref: user.id < transaction.receiver_id
+Ref: contract.id < transaction.contract_id
+
+Table price_bound { // ScyllaDB (key-values)
+  platform_id int [primary key]
+  min_price_per_click int
+  min_price_per_second_view int
+}
+
+Ref: user.id - price_bound.platform_id
+
+Table external_transaction { // PostgreSQL
+  id int [primary key]
+  user_id int
+  amount int
+  created_at timestamp
+}
+
+Ref: user.id < external_transaction.user_id
+
+Table events {
+  id int
+  platform_id int
+  banner_id int
+  visitor_id string
+  is_click bool
+  time_on_view int // seconds
+  input_text text
+}
+
+Ref: events.platform_id > user.id
+Ref: events.banner_id > banner.id

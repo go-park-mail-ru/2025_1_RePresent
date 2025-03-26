@@ -1,15 +1,7 @@
-database:
+database_postgresql:
   HOST: 127.0.0.1
   PORT: 8081
   INSIDE_PORT: 5432
-  POSTGRES_DB: test_db
-  POSTGRES_PASSWORD: 123456
-  POSTGRES_USER: postgres
-  SSLMODE: disable
-
-connect_database_in_container:
-  HOST: postgresdb
-  PORT: 5432
   POSTGRES_DB: test_db
   POSTGRES_PASSWORD: 123456
   POSTGRES_USER: postgres

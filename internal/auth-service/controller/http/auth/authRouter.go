@@ -3,7 +3,7 @@ package auth
 import (
 	"net/http"
 	usecaseAuth "retarget/internal/auth-service/usecase/auth"
-	middleware "retarget/pkg/middleware"
+	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
 )
@@ -16,15 +16,27 @@ func NewAuthController(authUsecase *usecaseAuth.AuthUsecase) AuthController {
 	return AuthController{authUsecase: authUsecase}
 }
 
-func SetupAuthRoutes(authUsecase *usecaseAuth.AuthUsecase) http.Handler {
+func SetupAuthRoutes(authenticator *authenticate.Authenticator, authUsecase *usecaseAuth.AuthUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
 	authController := NewAuthController(authUsecase)
 
-	muxRouter.Handle("/api/v1/auth/me", http.HandlerFunc(authController.GetCurrentUserHandler))
-	muxRouter.Handle("/api/v1/auth/logout", middleware.Auth(authUsecase)(http.HandlerFunc(authController.LogoutHandler)))
+	muxRouter.Handle("/api/v1/auth/me", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler)))
+	muxRouter.Handle("/api/v1/auth/logout", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler)))
 
 	muxRouter.HandleFunc("/api/v1/auth/login", authController.LoginHandler)
+	// muxRouter.HandleFunc("/api/v1/auth/login/mail", authController.LoginConfirmHandler)
+
 	muxRouter.HandleFunc("/api/v1/auth/signup", authController.RegisterHandler)
+	muxRouter.HandleFunc("/api/v1/auth/signup/mail", authController.RegisterConfirmHandler)
+
+	// muxRouter.HandleFunc("/api/v1/auth/regain", authController.RegainHandler)
+	// muxRouter.HandleFunc("/api/v1/auth/regain/mail", authController.RegainConfirmHandler)
+
+	// muxRouter.HandleFunc("/api/v1/auth/edit/password", authController.EditPasswordHandler)
+	// muxRouter.HandleFunc("/api/v1/auth/edit/password/mail", authController.EditPasswordConfirmHandler)
+
+	// muxRouter.HandleFunc("/api/v1/auth/edit/email", authController.EditMailHandler)
+	// muxRouter.HandleFunc("/api/v1/auth/edit/email/mail", authController.EditMailConfirmHandler)
 
 	return muxRouter
 }
