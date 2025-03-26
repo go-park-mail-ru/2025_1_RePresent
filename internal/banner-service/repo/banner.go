@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 
+	"log"
 	"retarget/internal/banner-service/entity"
 
 	_ "github.com/lib/pq"
@@ -18,8 +19,14 @@ type BannerRepository struct {
 	db *sql.DB
 }
 
-func NewBannerRepository(db *sql.DB) *BannerRepository {
-	return &BannerRepository{db: db}
+func NewBannerRepository(endPoint string) *BannerRepository {
+	bannerRepo := &BannerRepository{}
+	db, err := sql.Open("postgres", endPoint)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bannerRepo.db = db
+	return bannerRepo
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) {
@@ -62,6 +69,21 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner) error {
 
 	return nil
 
+}
+
+func (r *BannerRepository) UpdateBanner(banner entity.Banner) error {
+	stmt, err := r.db.Prepare("UPDATE banner SET title = $1, description = $2, content = $3, status = $4 WHERE id = $5")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(banner.Title, banner.Description, banner.Content, banner.Link, banner.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *BannerRepository) GetBannerByID(id int) (*entity.Banner, error) {

@@ -13,66 +13,36 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type CreateBannerRequest struct {
-	OwnerID     int    `json:"owner"`
+type CreateUpdateBannerRequest struct {
+	OwnerID     int    `json:"owner" validate:"required"`
 	Title       string `json:"title" validate:"required,min=3,max=30"`
 	Description string `json:"description" validate:"required"`
 	Content     string `json:"content_link"`
 	Link        string `json:"link" validate:"required"`
+	Status      int    `json:"status" validate:"required"`
 }
 
-func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
+		return
+	}
+	user, err := sess.GetSession(cookie.Value)
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
 		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
 		return
 	}
 
-	// Хардкожу вытаскивание баннеров юзверя
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	json.NewEncoder(w).Encode(response.NewResponse(true, "User Not Found"))
-	// 	// http.Error(w, "User not found", http.StatusUnauthorized)
-	// 	return
-	// }
-
-	// // Получаем user_id из URL
-	// vars := mux.Vars(r) // ЛИШНИЙ КОД, НО ПУСТЬ ПОКА БУДЕТ
-	// userIdStr := vars["user_id"]
-	// userID, err := strconv.Atoi(userIdStr)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid User ID"))
-	// 	// http.Error(w, "Invalid user_id", http.StatusBadRequest)
-	// 	return
-	// }
-	user, err := sess.GetSession(cookie.Value)
-
-	// userID := user.UserID
-
-	// if userID != user.UserID {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-
-	// 	json.NewEncoder(w).Encode(response.NewResponse(true, "This user haven`t root on getting this content"))
-	// 	// http.Error(w, "This user haven`t root on getting this content", http.StatusUnauthorized)
-	// 	return
-	// } // ЧТОБЫ НЕ ПЕРЕПИСЫВАТЬ FETCH
-
 	banners, err := h.BannerUsecase.GetBannersByUserID(user.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "+err.Error()))
-		// http.Error(w, "Error fetching banners: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -87,18 +57,10 @@ func (h *BannerController) GetBannersByUserCookie(w http.ResponseWriter, r *http
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error encoding banners: "+err.Error()))
-		// http.Error(w, "Error encoding banners: "+err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -108,6 +70,12 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 
 	// Жду миддлваре
 	user, err := sess.GetSession(cookie.Value)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
+		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
+		return
+	}
 
 	vars := mux.Vars(r)
 	bannerIDstr := vars["id"]
@@ -120,7 +88,6 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	banner, err := h.BannerUsecase.GetBannerByID(user.UserID, bannerID)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
@@ -128,7 +95,6 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(banner)
 	if err != nil {
@@ -138,14 +104,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req CreateBannerRequest
+	var req CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -163,6 +122,12 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	user, err := sess.GetSession(cookie.Value)
+	if err != nil || cookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
+		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
+		return
+	}
 	UserID := user.UserID
 	//Хардкод закончился
 
@@ -189,14 +154,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-		// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req CreateBannerRequest
+	var req CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -214,38 +172,47 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	user, err := sess.GetSession(cookie.Value)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
+		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
+		return
+	}
+
 	UserID := user.UserID
 	//Хардкод закончился
 
+	vars := mux.Vars(r)
+	bannerIDstr := vars["id"]
+
+	bannerID, err := strconv.Atoi(bannerIDstr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		return
+	}
+
 	banner := entity.Banner{
-		OwnerID:     UserID,
+		ID:          bannerID,
 		Title:       req.Title,
 		Description: req.Description,
 		Content:     req.Content,
-		Link:        req.Link,
-		Balance:     0,
-		Status:      0,
+		Status:      req.Status,
 	}
 
-	err = h.BannerUsecase.BannerRepository.CreateNewBanner(banner)
+	err = h.BannerUsecase.UpdateBanner(UserID, banner)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		// http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner created"))
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner updated"))
 }
 
 func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-		return
-	}
-
 	// Хардкожу вытаскивание юзверя
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
@@ -270,5 +237,28 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, UserID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
+
+}
+
+func (h *BannerController) BannerHandleFunc(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		h.ReadBanner(w, r)
+		return
+	}
+	if r.Method == http.MethodDelete {
+		h.DeleteBanner(w, r)
+		return
+	}
+	if r.Method == http.MethodPost {
+		h.CreateBanner(w, r)
+		return
+	}
+	if r.Method == http.MethodPut {
+		h.UpdateBanner(w, r)
+		return
+	}
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
+	return
 
 }
