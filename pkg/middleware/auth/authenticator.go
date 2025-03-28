@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -17,18 +16,14 @@ type Authenticator struct {
 	redisClient *redis.Client
 }
 
-func NewAuthenticator(endPoint string, password string, db string) (*Authenticator, error) {
-	db_string, err := strconv.Atoi(db)
-	if err != nil {
-		return nil, fmt.Errorf("error in config: %w", err)
-	}
+func NewAuthenticator(endPoint string, password string, db int) (*Authenticator, error) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     endPoint,
 		Password: password,
-		DB:       db_string,
+		DB:       db,
 	})
 
-	_, err = redisClient.Ping(context.Background()).Result()
+	_, err := redisClient.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, fmt.Errorf("error connect to Redis: %w", err)
 	}

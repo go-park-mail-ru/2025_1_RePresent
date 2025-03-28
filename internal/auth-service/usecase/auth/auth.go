@@ -17,16 +17,15 @@ type AuthUsecaseInterface interface {
 	GetUser(userId int) (*entityAuth.User, error)
 	CheckCode(code int, userId int) error
 	CreateCode(userId int) (int, error)
-
-	AddSession()
 }
 
 type AuthUsecase struct {
-	authRepository *repoAuth.AuthRepository
+	authRepository    *repoAuth.AuthRepository
+	sessionRepository *repoAuth.SessionRepository
 }
 
-func NewAuthUsecase(userRepo *repoAuth.AuthRepository) *AuthUsecase {
-	return &AuthUsecase{authRepository: userRepo}
+func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.SessionRepository) *AuthUsecase {
+	return &AuthUsecase{authRepository: userRepo, sessionRepository: sessionRepo}
 }
 
 func (a *AuthUsecase) Login(email string, password string, role int) (*entityAuth.User, error) {

@@ -26,7 +26,7 @@ type MailConfig struct {
 type AuthRedisConfig struct {
 	EndPoint string `yaml:"ENDPOINT"`
 	Password string `yaml:"PASSWORD"`
-	Database string `yaml:"DB_NUMBER"`
+	Database int    `yaml:"DB_NUMBER"`
 }
 
 type Config struct {
