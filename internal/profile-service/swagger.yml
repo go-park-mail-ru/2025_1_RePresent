@@ -372,9 +372,6 @@ components:
         email:
           type: string
           example: "durov@vk.com"
-        approve_email:
-          type: boolean
-          example: true
         description:
           type: string
           example: "empty"
@@ -388,7 +385,6 @@ components:
       required:
         - username
         - email
-        - approve_email
         - description
         - balance
         - role

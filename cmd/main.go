@@ -9,6 +9,7 @@ import (
 	"retarget/configs"
 
 	// profileApp "retarget/internal/profile-service/app"
+	advApp "retarget/internal/adv-service/app"
 	mailApp "retarget/internal/mail-service/app"
 )
 
@@ -20,7 +21,7 @@ func main() {
 
 	// go authApp.Run(cfg)
 	go mailApp.Run(cfg)
-	// go advApp.Run(cfg)
+	go advApp.Run(cfg)
 	// go profileApp.Run(cfg)
 
 	stop := make(chan os.Signal, 1)

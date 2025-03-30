@@ -7,13 +7,40 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/lib/pq v1.10.9
+<<<<<<< HEAD
+=======
+	github.com/minio/minio-go/v7 v7.0.88
+	github.com/redis/go-redis v6.15.9+incompatible
+	github.com/redis/go-redis/v9 v9.7.3
+>>>>>>> 069b6588dfb6bca3022a471cff5ba2b6fe31e954
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.36.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+<<<<<<< HEAD
 require github.com/swaggo/files v1.0.1 // indirect
+=======
+require (
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/go-ini/ini v1.67.0 // indirect
+	github.com/go-redis/redis v6.15.9+incompatible // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
+	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
+	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
+	github.com/minio/crc64nvme v1.0.1 // indirect
+	github.com/minio/md5-simd v1.1.2 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.36.3 // indirect
+	github.com/rs/xid v1.6.0 // indirect
+	gopkg.in/inf.v0 v0.9.1 // indirect
+)
+>>>>>>> 069b6588dfb6bca3022a471cff5ba2b6fe31e954
 
 require (
 	github.com/aymerick/raymond v2.0.2+incompatible

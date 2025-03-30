@@ -23,21 +23,30 @@ type MailConfig struct {
 	Sender     string `yaml:"SENDER"`
 }
 
+type AuthRedisConfig struct {
+	EndPoint string `yaml:"ENDPOINT"`
+	Password string `yaml:"PASSWORD"`
+	Database int    `yaml:"DB_NUMBER"`
+}
+
 type Config struct {
-	Database DatabaseConfig `yaml:"connect_database_in_container"`
-	Email    MailConfig     `yaml:"connect_smtp_server"`
+	Database  DatabaseConfig  `yaml:"database_postgresql"`
+	Email     MailConfig      `yaml:"smtp_server"`
+	AuthRedis AuthRedisConfig `yaml:"auth_redis"`
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var aux struct {
-		Database DatabaseConfig `yaml:"connect_database_in_container"`
-		Email    MailConfig     `yaml:"connect_smtp_server"`
+		Database  DatabaseConfig  `yaml:"database_postgresql"`
+		Email     MailConfig      `yaml:"smtp_server"`
+		AuthRedis AuthRedisConfig `yaml:"auth_redis"`
 	}
 	if err := unmarshal(&aux); err != nil {
 		return err
 	}
 	c.Database = aux.Database
 	c.Email = aux.Email
+	c.AuthRedis = aux.AuthRedis
 	return nil
 }
 

@@ -12,25 +12,29 @@ import (
 type AuthUsecaseInterface interface {
 	Login(email string, password string, role int) (*entityAuth.User, error)
 	Logout(sessionId string) error
-	GetUserBySessionID(sessionId string) (*entityAuth.User, error)
 	Register(username string, email string, password string, role int) (*entityAuth.User, error)
+
+	GetUser(userId int) (*entityAuth.User, error)
+	CheckCode(code int, userId int) error
+	CreateCode(userId int) (int, error)
 }
 
 type AuthUsecase struct {
-	userRepository *repoAuth.UserRepository
+	authRepository    *repoAuth.AuthRepository
+	sessionRepository *repoAuth.SessionRepository
 }
 
-func NewAuthUsecase(userRepo *repoAuth.UserRepository) *AuthUsecase {
-	return &AuthUsecase{userRepository: userRepo}
+func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.SessionRepository) *AuthUsecase {
+	return &AuthUsecase{authRepository: userRepo, sessionRepository: sessionRepo}
 }
 
 func (a *AuthUsecase) Login(email string, password string, role int) (*entityAuth.User, error) {
-	user, err := a.userRepository.GetUserByEmail(email)
+	user, err := a.authRepository.GetUserByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 	if user.Role != role {
-		return nil, errors.New("Неверные данные пользователя")
+		return nil, errors.New("Incorrect user data")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
@@ -40,30 +44,19 @@ func (a *AuthUsecase) Login(email string, password string, role int) (*entityAut
 }
 
 func (a *AuthUsecase) Logout(sessionId string) error {
-	err := entityAuth.DelSession(sessionId)
+	// err := // Удалить сессию
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *AuthUsecase) GetUserBySessionID(sessionId string) (*entityAuth.User, error) {
-	session, err := entityAuth.GetSession(sessionId)
-	if err != nil {
-		return nil, err
-	}
-	user, err := a.userRepository.GetUserByID(session.UserID)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, err
-	}
-	if user == nil {
-		return nil, errors.New("Пользователь с таким id не существует")
-	}
-	return user, nil
+func (a *AuthUsecase) GetUser(user_id int) (*entityAuth.User, error) {
+	return &entityAuth.User{}, nil
 }
 
 func (a *AuthUsecase) Register(username string, email string, password string, role int) (*entityAuth.User, error) {
-	user, err := a.userRepository.GetUserByEmail(email)
+	user, err := a.authRepository.GetUserByEmail(email)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -71,7 +64,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, errors.New("Пользователь с таким email уже существует")
 	}
 
-	user, err = a.userRepository.GetUserByUsername(username)
+	user, err = a.authRepository.GetUserByUsername(username)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -85,12 +78,12 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 	}
 
 	user = &entityAuth.User{
-		Username: username,
-		Email:    email,
-		Password: hashedPassword,
-		Avatar:   "",
-		Balance:  0,
-		Role:     role,
+		Username:    username,
+		Email:       email,
+		Password:    hashedPassword,
+		Description: "",
+		Balance:     0,
+		Role:        role,
 	}
 
 	err = entityAuth.ValidateUser(user)
@@ -98,7 +91,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, err
 	}
 
-	err = a.userRepository.CreateNewUser(user)
+	err = a.authRepository.CreateNewUser(user)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,14 @@
+services:
+  scylla:
+    image: scylladb/scylla
+    container_name: scylla
+    ports:
+      - "9042:9042"
+    volumes:
+      - ./init.cql:/scylla_scripts/init.cql
+    environment:
+      CASSANDRA_PASSWORD: 12345678
+    command: [
+      "--developer-mode=1",
+      "--overprovisioned=0"
+    ]

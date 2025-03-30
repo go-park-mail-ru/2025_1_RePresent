@@ -8,10 +8,8 @@ import (
 )
 
 type UserResponse struct {
-	Id       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
-	Avatar   string `json:"avatar"`
 	Balance  int    `json:"balance"`
 	Role     int    `json:"role"`
 }
@@ -23,28 +21,11 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
-		return
+	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
-	user, err := c.authUsecase.GetUserBySessionID(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "User Not Found"))
-		return
-	}
-
-	userResponse := UserResponse{
-		Id:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Avatar:   user.Avatar,
-		Balance:  user.Balance,
-		Role:     user.Role,
-	}
-	w.Header().Set("Cache-Control", "no-cache")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userResponse) // тут тоже надо решить как поменять структуру
+	userID := user.UserID
+	// Получили пользователя, в usecase GetUser(user_id), получили пользователя, вернули
 }
