@@ -187,7 +187,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 
 	bannerID, err := strconv.Atoi(bannerIDstr)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		return
 	}
