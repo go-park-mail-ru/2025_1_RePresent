@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -30,14 +31,14 @@ type AuthRedisConfig struct {
 }
 
 type Config struct {
-	Database  DatabaseConfig  `yaml:"database_postgresql"`
+	Database  DatabaseConfig  `yaml:"database"`
 	Email     MailConfig      `yaml:"smtp_server"`
 	AuthRedis AuthRedisConfig `yaml:"auth_redis"`
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var aux struct {
-		Database  DatabaseConfig  `yaml:"database_postgresql"`
+		Database  DatabaseConfig  `yaml:"database"`
 		Email     MailConfig      `yaml:"smtp_server"`
 		AuthRedis AuthRedisConfig `yaml:"auth_redis"`
 	}
@@ -63,4 +64,11 @@ func LoadConfigs(paths ...string) (*Config, error) {
 		}
 	}
 	return &cfg, nil
+}
+
+func (d DatabaseConfig) ConnectionString() string {
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		d.Host, d.Port, d.Username, d.Password, d.Dbname, d.Sslmode,
+	)
 }

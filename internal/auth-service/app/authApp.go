@@ -26,13 +26,13 @@ func Run(cfg *configs.Config) {
 		30*time.Minute,
 	)
 	defer func() {
-		if err := sessionRepository.Close(); err != nil {
+		if err := sessionRepository.CloseConnection(); err != nil {
 			log.Printf("error closing session repository: %v", err)
 		}
 	}()
 
 	// userRepository := repoAuth.NewAuthRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode)
-	userRepository := repoAuth.NewAuthRepository(cfg.Database.Connection)
+	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString())
 	defer func() {
 		if err := userRepository.CloseConnection(); err != nil {
 			log.Println(err)

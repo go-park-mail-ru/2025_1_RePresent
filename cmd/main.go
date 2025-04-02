@@ -4,24 +4,23 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	authApp "retarget/internal/auth-service/app"
 	"syscall"
 
 	"retarget/configs"
 
-	// profileApp "retarget/internal/profile-service/app"
-	advApp "retarget/internal/adv-service/app"
 	mailApp "retarget/internal/mail-service/app"
 )
 
 func main() {
-	cfg, err := configs.LoadConfigs("configs/database-dev.yml", "configs/mail.yml")
+	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// go authApp.Run(cfg)
+	go authApp.Run(cfg)
 	go mailApp.Run(cfg)
-	go advApp.Run(cfg)
+	// go advApp.Run(cfg)
 	// go profileApp.Run(cfg)
 
 	stop := make(chan os.Signal, 1)
