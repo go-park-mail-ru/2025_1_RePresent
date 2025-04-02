@@ -1,4 +1,21 @@
   services:
+    redis0:
+      image: redis:alpine
+      restart: always
+      ports:
+        - "6379:6379"
+      environment:
+        - REDIS_DATABASE=0
+        - REDIS_PASSWORD=${REDIS_PASSWORD}
+      networks:
+        - api_network
+      volumes:
+        - ./auth-data:/data
+      healthcheck:
+        test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
     postgresdb:
       image: postgres:17
       container_name: ReTargetDataBase

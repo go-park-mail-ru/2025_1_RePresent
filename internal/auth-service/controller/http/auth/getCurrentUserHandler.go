@@ -21,11 +21,33 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
+	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
-	userID := user.UserID
-	// Получили пользователя, в usecase GetUser(user_id), получили пользователя, вернули
+	userID := userSession.UserID
+
+	user, err := c.authUsecase.GetUser(userID)
+	if err != nil {
+		panic("UNIMPLIMENTED")
+	}
+
+	userResponse := &UserResponse{
+		Username: user.Username,
+		Email:    user.Email,
+		Balance:  user.Balance,
+		Role:     user.Role,
+	}
+
+	response := struct {
+		Service entity.Response `json:"service"`
+		Body    UserResponse    `json:"body"`
+	}{
+		Service: entity.NewResponse(false, "Sent"),
+		Body:    *userResponse,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }

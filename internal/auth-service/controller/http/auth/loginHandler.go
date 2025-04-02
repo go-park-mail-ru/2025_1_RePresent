@@ -6,6 +6,7 @@ import (
 
 	// entityAuth "retarget/internal/auth-service/entity/auth"
 	entity "retarget/pkg/entity"
+	"retarget/pkg/utils/validator"
 )
 
 type LoginRequest struct {
@@ -28,5 +29,39 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
-	// Login(данные пользователя), проверили данные, AddSession(user_id), поставили куки
+	errors, err := validator.ValidateStruct(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, errors))
+		return
+	}
+
+	user, err := c.authUsecase.Login(req.Email, req.Password, req.Role)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		return
+	}
+
+	session, err := c.authUsecase.AddSession(user.ID, user.Role)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    session.ID,
+		Expires:  session.Expires,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	}
+	http.SetCookie(w, cookie)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(entity.NewResponse(false, "Login Successful"))
 }

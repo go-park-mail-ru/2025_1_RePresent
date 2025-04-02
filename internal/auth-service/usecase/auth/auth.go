@@ -17,6 +17,8 @@ type AuthUsecaseInterface interface {
 	GetUser(userId int) (*entityAuth.User, error)
 	CheckCode(code int, userId int) error
 	CreateCode(userId int) (int, error)
+
+	AddSession(userId int, role int) (*entityAuth.Session, error)
 }
 
 type AuthUsecase struct {
@@ -44,7 +46,7 @@ func (a *AuthUsecase) Login(email string, password string, role int) (*entityAut
 }
 
 func (a *AuthUsecase) Logout(sessionId string) error {
-	// err := // Удалить сессию
+	err := a.sessionRepository.DelSession(sessionId)
 	if err != nil {
 		return err
 	}
@@ -52,7 +54,11 @@ func (a *AuthUsecase) Logout(sessionId string) error {
 }
 
 func (a *AuthUsecase) GetUser(user_id int) (*entityAuth.User, error) {
-	return &entityAuth.User{}, nil
+	user, err := a.authRepository.GetUserByID(user_id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (a *AuthUsecase) Register(username string, email string, password string, role int) (*entityAuth.User, error) {
@@ -105,4 +111,12 @@ func hashPassword(password string) ([]byte, error) {
 		return nil, err
 	}
 	return hash, nil
+}
+
+func (a *AuthUsecase) AddSession(userId int, role int) (*entityAuth.Session, error) {
+	session, err := a.sessionRepository.AddSession(userId, role)
+	if err != nil {
+		return nil, err
+	}
+	return session, nil
 }
