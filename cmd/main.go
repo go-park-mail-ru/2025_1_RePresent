@@ -4,12 +4,10 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"retarget/configs"
 	authApp "retarget/internal/auth-service/app"
 	"syscall"
-
-	"retarget/configs"
-
-	mailApp "retarget/internal/mail-service/app"
+	//mailApp "retarget/internal/mail-service/app"
 )
 
 func main() {
@@ -17,9 +15,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	go authApp.Run(cfg)
-	go mailApp.Run(cfg)
+	//go mailApp.Run(cfg)
 	// go advApp.Run(cfg)
 	// go profileApp.Run(cfg)
 

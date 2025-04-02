@@ -3,7 +3,8 @@
       image: redis:alpine
       restart: always
       ports:
-        - "6379:6379"
+        - "0.0.0.0:6379:6379"
+      container_name: ReTargetRedis
       environment:
         - REDIS_DATABASE=0
         - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -50,7 +51,7 @@
         dockerfile: deploy/Dockerfile
       container_name: ReTargetApi
       ports:
-        - 8080:8080
+        - 8025:8025
       depends_on:
         - postgresdb
       networks:

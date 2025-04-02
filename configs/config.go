@@ -48,20 +48,23 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Database = aux.Database
 	c.Email = aux.Email
 	c.AuthRedis = aux.AuthRedis
+	fmt.Println(aux)
 	return nil
 }
-
 func LoadConfigs(paths ...string) (*Config, error) {
 	var cfg Config
+	var total []byte
 	for _, path := range paths {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
-		err = yaml.Unmarshal(data, &cfg)
-		if err != nil {
-			return nil, err
-		}
+		total = append(total, data...)
+	}
+
+	err := yaml.Unmarshal(total, &cfg)
+	if err != nil {
+		return nil, err
 	}
 	return &cfg, nil
 }
