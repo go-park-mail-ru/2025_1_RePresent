@@ -48,7 +48,6 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Database = aux.Database
 	c.Email = aux.Email
 	c.AuthRedis = aux.AuthRedis
-	fmt.Println(aux)
 	return nil
 }
 func LoadConfigs(paths ...string) (*Config, error) {
