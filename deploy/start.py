@@ -18,4 +18,4 @@ with open(".env", "w") as f:
     f.write(f'PORT={database_config["database"]["PORT"]}\n')
     f.write(f'INSIDE_PORT={database_config["database"]["INSIDE_PORT"]}\n')
 
-    f.write(f'REDIS_PASSWORD={auth_redis_config["auth-redis"]["PASSWORD"]}\n')
+    f.write(f'REDIS_PASSWORD={auth_redis_config["auth_redis"]["PASSWORD"]}\n')
