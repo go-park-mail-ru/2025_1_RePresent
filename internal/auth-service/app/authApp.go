@@ -3,10 +3,10 @@ package authApp
 import (
 	"log"
 	"net/http"
+	authenticate "pkg/middleware/auth"
 	configs "retarget-authapp/configs"
 	authAppHttp "retarget-authapp/controller/http"
 	authMiddleware "retarget-authapp/controller/http/middleware"
-	authenticate "retarget-authapp/pkg/middleware/auth"
 	repoAuth "retarget-authapp/repo/auth"
 	repoSession "retarget-authapp/repo/auth"
 	usecaseAuth "retarget-authapp/usecase/auth"
