@@ -2,8 +2,8 @@ package auth
 
 import (
 	"net/http"
-	usecaseAuth "retarget/internal/auth-service/usecase/auth"
-	authenticate "retarget/pkg/middleware/auth"
+	authenticate "retarget-authapp/pkg/middleware/auth"
+	usecaseAuth "retarget-authapp/usecase/auth"
 
 	"github.com/gorilla/mux"
 )

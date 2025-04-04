@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	// entityAuth "retarget/internal/auth-service/entity/auth"
-	entity "retarget/pkg/entity"
-	"retarget/pkg/utils/validator"
+	entity "retarget-authapp/pkg/entity"
+	"retarget-authapp/pkg/utils/validator"
 )
 
 type LoginRequest struct {

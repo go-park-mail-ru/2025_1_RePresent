@@ -46,12 +46,13 @@
       restart: always
 
     api:
-      build:
-        context: ..
-        dockerfile: deploy/Dockerfile
+      build: ./internal/auth-service
       container_name: ReTargetApi
       ports:
         - 8025:8025
+      volumes:
+        - ./internal/configs:/configs
+        - ./internal/pkg:/pkg
       depends_on:
         - postgresdb
       networks:

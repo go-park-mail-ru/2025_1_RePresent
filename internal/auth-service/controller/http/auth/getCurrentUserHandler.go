@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"net/http"
-	entity "retarget/pkg/entity"
+	entity "retarget-authapp/pkg/entity"
 )
 
 type UserResponse struct {
