@@ -29,7 +29,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 # Этап запуска
 FROM alpine:latest
 
-# COPY --from=builder /bannerapp/main /app/main
+COPY --from=builder /bannerapp/main /bannerapp/main
 
 COPY --from=builder /bannerworkspace/banner-service/configs /bannerapp/configs
 
