@@ -45,13 +45,27 @@
         retries: 5
       restart: always
 
-    api:
+    auth:
       build:
         context: ./internal
         dockerfile: ./auth-service/Dockerfile
       container_name: ReTargetApi
       ports:
         - 8025:8025
+      #volumes:
+      #  - ./internal/configs:/configs
+      #  - ./internal/pkg:/pkg
+      depends_on:
+        - postgresdb
+      networks:
+        - api_network
+    banner:
+      build:
+        context: ./internal
+        dockerfile: ./banner-service/Dockerfile
+      container_name: ReTargetApi
+      ports:
+        - 8024:8024
       #volumes:
       #  - ./internal/configs:/configs
       #  - ./internal/pkg:/pkg

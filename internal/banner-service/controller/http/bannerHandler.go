@@ -3,12 +3,12 @@ package banner
 import (
 	"encoding/json"
 	"net/http"
-	sess "retarget/internal/auth-service/entity/auth" // Хардкод
-	entity "retarget/internal/banner-service/entity"
+	pkg "pkg/entity"
+	entity "retarget-bannerapp/entity" // Хардкод
 	"strconv"
 
 	// pkg "retarget/internal/pkg/entity"
-	response "retarget/pkg/entity"
+	response "pkg/entity"
 	// "strconv"
 	"github.com/gorilla/mux"
 )
@@ -24,21 +24,14 @@ type CreateUpdateBannerRequest struct {
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		return
+	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
 	}
-	user, err := sess.GetSession(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
-	}
+	userID := userSession.UserID
 
-	banners, err := h.BannerUsecase.GetBannersByUserID(user.UserID)
+	banners, err := h.BannerUsecase.GetBannersByUserID(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
@@ -61,21 +54,12 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 }
 
 func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		return
+	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
 	}
-
-	// Жду миддлваре
-	user, err := sess.GetSession(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
-	}
+	userID := userSession.UserID
 
 	vars := mux.Vars(r)
 	bannerIDstr := vars["id"]
@@ -87,7 +71,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	banner, err := h.BannerUsecase.GetBannerByID(user.UserID, bannerID)
+	banner, err := h.BannerUsecase.GetBannerByID(userID, bannerID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
@@ -113,26 +97,17 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Хардкожу вытаскивание юзверя
-	cookie, err := r.Cookie("session_id")
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
+	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
 	}
-	user, err := sess.GetSession(cookie.Value)
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
-	}
-	UserID := user.UserID
+	userID := userSession.UserID
+
 	//Хардкод закончился
 
 	banner := entity.Banner{
-		OwnerID:     UserID,
+		OwnerID:     userID,
 		Title:       req.Title,
 		Description: req.Description,
 		Content:     req.Content,
@@ -163,24 +138,12 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Хардкожу вытаскивание юзверя
-	cookie, err := r.Cookie("session_id")
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
+	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
 	}
-	user, err := sess.GetSession(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
-	}
-
-	UserID := user.UserID
-	//Хардкод закончился
+	userID := userSession.UserID
 
 	vars := mux.Vars(r)
 	bannerIDstr := vars["id"]
@@ -200,7 +163,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		Status:      req.Status,
 	}
 
-	err = h.BannerUsecase.UpdateBanner(UserID, banner)
+	err = h.BannerUsecase.UpdateBanner(userID, banner)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
@@ -213,17 +176,12 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) {
-	// Хардкожу вытаскивание юзверя
-	cookie, err := r.Cookie("session_id")
-	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Invalid Cookie"))
-		// http.Error(w, "Cookie not found or Invalid session ID", http.StatusUnauthorized)
-		return
+	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
 	}
-	user, err := sess.GetSession(cookie.Value)
-	UserID := user.UserID
-	//Хардкод закончился
+	userID := userSession.UserID
 
 	vars := mux.Vars(r)
 	bannerIDstr := vars["id"]
@@ -234,7 +192,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, UserID)
+	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, userID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 

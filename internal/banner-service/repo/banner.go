@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"log"
-	"retarget/internal/banner-service/entity"
+	"retarget-bannerapp/entity"
 
 	_ "github.com/lib/pq"
 
@@ -112,4 +112,8 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int) error {
 
 	_, err = r.db.Exec("UPDATE banner SET deleted = TRUE WHERE id = $1", id)
 	return err
+}
+
+func (r *BannerRepository) CloseConnection() error {
+	return r.db.Close()
 }
