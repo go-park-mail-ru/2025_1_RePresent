@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -30,14 +31,14 @@ type AuthRedisConfig struct {
 }
 
 type Config struct {
-	Database  DatabaseConfig  `yaml:"database_postgresql"`
+	Database  DatabaseConfig  `yaml:"database"`
 	Email     MailConfig      `yaml:"smtp_server"`
 	AuthRedis AuthRedisConfig `yaml:"auth_redis"`
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var aux struct {
-		Database  DatabaseConfig  `yaml:"database_postgresql"`
+		Database  DatabaseConfig  `yaml:"database"`
 		Email     MailConfig      `yaml:"smtp_server"`
 		AuthRedis AuthRedisConfig `yaml:"auth_redis"`
 	}
@@ -49,18 +50,27 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.AuthRedis = aux.AuthRedis
 	return nil
 }
-
 func LoadConfigs(paths ...string) (*Config, error) {
 	var cfg Config
+	var total []byte
 	for _, path := range paths {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
-		err = yaml.Unmarshal(data, &cfg)
-		if err != nil {
-			return nil, err
-		}
+		total = append(total, data...)
+	}
+
+	err := yaml.Unmarshal(total, &cfg)
+	if err != nil {
+		return nil, err
 	}
 	return &cfg, nil
+}
+
+func (d DatabaseConfig) ConnectionString() string {
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		d.Host, d.Port, d.Username, d.Password, d.Dbname, d.Sslmode,
+	)
 }

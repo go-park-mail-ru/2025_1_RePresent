@@ -15,7 +15,9 @@ drop_all:
 
 copy_sensitive:
         cp -r ./sensitive/requests ./backend_2025_1_RePresent/deploy/requests && \
-        cp ./sensitive/configs/database.yml ./backend_2025_1_RePresent/configs/database.yml
+        cp ./sensitive/configs/database.yml ./backend_2025_1_RePresent/configs/database.yml && \
+        cp ./sensitive/configs/mail.yml ./backend_2025_1_RePresent/configs/mail.yml && \
+        cp ./sensitive/configs/auth-redis.yml ./backend_2025_1_RePresent/configs/auth-redis.yml
         exit 0
 
 deploy_frontend:

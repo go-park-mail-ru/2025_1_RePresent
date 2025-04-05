@@ -18,7 +18,7 @@ type User struct {
 	Username    string `json:"username" validate:"required,min=3,max=20"`
 	Email       string `json:"email" validate:"email,required"`
 	Password    []byte `json:"password" validate:"required,min=8"`
-	Description string `json:"description" validate:"required"`
+	Description string `json:"description"`
 	Balance     int    `json:"balance" validate:"gte=0"`
 	Role        int    `json:"role" validate:"required,gte=1,lte=2"`
 }

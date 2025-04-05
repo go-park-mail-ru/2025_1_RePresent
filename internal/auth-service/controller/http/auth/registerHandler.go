@@ -3,14 +3,14 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
-	entity "retarget/pkg/entity"
-	"retarget/pkg/utils/validator"
+	entity "pkg/entity"
+	"pkg/utils/validator"
 )
 
 type RegisterRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=20"`
 	Email    string `json:"email" validate:"email,required"`
-	Code     string `json:"code" validate:"required,len=6"`
+	// Code     string `json:"code" validate:"required,len=6"`
 	Password string `json:"password" validate:"required,min=8"`
 	Role     int    `json:"role" validate:"required,gte=1,lte=2"`
 }
@@ -36,5 +36,34 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
 		return
 	}
+
 	// Login(данные пользователя), проверили данные, AddSession(user_id), поставили куки
+
+	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, 1)
+	if err != nil {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		return
+	}
+
+	session, err := c.authUsecase.AddSession(user.ID, 1)
+	if err != nil {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    session.ID,
+		Expires:  session.Expires,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	}
+	http.SetCookie(w, cookie)
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(entity.NewResponse(false, "registration succesful"))
 }

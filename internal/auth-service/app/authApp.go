@@ -3,13 +3,13 @@ package authApp
 import (
 	"log"
 	"net/http"
-	"retarget/configs"
-	authAppHttp "retarget/internal/auth-service/controller/http"
-	authMiddleware "retarget/internal/auth-service/controller/http/middleware"
-	repoAuth "retarget/internal/auth-service/repo/auth"
-	repoSession "retarget/internal/auth-service/repo/auth"
-	usecaseAuth "retarget/internal/auth-service/usecase/auth"
-	authenticate "retarget/pkg/middleware/auth"
+	authenticate "pkg/middleware/auth"
+	configs "retarget-authapp/configs"
+	authAppHttp "retarget-authapp/controller/http"
+	authMiddleware "retarget-authapp/controller/http/middleware"
+	repoAuth "retarget-authapp/repo/auth"
+	repoSession "retarget-authapp/repo/auth"
+	usecaseAuth "retarget-authapp/usecase/auth"
 	"time"
 )
 
@@ -26,13 +26,13 @@ func Run(cfg *configs.Config) {
 		30*time.Minute,
 	)
 	defer func() {
-		if err := sessionRepository.Close(); err != nil {
+		if err := sessionRepository.CloseConnection(); err != nil {
 			log.Printf("error closing session repository: %v", err)
 		}
 	}()
 
 	// userRepository := repoAuth.NewAuthRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode)
-	userRepository := repoAuth.NewAuthRepository(cfg.Database.Connection)
+	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString())
 	defer func() {
 		if err := userRepository.CloseConnection(); err != nil {
 			log.Println(err)
@@ -43,5 +43,5 @@ func Run(cfg *configs.Config) {
 
 	mux := authAppHttp.SetupRoutes(authenticator, authUsecase)
 
-	log.Fatal(http.ListenAndServe(":8020", authMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8025", authMiddleware.CORS(mux)))
 }

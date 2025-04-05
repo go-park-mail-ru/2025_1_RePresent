@@ -2,11 +2,17 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
+
+type SessionData struct {
+	UserID int `json:"user_id"`
+	Role   int `json:"role"`
+}
 
 type AuthenticatorInterface interface {
 	Authenticate(cookie string) (int, int, error)
@@ -40,11 +46,11 @@ func (a *Authenticator) Authenticate(cookie string) (int, int, error) {
 		return 0, -1, fmt.Errorf("error read from Redis: %w", err)
 	}
 
-	var userID, role int
-	_, err = fmt.Sscanf(val, "%d:%d", &userID, &role)
+	var session SessionData
+	err = json.Unmarshal([]byte(val), &session)
 	if err != nil {
-		return 0, -1, fmt.Errorf("error parse of value: %w", err)
+		return 0, -1, fmt.Errorf("error decoding JSON: %w", err)
 	}
 
-	return userID, role, nil
+	return session.UserID, session.Role, nil
 }

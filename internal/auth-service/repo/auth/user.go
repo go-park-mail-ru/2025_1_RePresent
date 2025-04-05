@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	authEntity "retarget/internal/auth-service/entity/auth"
+	authEntity "retarget-authapp/entity/auth"
 
 	_ "github.com/lib/pq"
 )
@@ -33,7 +33,7 @@ func NewAuthRepository(endPoint string) *AuthRepository {
 }
 
 func (r *AuthRepository) GetUserByID(id int) (*authEntity.User, error) {
-	row := r.db.QueryRow("SELECT id, username, email, password, description, balance, role FROM user WHERE id = $1", id)
+	row := r.db.QueryRow("SELECT id, username, email, password, description, balance, role FROM auth_user WHERE id = $1", id)
 	user := &authEntity.User{}
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Description, &user.Balance, &user.Role)
 	if err != nil {
@@ -43,7 +43,7 @@ func (r *AuthRepository) GetUserByID(id int) (*authEntity.User, error) {
 }
 
 func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) {
-	row := r.db.QueryRow("SELECT id, username, email, password, description, balance, role FROM user WHERE email = $1", email)
+	row := r.db.QueryRow("SELECT id, username, email, password, description, balance, role FROM auth_user WHERE email = $1", email)
 	user := &authEntity.User{}
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Description, &user.Balance, &user.Role)
 	if err != nil {
@@ -53,7 +53,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) 
 }
 
 func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, error) {
-	row := r.db.QueryRow("SELECT id, username, email, password, description, balance, role FROM user WHERE username = $1", username)
+	row := r.db.QueryRow("SELECT id, username, email, password, description, balance, role FROM auth_user WHERE username = $1", username)
 	user := &authEntity.User{}
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Description, &user.Balance, &user.Role)
 	if err != nil {
@@ -68,7 +68,7 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User) error {
 		return err
 	}
 
-	stmt, err := r.db.Prepare("INSERT INTO user (username, email, password, description, balance, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id")
+	stmt, err := r.db.Prepare("INSERT INTO auth_user (username, email, password, description, balance, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id")
 	if err != nil {
 		return err
 	}
