@@ -22,6 +22,7 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	// middleware.AuthMiddleware(authUsecase)()
 	muxRouter.Handle("/api/v1/banner/", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetUserBanners)))
 	muxRouter.Handle("/api/v1/banner/{banner_id}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.BannerHandleFunc)))
+	muxRouter.Handle("/api/v1/banner/create", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.CreateBanner)))
 
 	return muxRouter
 }
