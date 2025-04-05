@@ -20,18 +20,18 @@ COPY ./pkg ./pkg
 COPY ./banner-service ./banner-service
 COPY ./configs ./banner-service/configs
 
-WORKDIR /workspace/banner-service
+WORKDIR /bannerworkspace/banner-service
 
 # 4. Собираем приложение
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -v -ldflags="-w -s" -o /bannerapp/main /workspace/banner-service
+    go build -v -ldflags="-w -s" -o /bannerapp/main /bannerworkspace/banner-service
 
 # Этап запуска
 FROM alpine:latest
 
 # COPY --from=builder /bannerapp/main /app/main
 
-COPY --from=builder /workspace/banner-service/configs /bannerapp/configs
+COPY --from=builder /bannerworkspace/banner-service/configs /bannerapp/configs
 
 RUN chmod +x /bannerapp/main
 
@@ -39,4 +39,4 @@ WORKDIR /bannerapp
 
 EXPOSE 8024
 
-CMD ["/app/main"]
+CMD ["/bannerapp/main"]
