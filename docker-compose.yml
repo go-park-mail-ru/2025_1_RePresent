@@ -49,7 +49,7 @@
       build:
         context: ./internal
         dockerfile: ./auth-service/Dockerfile
-      container_name: ReTargetApi
+      container_name: ReTargetApiAuth
       ports:
         - 8025:8025
       #volumes:
@@ -63,7 +63,7 @@
       build:
         context: ./internal
         dockerfile: ./banner-service/Dockerfile
-      container_name: ReTargetApi
+      container_name: ReTargetApiBanner
       ports:
         - 8024:8024
       #volumes:
