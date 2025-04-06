@@ -47,11 +47,14 @@
 
     api:
       build:
-        context: ..
-        dockerfile: deploy/Dockerfile
+        context: ./internal
+        dockerfile: ./auth-service/Dockerfile
       container_name: ReTargetApi
       ports:
         - 8025:8025
+      #volumes:
+      #  - ./internal/configs:/configs
+      #  - ./internal/pkg:/pkg
       depends_on:
         - postgresdb
       networks:

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"retarget/pkg/entity"
+	"pkg/entity"
 )
 
 func AuthMiddleware(authenticator AuthenticatorInterface) func(http.Handler) http.Handler {

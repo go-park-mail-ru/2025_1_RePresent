@@ -4,10 +4,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"retarget/configs"
-	authApp "retarget/internal/auth-service/app"
+	authApp "retarget-authapp/app"
+	"retarget-authapp/configs"
 	"syscall"
-	//mailApp "retarget/internal/mail-service/app"
 )
 
 func main() {
@@ -16,10 +15,6 @@ func main() {
 		log.Fatal(err)
 	}
 	go authApp.Run(cfg)
-	//go mailApp.Run(cfg)
-	// go advApp.Run(cfg)
-	// go profileApp.Run(cfg)
-
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop

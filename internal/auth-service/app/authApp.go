@@ -3,13 +3,13 @@ package authApp
 import (
 	"log"
 	"net/http"
-	"retarget/configs"
-	authAppHttp "retarget/internal/auth-service/controller/http"
-	authMiddleware "retarget/internal/auth-service/controller/http/middleware"
-	repoAuth "retarget/internal/auth-service/repo/auth"
-	repoSession "retarget/internal/auth-service/repo/auth"
-	usecaseAuth "retarget/internal/auth-service/usecase/auth"
-	authenticate "retarget/pkg/middleware/auth"
+	authenticate "pkg/middleware/auth"
+	configs "retarget-authapp/configs"
+	authAppHttp "retarget-authapp/controller/http"
+	authMiddleware "retarget-authapp/controller/http/middleware"
+	repoAuth "retarget-authapp/repo/auth"
+	repoSession "retarget-authapp/repo/auth"
+	usecaseAuth "retarget-authapp/usecase/auth"
 	"time"
 )
 

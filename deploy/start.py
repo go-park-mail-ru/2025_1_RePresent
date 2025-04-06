@@ -17,5 +17,4 @@ with open(".env", "w") as f:
     f.write(f'HOST={database_config["database"]["HOST"]}\n')
     f.write(f'PORT={database_config["database"]["PORT"]}\n')
     f.write(f'INSIDE_PORT={database_config["database"]["INSIDE_PORT"]}\n')
-
     f.write(f'REDIS_PASSWORD={auth_redis_config["auth_redis"]["PASSWORD"]}\n')

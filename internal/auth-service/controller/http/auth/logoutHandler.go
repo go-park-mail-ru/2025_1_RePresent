@@ -3,7 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
-	entity "retarget/pkg/entity"
+	entity "pkg/entity"
 	"time"
 )
 
