@@ -9,10 +9,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func SetupRoutes(authenticator *authenticate.Authenticator, bannerUsecase *usecaseBanner.BannerUsecase) *mux.Router {
+func SetupRoutes(authenticator *authenticate.Authenticator, bannerUsecase *usecaseBanner.BannerUsecase,
+	imageUsecase *usecaseBanner.BannerImageUsecase) *mux.Router {
 	r := mux.NewRouter()
 
-	bannerRoutes := handlerBanner.SetupBannerRoutes(authenticator, bannerUsecase)
+	bannerRoutes := handlerBanner.SetupBannerRoutes(authenticator, bannerUsecase, imageUsecase)
 	r.PathPrefix("/api/v1/banner/").Handler(bannerRoutes)
 
 	return r

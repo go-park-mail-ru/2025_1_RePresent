@@ -19,19 +19,7 @@ func Run(cfg *configs.Config) {
 		log.Fatal(err.Error())
 	}
 
-	// sessionRepository := repoSession.NewSessionRepository(
-	// 	cfg.AuthRedis.EndPoint,
-	// 	cfg.AuthRedis.Password,
-	// 	cfg.AuthRedis.Database,
-	// 	30*time.Minute,
-	// )
-	// defer func() {
-	// 	if err := sessionRepository.CloseConnection(); err != nil {
-	// 		log.Printf("error closing session repository: %v", err)
-	// 	}
-	// }()
-
-	// userRepository := repoAuth.NewAuthRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode)
+	imageRepository := repo.NewBannerImageRepository("localhost:9000", "minioadmin", "minioadmin", "", false, "avatar")
 	bannerRepository := repo.NewBannerRepository(cfg.Database.ConnectionString())
 	defer func() {
 		if err := bannerRepository.CloseConnection(); err != nil {
@@ -39,9 +27,10 @@ func Run(cfg *configs.Config) {
 		}
 	}()
 
+	image := usecase.NewBannerImageUsecase(imageRepository)
 	banner := usecase.NewBannerUsecase(bannerRepository)
 
-	mux := controller.SetupRoutes(authenticator, banner)
+	mux := controller.SetupRoutes(authenticator, banner, image)
 
 	log.Fatal(http.ListenAndServe(":8024", middleware.CORS(mux)))
 }

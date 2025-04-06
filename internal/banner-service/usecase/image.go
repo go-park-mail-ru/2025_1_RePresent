@@ -12,9 +12,9 @@ import (
 )
 
 type BannerImageUsecaseInterface interface {
-	generateBannerImageName(id int) string
-	DownloadBannerImage(userID int) (*minio.Object, error)
-	UploadBannerImage(userID int, file multipart.File) error
+	generateBannerImageName() string
+	DownloadBannerImage(imageID string) (*minio.Object, error)
+	UploadBannerImage(file multipart.File) error
 }
 
 type BannerImageUsecase struct {
