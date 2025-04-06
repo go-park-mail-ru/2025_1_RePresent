@@ -18,8 +18,8 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 
 	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	// if !ok {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+	//      w.WriteHeader(http.StatusInternalServerError)
+	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	// }
 
 	// userID := user.UserID
@@ -33,7 +33,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
 		return
 	}
 
@@ -95,8 +95,8 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 
 	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	// if !ok {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+	//      w.WriteHeader(http.StatusInternalServerError)
+	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	// }
 	// userID := user.UserID
 

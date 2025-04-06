@@ -72,13 +72,13 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner) error {
 }
 
 func (r *BannerRepository) UpdateBanner(banner entity.Banner) error {
-	stmt, err := r.db.Prepare("UPDATE banner SET title = $1, description = $2, content = $3, status = $4 WHERE id = $5")
+	stmt, err := r.db.Prepare("UPDATE banner SET title = $1, description = $2, content = $3, link = $4, status = $5 WHERE id = $6")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(banner.Title, banner.Description, banner.Content, banner.Link, banner.ID)
+	_, err = stmt.Exec(banner.Title, banner.Description, banner.Content, banner.Link, banner.Status, banner.ID)
 	if err != nil {
 		return err
 	}
@@ -95,6 +95,16 @@ func (r *BannerRepository) GetBannerByID(id int) (*entity.Banner, error) {
 	}
 	return banner, nil
 }
+
+// func (r *BannerRepository) GetRandomBanner(id int) (*entity.Banner, error) {
+//      row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1", id)
+//      banner := &entity.Banner{}
+//      err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Balance, &banner.Link)
+//      if err != nil {
+//              return nil, err
+//      }
+//      return banner, nil
+// }
 
 func (r *BannerRepository) DeleteBannerByID(owner, id int) error {
 	var deleted bool
