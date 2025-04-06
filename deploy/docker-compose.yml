@@ -44,7 +44,21 @@
         timeout: 5s
         retries: 5
       restart: always
-      
+
+    minio:
+    image: minio/minio:latest
+    container_name: ReTargetMiniO
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    networks:
+        - api_network
+    volumes:
+      - ./minio-data:/data
+    command: server /data
+
     auth:
       build:
         context: ../internal
