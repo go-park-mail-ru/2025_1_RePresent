@@ -40,7 +40,7 @@ func (r *BannerImageUsecase) DownloadBannerImage(imageID string) (*minio.Object,
 	return r.BannerImageRepository.DownloadFile(imageID)
 }
 
-func (r *BannerImageUsecase) UploadBannerImage(userID int, file multipart.File) (string, error) {
+func (r *BannerImageUsecase) UploadBannerImage(file multipart.File) (string, error) {
 	if file == nil {
 		return "", errors.New("Uploaded file is nil")
 	}

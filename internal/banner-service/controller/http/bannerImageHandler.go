@@ -16,13 +16,13 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
-	}
+	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
+	// if !ok {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+	// }
 
-	userID := user.UserID
+	// userID := user.UserID
 
 	if r.ContentLength > (10 << 20) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -73,7 +73,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	link, err := c.ImageUsecase.UploadBannerImage(userID, file)
+	link, err := c.ImageUsecase.UploadBannerImage(file)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload image"))
