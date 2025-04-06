@@ -1,9 +1,8 @@
-package banner
+package controller
 
 import (
 	"encoding/json"
 	"net/http"
-	pkg "pkg/entity"
 	entity "retarget-bannerapp/entity" // Хардкод
 	"strconv"
 
@@ -14,7 +13,7 @@ import (
 )
 
 type CreateUpdateBannerRequest struct {
-	OwnerID     int    `json:"owner" validate:"required"`
+	// OwnerID     int    `json:"owner" validate:"required"`
 	Title       string `json:"title" validate:"required,min=3,max=30"`
 	Description string `json:"description" validate:"required"`
 	Content     string `json:"content_link"`
@@ -24,10 +23,10 @@ type CreateUpdateBannerRequest struct {
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
 
-	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
@@ -54,10 +53,10 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 }
 
 func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
-	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
@@ -88,6 +87,10 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
+	}
 	var req CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -97,10 +100,10 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
@@ -138,10 +141,10 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
@@ -176,10 +179,10 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) {
-	userSession, ok := r.Context().Value(pkg.UserContextKey).(pkg.UserContext)
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(pkg.NewResponse(true, "Error of authenticator"))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
@@ -207,10 +210,6 @@ func (h *BannerController) BannerHandleFunc(w http.ResponseWriter, r *http.Reque
 		h.DeleteBanner(w, r)
 		return
 	}
-	if r.Method == http.MethodPost {
-		h.CreateBanner(w, r)
-		return
-	}
 	if r.Method == http.MethodPut {
 		h.UpdateBanner(w, r)
 		return
@@ -218,5 +217,4 @@ func (h *BannerController) BannerHandleFunc(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
 	return
-
 }
