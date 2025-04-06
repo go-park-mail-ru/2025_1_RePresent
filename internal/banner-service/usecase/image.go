@@ -36,9 +36,8 @@ func (r *BannerImageUsecase) generateBannerImageName() string {
 	return randomString
 }
 
-func (r *BannerImageUsecase) DownloadBannerImage() (*minio.Object, error) {
-	objectName := r.generateBannerImageName()
-	return r.BannerImageRepository.DownloadFile(objectName)
+func (r *BannerImageUsecase) DownloadBannerImage(imageID string) (*minio.Object, error) {
+	return r.BannerImageRepository.DownloadFile(imageID)
 }
 
 func (r *BannerImageUsecase) UploadBannerImage(userID int, file multipart.File) (string, error) {
