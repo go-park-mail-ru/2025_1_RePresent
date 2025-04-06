@@ -1,0 +1,402 @@
+openapi: 3.0.0
+info:
+  title: Profile Service
+  description: API профилей пользователей
+  version: 1.0.0
+
+servers:
+  - url: http://re-target.ru/api/v1/
+
+tags:
+  - name: Profile
+    description: Работа с данными профиля
+  - name: Avatar
+    description: Работа с аватарками пользователей
+
+paths:
+  /profile/my:
+    get:
+      tags:
+        - Profile
+      summary: Получить данные профиля пользователя
+      description: Возвращает профиль пользователя по cookie
+      parameters:
+      - in: cookie
+        name: session_id
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Профиль найден и успешно отправлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Sent"
+                  body:
+                    type: object
+                    $ref: '#/components/schemas/ProfileResponse'
+        401:
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Unauthorized"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        404:
+          description: Профиль пользователя не найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Profile not found"
+        500:
+          description: Ошибка поиска профиля
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+  /profile/edit:
+    put:
+      tags:
+        - Profile
+      summary: Обновить данные профиля пользователя
+      description: Обновляет профиль пользователя по cookie
+      parameters:
+      - in: cookie
+        name: session_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+      responses:
+        200:
+          description: Профиль найден и успешно обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Got and Saved"
+        400:
+          description: Ошибка парсинга Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Invalid request body"
+        401:
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Unauthorized"
+        422:
+          description: Неверны введённые данные / Поля не прошли валидацию
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Ошибки валидации полей"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        500:
+          description: Ошибка изменения профиля
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+  /avatar/download:
+    get:
+      tags:
+        - Avatar
+      summary: Получить аватарку пользователя
+      description: Возвращает аватарку пользователя по cookie.
+      parameters:
+      - in: cookie
+        name: session_id
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Аватарка успешно найдена и отправлена
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        401:
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Method Not Allowed"
+        404:
+          description: Аватарка пользователя не найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Avatar not found"
+        415:
+          description: Тип файла не поддерживается
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unsupported file type"
+        500:
+          description: Ошибка поиска/чтения аватара
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "some error"
+  /avatar/upload:
+    put:
+      tags:
+        - Avatar
+      summary: Загрузить аватарку пользователя
+      description: Обновляет отправленную аватарку пользователя по cookie
+      parameters:
+      - in: cookie
+        name: session_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Картинка (image/jpeg, image/jpg, image/png, image/gif)
+                  example:
+                    - image/jpeg
+                    - image/jpg
+                    - image/png
+                    - image/gif
+      responses:
+        200:
+          description: Аватарка успешно найдена и сохранена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Got and Saved"
+        400:
+          description: Некорректная передача файла в запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Invalid request/Avatar not found in request"
+        401:
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Unauthorized"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        415:
+          description: Изображение имеет неподдерживаемый тип
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files"
+        422:
+          description: Изображение слишком большое
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Unsupported file size(max size 10MB): size your file is too large"
+        500:
+          description: Ошибка обновления аватара
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+components:
+  schemas:
+    ProfileResponse:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "Pasha Durov co"
+        email:
+          type: string
+          example: "durov@vk.com"
+        description:
+          type: string
+          example: "empty"
+        balance:
+          type: integer
+          example: 0
+        role:
+          type: integer
+          example: 1
+          description: 1 - рекламодатель, 2 - рекламоразмещатель
+      required:
+        - username
+        - email
+        - description
+        - balance
+        - role
+    ProfileRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "Pasha Durov co"
+        description:
+          type: string
+          example: "empty"
+      required:
+        - username
+        - description

@@ -1,0 +1,322 @@
+openapi: 3.0.0
+info:
+  title: Advertisement Service
+  description: API для обработки взаимодействия с платформами
+  version: 1.0.0
+
+servers:
+  - url: http://re-target.ru/api/v1/adv
+
+tags:
+  - name: advertisement
+    description: Работа с платформами
+
+paths:
+  /link/generate:
+    put:
+      tags:
+        - advertisement
+      summary: Создать уникальную ссылку для платформы 
+      description: Создаёт (если её нет, иначе изменяет) и Возвращает уникальную ссылку платформы
+      parameters:
+      - in: cookie
+        name: session_id
+        required: true
+        schema:
+          type: string
+      responses:
+        201:
+          description: Ссылка создана успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Created"
+                  body:
+                    type: object
+                    properties:
+                      secret-link:
+                        type: string
+                        example: http://re-target.ru/api/v1/adv/iframe/secret-link
+        200:
+          description: У пользователя уже есть ссылка, вернём её
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Sent"
+                  body:
+                    type: object
+                    properties:
+                      secret-link:
+                        type: string
+                        example: http://re-target.ru/api/v1/adv/iframe/secret-link
+        401:
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Unauthorized"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        500:
+          description: Ошибка поиска или создания ссылки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+  /link/my:
+    get:
+      tags:
+        - advertisement
+      summary: Получить уникальную ссылку для платформы 
+      description: Возвращает уникальную ссылку платформы
+      parameters:
+      - in: cookie
+        name: session_id
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Ссылка найдена успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Sent"
+                  body:
+                    type: object
+                    properties:
+                      secret-link:
+                        type: string
+                        example: http://re-target.ru/api/v1/adv/iframe/secret-link
+        401:
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: Unauthorized
+        400:
+          description: Ошибка поиска ссылки (если у платформы нет ссылки)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Link by user_id not found"
+        500:
+          description: Ошибка
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+  /iframe/secret-link:
+    get:
+      tags:
+        - advertisement
+      summary: Получить iframe по уникальной ссылке платформы
+      description: Возвращает объект типа text/html с бизнес-логикой на клиенте
+      parameters:
+      - in: cookie
+        name: session_id
+        required: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: Iframe получен успешно
+          content:
+            text/html:
+              schema:
+                type: string
+                format: html
+                example: |
+                  <html>
+                    <body>
+                      <h1>Здесь будет ваш iframe</h1>
+                    </body>
+                  </html>
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Sent"
+        401:
+          description: Некорректная ссылка
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Invalid link"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        500:
+          description: Ошибка
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+  /metrics/secret-link:
+    post:
+      tags:
+        - advertisement
+      summary: Отправить метрики при закрытии страницы
+      description: Отправляет метрики uuid пользователя на обработку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMetricsResponse'
+      parameters:
+      - in: cookie
+        name: visitor_id
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Данные обработаны успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      success:
+                        type: string
+                        example: "Sent"
+        401:
+          description: Некорректная ссылка
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Invalid link"
+        405:
+          description: Неверный метод запроса
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Method Not Allowed
+        500:
+          description: Ошибка записи данных
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "some error"
+components:
+  schemas:
+    UserMetricsResponse:
+      type: object
+      properties:
+        visitor_id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426655440000"
+        click:
+          type: boolean
+          example: true
+        timeView:
+          type: integer
+          example: 30
+          description: Время просмотра страницы в секундах
+      required:
+        - visitor_id
+        - click
+        - timeView

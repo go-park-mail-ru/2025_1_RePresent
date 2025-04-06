@@ -1,4 +1,22 @@
   services:
+    redis0:
+      image: redis:alpine
+      restart: always
+      ports:
+        - "0.0.0.0:6379:6379"
+      container_name: ReTargetRedis
+      environment:
+        - REDIS_DATABASE=0
+        - REDIS_PASSWORD=${REDIS_PASSWORD}
+      networks:
+        - api_network
+      volumes:
+        - ./auth-data:/data
+      healthcheck:
+        test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
     postgresdb:
       image: postgres:17
       container_name: ReTargetDataBase
@@ -33,7 +51,7 @@
         dockerfile: deploy/Dockerfile
       container_name: ReTargetApi
       ports:
-        - 8080:8080
+        - 8025:8025
       depends_on:
         - postgresdb
       networks:

@@ -7,6 +7,9 @@ import yaml
 with open("../configs/database.yml", "r") as f:
     database_config = yaml.safe_load(f)
 
+with open("../configs/auth-redis.yml", "r") as f:
+    auth_redis_config = yaml.safe_load(f)
+
 with open(".env", "w") as f:
     f.write(f'POSTGRES_USER={database_config["database"]["POSTGRES_USER"]}\n')
     f.write(f'POSTGRES_PASSWORD={database_config["database"]["POSTGRES_PASSWORD"]}\n')
@@ -14,3 +17,5 @@ with open(".env", "w") as f:
     f.write(f'HOST={database_config["database"]["HOST"]}\n')
     f.write(f'PORT={database_config["database"]["PORT"]}\n')
     f.write(f'INSIDE_PORT={database_config["database"]["INSIDE_PORT"]}\n')
+
+    f.write(f'REDIS_PASSWORD={auth_redis_config["auth_redis"]["PASSWORD"]}\n')
