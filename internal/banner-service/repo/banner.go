@@ -30,7 +30,7 @@ func NewBannerRepository(endPoint string) *BannerRepository {
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) {
-	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status FROM banner WHERE owner_id = $1 AND deleted = FALSE", id)
+	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status FROM banner WHERE owner_id = $1;", id)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) 
 
 func (r *BannerRepository) CreateNewBanner(banner entity.Banner) error {
 
-	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id")
+	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;")
 	if err != nil {
 		return err
 	}
@@ -95,16 +95,6 @@ func (r *BannerRepository) GetBannerByID(id int) (*entity.Banner, error) {
 	}
 	return banner, nil
 }
-
-// func (r *BannerRepository) GetRandomBanner(id int) (*entity.Banner, error) {
-// 	row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1", id)
-// 	banner := &entity.Banner{}
-// 	err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Balance, &banner.Link)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return banner, nil
-// }
 
 func (r *BannerRepository) DeleteBannerByID(owner, id int) error {
 	var deleted bool
