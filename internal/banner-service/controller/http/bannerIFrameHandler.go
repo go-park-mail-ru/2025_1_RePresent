@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"path/filepath"
 	"strconv"
 
@@ -25,14 +26,14 @@ type IFrame struct {
 }
 
 func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
-	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "card.html")))
+	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	vars := mux.Vars(r)
 	bannerIDstr := vars["banner_id"]
 	bannerID, err := strconv.Atoi(bannerIDstr)
@@ -41,7 +42,6 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 
 	banner, err := h.BannerUsecase.GetBannerByID(userID, bannerID)
 	if err != nil {
@@ -49,12 +49,15 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
-
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	data := IFrame{
 		ImageSrc:    "http://109.120.190.243/api/v1/banner/" + banner.Content,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
 	}
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Println("template execute error:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
