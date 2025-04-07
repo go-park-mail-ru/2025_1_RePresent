@@ -103,7 +103,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
 		return
 	}
 	defer func() {
@@ -116,7 +116,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Read(buf)
 	if err != nil && err != io.EOF {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read avatar: "+err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
 		return
 	}
 
@@ -137,15 +137,15 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek avatar"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=avatar")
+	w.Header().Set("Content-Disposition", "attachment; filename=image")
 	_, err = io.Copy(w, object)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download avatar"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
 		return
 	}
 }

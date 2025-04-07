@@ -24,7 +24,7 @@ func (b *BannerUsecase) GetBannersByUserID(userID int) ([]*entity.Banner, error)
 }
 
 func (b *BannerUsecase) GetBannerByID(userID, bannerID int) (*entity.Banner, error) {
-	banner, err := b.BannerRepository.GetBannerByID(userID)
+	banner, err := b.BannerRepository.GetBannerByID(bannerID)
 	if err != nil {
 		return nil, err
 	}
