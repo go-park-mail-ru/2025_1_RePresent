@@ -2,7 +2,7 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"net/http"
 	entity "retarget-bannerapp/entity" // Хардкод
 	"strconv"
@@ -151,9 +151,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 
 	vars := mux.Vars(r)
 	bannerIDstr := vars["banner_id"]
-	fmt.Println("Строка баннера: ", bannerIDstr)
 	bannerID, err := strconv.Atoi(bannerIDstr)
-	fmt.Println("Число баннера: ", bannerID)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
@@ -218,5 +216,4 @@ func (h *BannerController) BannerHandleFunc(w http.ResponseWriter, r *http.Reque
 	}
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-	return
 }
