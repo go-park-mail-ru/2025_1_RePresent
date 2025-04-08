@@ -86,7 +86,7 @@
     }
   </style>
 </head>
-<body>
+<body href="{{.Link}}">
   <div class="card">
     <div class="card-header">
       Реклама • 16+
@@ -95,12 +95,12 @@
       <img src="{{.ImageSrc}}" alt="Java Logo">
     </div>
     <div class="card-body">
-      <a href="{{.Link}}">{{.Link}}</a>
+      <a >{{.Link}}</a>
       <h2>{{.Title}}</h2>
       <p>{{.Description}}</p>
     </div>
     <div class="card-footer">
-      <button>Узнать больше</button>
+      <button href="{{.Link}}">Узнать больше</button>
     </div>
   </div>
 </body>
