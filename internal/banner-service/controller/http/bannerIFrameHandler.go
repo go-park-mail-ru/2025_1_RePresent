@@ -51,7 +51,7 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	data := IFrame{
-		ImageSrc:    "http://109.120.190.243/api/v1/banner/" + banner.Content,
+		ImageSrc:    "http://109.120.190.243/api/v1/banner/image/" + banner.Content,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
