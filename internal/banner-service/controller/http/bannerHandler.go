@@ -162,6 +162,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		ID:          bannerID,
 		Title:       req.Title,
 		Description: req.Description,
+		Link:        req.Link,
 		Content:     req.Content,
 		Status:      req.Status,
 	}
@@ -187,7 +188,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	userID := userSession.UserID
 
 	vars := mux.Vars(r)
-	bannerIDstr := vars["banner_id"]
+	bannerIDstr := vars["id"]
 	bannerID, err := strconv.Atoi(bannerIDstr)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -195,7 +196,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.BannerUsecase.BannerRepository.DeleteBannerByID(userID, bannerID)
+	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, userID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 
