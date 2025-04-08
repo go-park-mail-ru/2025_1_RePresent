@@ -30,7 +30,7 @@ func NewBannerRepository(endPoint string) *BannerRepository {
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) {
-	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status FROM banner WHERE owner_id = $1 AND deleted = FALSE;", id)
+	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status, link FROM banner WHERE owner_id = $1 AND deleted = FALSE;", id)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) 
 
 	for rows.Next() {
 		banner := &entity.Banner{}
-		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status)
+		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Link)
 		if err != nil {
 			return nil, err
 		}
