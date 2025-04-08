@@ -187,7 +187,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	userID := userSession.UserID
 
 	vars := mux.Vars(r)
-	bannerIDstr := vars["id"]
+	bannerIDstr := vars["banner_id"]
 	bannerID, err := strconv.Atoi(bannerIDstr)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
