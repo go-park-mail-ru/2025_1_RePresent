@@ -195,7 +195,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, userID)
+	h.BannerUsecase.BannerRepository.DeleteBannerByID(userID, bannerID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 
