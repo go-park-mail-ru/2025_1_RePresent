@@ -17,7 +17,7 @@ type CreateUpdateBannerRequest struct {
 	// OwnerID     int    `json:"owner" validate:"required"`
 	Title       string `json:"title" validate:"required,min=3,max=30"`
 	Description string `json:"description" validate:"required"`
-	Content     string `json:"content_link"`
+	Content     string `json:"content"`
 	Link        string `json:"link" validate:"required"`
 	Status      int    `json:"status" validate:"required"`
 }
