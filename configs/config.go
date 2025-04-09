@@ -35,6 +35,7 @@ type MinioConfig struct {
 	AccessKeyID    string `yaml:"ACCESS_KEY_ID"`
 	SecretAccesKey string `yaml:"SECRET_ACCESS_KEY"`
 	Token          string `yaml:"TOKEN"`
+	UseSSL         string `yaml:"USE_SSL"`
 }
 
 type Config struct {
