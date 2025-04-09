@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml", "minio.yml")
+	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml", "configs/minio.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
