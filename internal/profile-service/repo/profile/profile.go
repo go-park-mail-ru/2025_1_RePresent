@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	entityProfile "retarget/internal/profile-service/entity/profile"
+
+	_ "github.com/lib/pq"
 )
 
 type ProfileRepositoryInterface interface {
