@@ -49,6 +49,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Database  DatabaseConfig  `yaml:"database"`
 		Email     MailConfig      `yaml:"smtp_server"`
 		AuthRedis AuthRedisConfig `yaml:"auth_redis"`
+		Minio     MinioConfig     `yaml:"object_storage"`
 	}
 	if err := unmarshal(&aux); err != nil {
 		return err
