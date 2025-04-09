@@ -33,3 +33,5 @@ FROM alpine:latest AS banner-service
 WORKDIR /app
 COPY --from=builder /bin/banner-service ./banner-service
 COPY --from=builder /app/configs ./configs
+
+ENTRYPOINT ["./banner-service"]
