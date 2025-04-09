@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	entity "pkg/entity"
+	entity "retarget/pkg/entity"
 
 	"github.com/gorilla/mux"
 )
@@ -103,7 +103,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found"))
 		return
 	}
 	defer func() {
@@ -116,7 +116,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Read(buf)
 	if err != nil && err != io.EOF {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read avatar: "+err.Error()))
 		return
 	}
 
@@ -137,15 +137,15 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek avatar"))
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=image")
+	w.Header().Set("Content-Disposition", "attachment; filename=avatar")
 	_, err = io.Copy(w, object)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download avatar"))
 		return
 	}
 }
