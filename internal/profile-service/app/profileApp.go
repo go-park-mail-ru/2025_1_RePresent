@@ -21,7 +21,7 @@ func Run(cfg *configs.Config) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	profileRepository := repoProfile.NewProfileRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode)
+	profileRepository := repoProfile.NewProfileRepository(cfg.Database.ConnectionString())
 	defer func() {
 		if err := profileRepository.CloseConnection(); err != nil {
 			log.Println(err)

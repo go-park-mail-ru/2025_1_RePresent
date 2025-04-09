@@ -2,7 +2,6 @@ package profile
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	entityProfile "retarget/internal/profile-service/entity/profile"
 )
@@ -15,12 +14,11 @@ type ProfileRepositoryInterface interface {
 
 type ProfileRepository struct {
 	db *sql.DB
-} // TODO: Переделать коннект в эндпойнт
+}
 
-func NewProfileRepository(username, password, dbname, host string, port int, sslmode string) *ProfileRepository {
+func NewProfileRepository(endPoint string) *ProfileRepository {
 	profileRepo := &ProfileRepository{}
-	db, err := sql.Open("postgres", fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=%s",
-		username, password, dbname, host, port, sslmode))
+	db, err := sql.Open("postgres", endPoint)
 	if err != nil {
 		log.Fatal(err)
 	}
