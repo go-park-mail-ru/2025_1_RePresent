@@ -93,13 +93,6 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	imageID := vars["image_id"]
 
-	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
-	// if !ok {
-	//      w.WriteHeader(http.StatusInternalServerError)
-	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
-	// }
-	// userID := user.UserID
-
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
