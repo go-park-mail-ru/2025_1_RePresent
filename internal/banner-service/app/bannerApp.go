@@ -3,14 +3,14 @@ package authApp
 import (
 	"log"
 	"net/http"
-	authenticate "pkg/middleware/auth"
-	configs "retarget-bannerapp/configs"
-	controller "retarget-bannerapp/controller"
-	middleware "retarget-bannerapp/controller/http/middleware"
-	"retarget-bannerapp/repo"
+	configs "retarget/configs"
+	controller "retarget/internal/banner-service/controller"
+	middleware "retarget/internal/banner-service/controller/http/middleware"
+	"retarget/internal/banner-service/repo"
+	authenticate "retarget/pkg/middleware/auth"
 
-	// repoSession "retarget-bannerapp/repo"
-	usecase "retarget-bannerapp/usecase"
+	// repoSession "retarget/internal/banner-service/repo"
+	usecase "retarget/internal/banner-service/usecase"
 )
 
 func Run(cfg *configs.Config) {

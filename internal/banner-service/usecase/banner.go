@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"errors"
-	"retarget-bannerapp/entity"
-	"retarget-bannerapp/repo"
+	"retarget/internal/banner-service/entity"
+	"retarget/internal/banner-service/repo"
 )
 
 type BannerUsecase struct {

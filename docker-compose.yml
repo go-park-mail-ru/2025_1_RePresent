@@ -65,7 +65,7 @@ services:
   auth:
     build:
       context: ../internal
-      dockerfile: ./auth-service/Dockerfile
+      target: auth-service
     container_name: ReTargetApiAuth
     ports:
       - "8025:8025"
@@ -77,7 +77,7 @@ services:
   banner:
     build:
       context: ../internal
-      dockerfile: ./banner-service/Dockerfile
+      target: banner-service
     container_name: ReTargetApiBanner
     ports:
       - "8024:8024"

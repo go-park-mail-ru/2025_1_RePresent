@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"mime/multipart"
-	repoBannerImage "retarget-bannerapp/repo"
+	repoBannerImage "retarget/internal/banner-service/repo"
 
 	"github.com/minio/minio-go/v7"
 )

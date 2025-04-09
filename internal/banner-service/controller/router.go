@@ -2,9 +2,9 @@ package http
 
 import (
 	// usecaseAuth "retarget/internal/auth-service/usecase/auth"
-	authenticate "pkg/middleware/auth"
-	handlerBanner "retarget-bannerapp/controller/http"
-	usecaseBanner "retarget-bannerapp/usecase"
+	handlerBanner "retarget/internal/banner-service/controller/http"
+	usecaseBanner "retarget/internal/banner-service/usecase"
+	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
 )
