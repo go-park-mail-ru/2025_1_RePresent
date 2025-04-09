@@ -58,6 +58,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Database = aux.Database
 	c.Email = aux.Email
 	c.AuthRedis = aux.AuthRedis
+	c.Minio = aux.Minio
 	return nil
 }
 func LoadConfigs(paths ...string) (*Config, error) {
