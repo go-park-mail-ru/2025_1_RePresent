@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	// "fmt"
 	"net/http"
-	entity "retarget-bannerapp/entity" // Хардкод
+	entity "retarget/internal/banner-service/entity"
+	response "retarget/pkg/entity"
 	"strconv"
 
-	// pkg "retarget/internal/pkg/entity"
-	response "pkg/entity"
-	// "strconv"
 	"github.com/gorilla/mux"
 )
 
@@ -40,10 +38,6 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
-	if banners == nil {
-		banners = []*entity.Banner{}
-	}
 
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(banners)

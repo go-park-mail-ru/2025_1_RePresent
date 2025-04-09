@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	app "retarget-bannerapp/app"
-	"retarget-bannerapp/configs"
+	"retarget/configs"
+	authApp "retarget/internal/auth-service/app"
 	"syscall"
 )
 
@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	go app.Run(cfg)
+	go authApp.Run(cfg)
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop

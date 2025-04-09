@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"log"
-	"retarget-bannerapp/entity"
+	"retarget/internal/banner-service/entity"
 
 	_ "github.com/lib/pq"
 
