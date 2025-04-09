@@ -57,7 +57,9 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
     networks:
-      - api_network
+      - api_network: 
+          aliases:
+            - ReTargetMiniO.local
     volumes:
       - ./minio-data:/data
     command: server /data
