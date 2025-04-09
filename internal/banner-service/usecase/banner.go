@@ -28,9 +28,9 @@ func (b *BannerUsecase) GetBannerByID(userID, bannerID int) (*entity.Banner, err
 	if err != nil {
 		return nil, err
 	}
-	if banner.OwnerID != userID || banner.Deleted {
-		return nil, errors.New("banner not found")
-	}
+	// if banner.OwnerID != userID || banner.Deleted {
+	// 	return nil, errors.New("banner not found")
+	// }
 	return banner, err
 }
 
