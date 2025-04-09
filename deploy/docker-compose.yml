@@ -59,7 +59,7 @@ services:
     networks:
       api_network: 
         aliases:
-          - ReTargetMiniO.local
+          - ReTargetMiniO
     volumes:
       - ./minio-data:/data
     command: server /data
