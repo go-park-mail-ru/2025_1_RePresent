@@ -28,9 +28,17 @@ func (b *BannerUsecase) GetBannerByID(userID, bannerID int) (*entity.Banner, err
 	if err != nil {
 		return nil, err
 	}
-	// if banner.OwnerID != userID || banner.Deleted {
-	// 	return nil, errors.New("banner not found")
-	// }
+	if banner.OwnerID != userID || banner.Deleted {
+		return nil, errors.New("banner not found")
+	}
+	return banner, err
+}
+
+func (b *BannerUsecase) GetBannerForIFrame(bannerID int) (*entity.Banner, error) {
+	banner, err := b.BannerRepository.GetBannerByID(bannerID)
+	if err != nil {
+		return nil, err
+	}
 	return banner, err
 }
 
