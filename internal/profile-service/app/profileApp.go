@@ -34,5 +34,5 @@ func Run(cfg *configs.Config) {
 
 	mux := profileAppHttp.SetupRoutes(authenticator, profileUsecase, avatarUsecase)
 
-	log.Fatal(http.ListenAndServe(":8025", profileMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8023", profileMiddleware.CORS(mux)))
 }
