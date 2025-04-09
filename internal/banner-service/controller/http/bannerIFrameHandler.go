@@ -27,12 +27,12 @@ type IFrame struct {
 
 func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
-	// if !ok {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
-	// }
-	// userID := userSession.UserID
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+	}
+	userID := userSession.UserID
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	vars := mux.Vars(r)
 	bannerIDstr := vars["banner_id"]
