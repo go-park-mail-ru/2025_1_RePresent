@@ -23,6 +23,7 @@ FROM alpine:latest AS auth-service
 
 WORKDIR /app
 COPY --from=builder /bin/auth-service ./auth-service
+COPY --from=builder /app/configs ./configs
 
 ENTRYPOINT ["./auth-service"]
 
@@ -31,5 +32,4 @@ FROM alpine:latest AS banner-service
 
 WORKDIR /app
 COPY --from=builder /bin/banner-service ./banner-service
-
-ENTRYPOINT ["./banner-service"]
+COPY --from=builder /app/configs ./configs
