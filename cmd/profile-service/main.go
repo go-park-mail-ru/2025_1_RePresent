@@ -5,12 +5,12 @@ import (
 	"os"
 	"os/signal"
 	"retarget/configs"
-	app "retarget/internal/banner-service/app"
+	app "retarget/internal/profile-service/app"
 	"syscall"
 )
 
 func main() {
-	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml", "minio.yml")
+	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml", "configs/minio.yml")
 	if err != nil {
 		log.Fatal(err)
 	}

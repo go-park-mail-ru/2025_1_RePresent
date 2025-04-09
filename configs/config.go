@@ -30,10 +30,18 @@ type AuthRedisConfig struct {
 	Database int    `yaml:"DB_NUMBER"`
 }
 
+type MinioConfig struct {
+	EndPoint       string `yaml:"ENDPOINT"`
+	AccessKeyID    string `yaml:"ACCESS_KEY_ID"`
+	SecretAccesKey string `yaml:"SECRET_ACCESS_KEY"`
+	Token          string `yaml:"TOKEN"`
+}
+
 type Config struct {
 	Database  DatabaseConfig  `yaml:"database"`
 	Email     MailConfig      `yaml:"smtp_server"`
 	AuthRedis AuthRedisConfig `yaml:"auth_redis"`
+	Minio     MinioConfig     `yaml:"object_storage"`
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {

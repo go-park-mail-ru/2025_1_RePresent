@@ -13,6 +13,8 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/auth-service ./cmd/auth-service
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/banner-service ./cmd/banner-service
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/profile-service
+
 
 # ===================================
 # Этап 3: Минимальные образы для сервисов
@@ -36,3 +38,12 @@ COPY --from=builder /app/configs ./configs
 COPY --from=builder /app/internal/banner-service/templates ./templates
 
 ENTRYPOINT ["./banner-service"]
+
+# ---- Service 3 ----
+FROM alpine:latest AS profile-service
+
+WORKDIR /app
+COPY --from=builder /bin/profile-service ./profile-service
+COPY --from=builder /app/configs ./configs
+
+ENTRYPOINT ["./profile-service"]

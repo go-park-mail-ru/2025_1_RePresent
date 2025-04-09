@@ -27,7 +27,7 @@ func Run(cfg *configs.Config) {
 			log.Println(err)
 		}
 	}()
-	avatarRepository := repoAvatar.NewAvatarRepository("localhost:9000", "minioadmin", "minioadmin", "", false, "avatar")
+	avatarRepository := repoAvatar.NewAvatarRepository(cfg.Minio.EndPoint, cfg.Minio.AccessKeyID, cfg.Minio.SecretAccesKey, cfg.Minio.Token, false, "avatar")
 
 	profileUsecase := usecaseProfile.NewProfileUsecase(profileRepository)
 	avatarUsecase := usecaseAvatar.NewAvatarUsecase(avatarRepository)
