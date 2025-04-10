@@ -7,9 +7,9 @@ import (
 	"log"
 	"time"
 
-	authEntity "retarget/internal/auth-service/entity/auth"
+	authEntity "retarget/internal/banner-service/entity"
 
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
