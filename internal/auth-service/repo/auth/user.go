@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	authEntity "retarget-authapp/entity/auth"
+	authEntity "retarget/internal/auth-service/entity/auth"
 
 	_ "github.com/lib/pq"
 )

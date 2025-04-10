@@ -28,7 +28,7 @@ func NewBannerRepository(endPoint string) *BannerRepository {
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) {
-	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status FROM banner WHERE owner_id = $1;", id)
+	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status, link FROM banner WHERE owner_id = $1 AND deleted = FALSE;", id)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) 
 
 	for rows.Next() {
 		banner := &entity.Banner{}
-		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status)
+		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Link)
 		if err != nil {
 			return nil, err
 		}
@@ -85,9 +85,13 @@ func (r *BannerRepository) UpdateBanner(banner entity.Banner) error {
 }
 
 func (r *BannerRepository) GetBannerByID(id int) (*entity.Banner, error) {
-	row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1", id)
+	row := r.db.QueryRow(`
+    SELECT owner_id, title, description, content, balance, link, status
+    FROM banner
+    WHERE id = $1 AND deleted = FALSE;
+	`, id)
 	banner := &entity.Banner{}
-	err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Balance, &banner.Link)
+	err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Balance, &banner.Link, &banner.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +99,7 @@ func (r *BannerRepository) GetBannerByID(id int) (*entity.Banner, error) {
 }
 
 // func (r *BannerRepository) GetRandomBanner(id int) (*entity.Banner, error) {
-//      row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1", id)
+//      row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1 AND deleted = FALSE;", id)
 //      banner := &entity.Banner{}
 //      err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Balance, &banner.Link)
 //      if err != nil {

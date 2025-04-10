@@ -13,7 +13,7 @@ import (
 type CreateUpdateBannerRequest struct {
 	Title       string `json:"title" validate:"required,min=3,max=30"`
 	Description string `json:"description" validate:"required"`
-	Content     string `json:"content_link"`
+	Content     string `json:"content"`
 	Link        string `json:"link" validate:"required"`
 	Status      int    `json:"status" validate:"required"`
 }
@@ -79,10 +79,6 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-	}
 	var req CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -111,7 +107,6 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
-		// http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -148,6 +143,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		ID:          bannerID,
 		Title:       req.Title,
 		Description: req.Description,
+		Link:        req.Link,
 		Content:     req.Content,
 		Status:      req.Status,
 	}
@@ -171,7 +167,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	userID := userSession.UserID
 
 	vars := mux.Vars(r)
-	bannerIDstr := vars["id"]
+	bannerIDstr := vars["banner_id"]
 	bannerID, err := strconv.Atoi(bannerIDstr)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -179,7 +175,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.BannerUsecase.BannerRepository.DeleteBannerByID(bannerID, userID)
+	h.BannerUsecase.BannerRepository.DeleteBannerByID(userID, bannerID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 
