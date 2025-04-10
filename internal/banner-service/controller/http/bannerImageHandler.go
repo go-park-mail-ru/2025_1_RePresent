@@ -79,7 +79,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
 		return
 	}
 	defer func() {
