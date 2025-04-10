@@ -3,8 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
-
-	// entityAuth "retarget/internal/auth-service/entity/auth"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
 )

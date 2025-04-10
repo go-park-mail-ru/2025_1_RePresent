@@ -2,13 +2,11 @@ package repo
 
 import (
 	"database/sql"
-
+	"errors"
 	"log"
 	"retarget/internal/banner-service/entity"
 
 	_ "github.com/lib/pq"
-
-	"errors"
 )
 
 type BannerRepositoryInterface interface {

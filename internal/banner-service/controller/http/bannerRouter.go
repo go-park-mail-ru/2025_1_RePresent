@@ -24,9 +24,12 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	muxRouter.Handle("/api/v1/banner/", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetUserBanners)))
 	muxRouter.Handle("/api/v1/banner/create", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.CreateBanner)))
 	muxRouter.Handle("/api/v1/banner/upload", (http.HandlerFunc(bannerController.UploadImageHandler)))
+	muxRouter.Handle("/api/v1/banner/image/{image_id}", (http.HandlerFunc(bannerController.DownloadImage)))
+	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.UpdateBanner))).Methods("PUT")
+	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.DeleteBanner))).Methods("DELETE")
+	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.ReadBanner))).Methods("DELETE")
 	muxRouter.Handle("/api/v1/banner/iframe/{banner_id:[0-9]+}", (http.HandlerFunc(bannerController.GetBannerIFrame))).Methods("GET")
 	muxRouter.Handle("/api/v1/banner/image/{image_id}", (http.HandlerFunc(bannerController.DownloadImage))).Methods("GET")
-	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.BannerHandleFunc))).Methods("GET", "PUT", "DELETE")
 
 	return muxRouter
 }

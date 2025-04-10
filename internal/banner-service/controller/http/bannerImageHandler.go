@@ -15,22 +15,15 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
+	const maxFileSize int64 = 10 << 20
 
-	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
-	// if !ok {
-	//      w.WriteHeader(http.StatusInternalServerError)
-	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
-	// }
-
-	// userID := user.UserID
-
-	if r.ContentLength > (10 << 20) {
+	if r.ContentLength > (maxFileSize) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
 		return
 	}
 
-	err := r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(maxFileSize)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
