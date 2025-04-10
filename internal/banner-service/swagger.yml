@@ -1,1 +1,204 @@
-TODO: Перенести логику из internal
+openapi: 3.0.0
+info:
+  title: Banner API
+  description: API для управления баннерами
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: banners
+    description: Операции с баннерами
+paths:
+  /banners:
+    get:
+      summary: Получить баннеры пользователя
+      tags:
+        - banners
+      responses:
+        '200':
+          description: Список баннеров
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Banner'
+        '401':
+          description: Некорректный cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    post:
+      summary: Создать новый баннер
+      tags:
+        - banners
+      requestBody:
+        description: Данные баннера
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUpdateBannerRequest'
+      responses:
+        '201':
+          description: Баннер создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '422':
+          description: Невалидный формат данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /banners/{id}:
+    get:
+      summary: Получить баннер по ID
+      tags:
+        - banners
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID баннера
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Детали баннера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Banner'
+        '401':
+          description: Некорректный cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    put:
+      summary: Обновить баннер
+      tags:
+        - banners
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID баннера
+          schema:
+            type: integer
+      requestBody:
+        description: Обновлённые данные баннера
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUpdateBannerRequest'
+      responses:
+        '202':
+          description: Баннер обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '403':
+          description: Недостаточно прав
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '422':
+          description: Невалидный формат данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      summary: Удалить баннер
+      tags:
+        - banners
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID баннера
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Баннер удалён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '401':
+          description: Некорректный cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+components:
+  schemas:
+    Banner:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Title:
+          type: string
+        Description:
+          type: string
+        Content:
+          type: string
+        Link:
+          type: string
+        Balance:
+          type: integer
+        Status:
+          type: integer
+        OwnerID:
+          type: integer
+    CreateUpdateBannerRequest:
+      type: object
+      properties:
+        Title:
+          type: string
+        Description:
+          type: string
+        Content:
+          type: string
+        Link:
+          type: string
+        Status:
+          type: integer
+    Response:
+      type: object
+      properties:
+        service:
+          type: object
+          properties:
+            error:
+              type: string
+              nullable: true
+            success:
+              type: string
+              nullable: true

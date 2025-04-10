@@ -1,68 +1,94 @@
-  services:
-    redis0:
-      image: redis:alpine
-      restart: always
-      ports:
-        - "0.0.0.0:6379:6379"
-      container_name: ReTargetRedis
-      environment:
-        - REDIS_DATABASE=0
-        - REDIS_PASSWORD=${REDIS_PASSWORD}
-      networks:
-        - api_network
-      volumes:
-        - ./auth-data:/data
-      healthcheck:
-        test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
-        interval: 5s
-        timeout: 3s
-        retries: 5
-    postgresdb:
-      image: postgres:17
-      container_name: ReTargetDataBase
-      environment:
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-        POSTGRES_DB: ${POSTGRES_DB}
-      ports:
-        - "${PORT}:${INSIDE_PORT}"
-      command: [
-        "postgres",
-        "-c", "password_encryption=md5",
-        "-c", "max_connections=200",
-        "-c", "log_statement=all",
-        "-c", "ssl=off"
-      ]
-      networks:
-        - api_network
-      volumes:
-        - pg_data:/var/lib/postgresql/data
-        - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
-      restart: always
+version: '3.8'
 
-    api:
-      build:
-        context: ./internal
-        dockerfile: ./auth-service/Dockerfile
-      container_name: ReTargetApi
-      ports:
-        - 8025:8025
-      #volumes:
-      #  - ./internal/configs:/configs
-      #  - ./internal/pkg:/pkg
-      depends_on:
-        - postgresdb
-      networks:
-        - api_network
+services:
+  redis0:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "0.0.0.0:6379:6379"
+    container_name: ReTargetRedis
+    environment:
+      - REDIS_DATABASE=0
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - api_network
+    volumes:
+      - ./auth-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  volumes:
-    pg_data:
+  postgresdb:
+    image: postgres:17
+    container_name: ReTargetDataBase
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${PORT}:${INSIDE_PORT}"
+    command: [
+      "postgres",
+      "-c", "password_encryption=md5",
+      "-c", "max_connections=200",
+      "-c", "log_statement=all",
+      "-c", "ssl=off"
+    ]
+    networks:
+      - api_network
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
 
-  networks:
-    api_network:
-      driver: bridge
+  minio:
+    image: minio/minio:latest
+    container_name: ReTargetMiniO
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    networks:
+      - api_network
+    volumes:
+      - ./minio-data:/data
+    command: server /data
+
+  auth:
+    build:
+      context: ../internal
+      target: auth-service
+    container_name: ReTargetApiAuth
+    ports:
+      - "8025:8025"
+    depends_on:
+      - postgresdb
+    networks:
+      - api_network
+
+  banner:
+    build:
+      context: ../internal
+      target: banner-service
+    container_name: ReTargetApiBanner
+    ports:
+      - "8024:8024"
+    depends_on:
+      - postgresdb
+    networks:
+      - api_network
+
+volumes:
+  pg_data:
+
+networks:
+  api_network:
+    driver: bridge

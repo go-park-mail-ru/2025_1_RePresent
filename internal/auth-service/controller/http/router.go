@@ -1,9 +1,9 @@
 package http
 
 import (
-	authenticate "pkg/middleware/auth"
-	handlerAuth "retarget-authapp/controller/http/auth"
-	usecaseAuth "retarget-authapp/usecase/auth"
+	handlerAuth "retarget/internal/auth-service/controller/http/auth"
+	usecaseAuth "retarget/internal/auth-service/usecase/auth"
+	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
 )
