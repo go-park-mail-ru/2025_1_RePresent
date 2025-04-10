@@ -8,9 +8,15 @@ import (
 	payMiddleware "retarget/internal/pay-service/controller/http/middleware"
 	repoPay "retarget/internal/pay-service/repo"
 	usecasePay "retarget/internal/pay-service/usecase"
+	authenticate "retarget/pkg/middleware/auth"
 )
 
 func Run(cfg *configs.Config) {
+	authenticator, err := authenticate.NewAuthenticator(cfg.AuthRedis.EndPoint, cfg.AuthRedis.Password, cfg.AuthRedis.Database)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	payRepository := repoPay.NewPaymentRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode)
 	defer func() {
 		if err := payRepository.CloseConnection(); err != nil {
@@ -20,7 +26,7 @@ func Run(cfg *configs.Config) {
 
 	payUsecase := usecasePay.NewPayUsecase(payRepository)
 
-	mux := payAppHttp.SetupRoutes(payUsecase)
+	mux := payAppHttp.SetupRoutes(authenticator, payUsecase)
 
-	log.Fatal(http.ListenAndServe(":8099", payMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8023", payMiddleware.CORS(mux)))
 }
