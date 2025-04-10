@@ -35,7 +35,7 @@ func (r *BannerRepository) GetBannersByUserId(id int) ([]entity.Banner, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var banners []entity.Banner
+	banners := []entity.Banner{}
 
 	for rows.Next() {
 		banner := entity.Banner{}
