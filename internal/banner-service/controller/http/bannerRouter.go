@@ -21,15 +21,16 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	muxRouter := mux.NewRouter()
 	bannerController := NewBannerController(bannerUsecase, imageUsecase)
 	// middleware.AuthMiddleware(authUsecase)()
-	muxRouter.Handle("/api/v1/banner/", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetUserBanners)))
-	muxRouter.Handle("/api/v1/banner/create", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.CreateBanner)))
-	muxRouter.Handle("/api/v1/banner/upload", (http.HandlerFunc(bannerController.UploadImageHandler)))
-	muxRouter.Handle("/api/v1/banner/image/{image_id}", (http.HandlerFunc(bannerController.DownloadImage)))
+	muxRouter.Handle("/api/v1/banner/", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetUserBanners))).Methods("GET")
+	// CRUD
+	muxRouter.Handle("/api/v1/banner/create", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.CreateBanner))).Methods("POST")
+	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.ReadBanner))).Methods("GET")
 	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.UpdateBanner))).Methods("PUT")
 	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.DeleteBanner))).Methods("DELETE")
-	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.ReadBanner))).Methods("DELETE")
+	//IFrame
 	muxRouter.Handle("/api/v1/banner/iframe/{banner_id:[0-9]+}", (http.HandlerFunc(bannerController.GetBannerIFrame))).Methods("GET")
+	// Работа с картинками
 	muxRouter.Handle("/api/v1/banner/image/{image_id}", (http.HandlerFunc(bannerController.DownloadImage))).Methods("GET")
-
+	muxRouter.Handle("/api/v1/banner/upload", (http.HandlerFunc(bannerController.UploadImageHandler))).Methods("POST")
 	return muxRouter
 }
