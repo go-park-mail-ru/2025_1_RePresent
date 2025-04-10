@@ -10,11 +10,6 @@ import (
 )
 
 func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
 	const maxFileSize int64 = 10 << 20
 
 	if r.ContentLength > (maxFileSize) {
@@ -78,20 +73,8 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
 	vars := mux.Vars(r)
 	imageID := vars["image_id"]
-
-	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
-	// if !ok {
-	//      w.WriteHeader(http.StatusInternalServerError)
-	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
-	// }
-	// userID := user.UserID
 
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {

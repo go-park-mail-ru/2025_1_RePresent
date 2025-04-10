@@ -79,10 +79,6 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Method Not Allowed"))
-	}
 	var req CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
