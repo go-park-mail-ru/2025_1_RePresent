@@ -32,13 +32,11 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 	banners, err := h.BannerUsecase.GetBannersByUserID(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "+err.Error()))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(banners)
 	if err != nil {

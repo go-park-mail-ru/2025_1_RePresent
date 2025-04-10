@@ -29,16 +29,16 @@ func NewBannerRepository(endPoint string) *BannerRepository {
 	return bannerRepo
 }
 
-func (r *BannerRepository) GetBannersByUserId(id int) ([]*entity.Banner, error) {
+func (r *BannerRepository) GetBannersByUserId(id int) ([]entity.Banner, error) {
 	rows, err := r.db.Query("SELECT id, owner_id, title, description, content, status, link FROM banner WHERE owner_id = $1 AND deleted = FALSE;", id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var banners []*entity.Banner
+	var banners []entity.Banner
 
 	for rows.Next() {
-		banner := &entity.Banner{}
+		banner := entity.Banner{}
 		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Link)
 		if err != nil {
 			return nil, err

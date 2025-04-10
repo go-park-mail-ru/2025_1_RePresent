@@ -14,7 +14,7 @@ func NewBannerUsecase(bannerRepository *repo.BannerRepository) *BannerUsecase {
 	return &BannerUsecase{BannerRepository: bannerRepository}
 }
 
-func (b *BannerUsecase) GetBannersByUserID(userID int) ([]*entity.Banner, error) {
+func (b *BannerUsecase) GetBannersByUserID(userID int) ([]entity.Banner, error) {
 	banners, err := b.BannerRepository.GetBannersByUserId(userID)
 	if err != nil {
 		return nil, err
