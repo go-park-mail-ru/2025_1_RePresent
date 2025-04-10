@@ -35,7 +35,9 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "+err.Error()))
 		return
 	}
-
+	if banners == nil {
+		banners = []entity.Banner{}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(banners)
