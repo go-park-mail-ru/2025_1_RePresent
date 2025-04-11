@@ -4,6 +4,7 @@ import (
 	"errors"
 	entityProfile "retarget/internal/profile-service/entity/profile"
 	repoProfile "retarget/internal/profile-service/repo/profile"
+	"retarget/pkg/utils/validator"
 )
 
 type ProfileUsecaseInterface interface {
@@ -42,9 +43,9 @@ func (r *ProfileUsecase) GetProfile(userID int) (*entityProfile.ProfileResponse,
 		Balance:     profile.Balance,
 		Role:        profile.Role,
 	}
-	// validationErrors, err := validator.ValidateStruct(response)
-	//if err != nil {
-	//		return nil, errors.New(validationErrors)
-	//}
+	validationErrors, err := validator.ValidateStruct(response)
+	if err != nil {
+		return nil, errors.New(validationErrors)
+	}
 	return response, nil
 }
