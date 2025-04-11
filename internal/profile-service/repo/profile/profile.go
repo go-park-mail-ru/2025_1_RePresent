@@ -29,14 +29,14 @@ func NewProfileRepository(endPoint string) *ProfileRepository {
 }
 
 func (r *ProfileRepository) UpdateProfileByID(userID int, username, description string) error {
-	_, err := r.db.Exec("UPDATE user SET username = $1, description = $2 WHERE id = $3",
+	_, err := r.db.Exec("UPDATE auth_user SET username = $1, description = $2 WHERE id = $3",
 		username, description, userID)
 	return err
 }
 
 func (r *ProfileRepository) GetProfileByID(userID int) (*entityProfile.Profile, error) {
 	var profile entityProfile.Profile
-	err := r.db.QueryRow("SELECT id, username, email, description, balance, role FROM user WHERE id = $1",
+	err := r.db.QueryRow("SELECT id, username, email, description, balance, role FROM auth_user WHERE id = $1",
 		userID).Scan(&profile.ID, &profile.Username, &profile.Email, &profile.Description, &profile.Balance, &profile.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
