@@ -7,14 +7,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	// "fmt"
 	"net/http"
-	// Хардкод
-	// "strconv"
-
-	// pkg "retarget/internal/pkg/entity"
 	response "retarget/pkg/entity"
-	// "strconv"
+
 	"github.com/gorilla/mux"
 )
 
@@ -50,8 +45,12 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	url, err := h.LinkBuilder.BannerImageURL(banner.Content)
+	if err != nil {
+		// обработка ошибки
+	}
 	data := IFrame{
-		ImageSrc:    "http://109.120.190.243/api/v1/banner/image/" + banner.Content,
+		ImageSrc:    url,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,

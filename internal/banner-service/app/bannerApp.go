@@ -9,7 +9,6 @@ import (
 	"retarget/internal/banner-service/repo"
 	authenticate "retarget/pkg/middleware/auth"
 
-	// repoSession "retarget/internal/banner-service/repo"
 	usecase "retarget/internal/banner-service/usecase"
 )
 
