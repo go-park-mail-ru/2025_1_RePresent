@@ -8,32 +8,22 @@ import (
 	"github.com/google/uuid"
 
 	"log"
-	"retarget/internal/pay-service/entity"
+	entity "retarget/internal/pay-service/entity"
 
 	_ "github.com/lib/pq"
 
 	"errors"
 )
 
-type Transaction struct {
-	ID            int       `json:"id"`
-	TransactionID string    `json:"transactionId"`
-	UserID        int       `json:"user_id"`
-	Amount        int64     `json:"amount"`
-	Type          string    `json:"type"`
-	Status        string    `json:"status"`
-	CreatedAt     time.Time `json:"created_at"`
-}
-
 var (
 	ErrUserNotFound  = errors.New("user not found")
 	ErrInvalidAmount = errors.New("invalid amount")
 )
 
-func (t Transaction) Error() string {
-	//TODO implement me
-	panic("implement me")
-}
+// func (t entity.Transaction) Error() string {
+// 	//TODO implement me
+// 	panic("implement me")
+// }
 
 type PaymentRepositoryInterface interface {
 	GetPaymentByUserId(id int) ([]*entity.Payment, error)
@@ -92,7 +82,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, 
 	return newBalance, nil
 }
 
-func (r *PaymentRepository) CreateTransaction(tx *Transaction) error {
+func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction) error {
 	query := `
         INSERT INTO transaction
             (transaction_id, user_id, amount, type, status, created_at)
@@ -108,7 +98,7 @@ func (r *PaymentRepository) CreateTransaction(tx *Transaction) error {
 func (r *PaymentRepository) TopUpAccount(userID int, amount int64) error {
 	transactionID := uuid.New().String()
 
-	return r.CreateTransaction(&Transaction{
+	return r.CreateTransaction(&entity.Transaction{
 		TransactionID: transactionID,
 		UserID:        userID,
 		Amount:        amount,
@@ -118,13 +108,13 @@ func (r *PaymentRepository) TopUpAccount(userID int, amount int64) error {
 	})
 }
 
-func (r *PaymentRepository) GetLastTransaction(userID int) (*Transaction, error) {
-	var tx Transaction
+func (r *PaymentRepository) GetLastTransaction(userID int) (*entity.Transaction, error) {
+	var tx entity.Transaction
 
 	err := r.db.QueryRow(
 		"SELECT * FROM transaction WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1",
 		userID,
-	).Scan(&tx.ID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt)
+	).Scan(&tx.ID, &tx.TransactionID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt)
 
 	if err != nil {
 		return nil, err
@@ -133,8 +123,8 @@ func (r *PaymentRepository) GetLastTransaction(userID int) (*Transaction, error)
 	return &tx, nil
 }
 
-func (r *PaymentRepository) GetTransactionByID(transactionID string) (*Transaction, error) {
-	var tx Transaction
+func (r *PaymentRepository) GetTransactionByID(transactionID string) (*entity.Transaction, error) {
+	var tx entity.Transaction
 
 	err := r.db.QueryRow(
 		"SELECT * FROM transaction WHERE transaction_id = $1",

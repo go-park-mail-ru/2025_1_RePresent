@@ -15,6 +15,10 @@ type TransactionResponse struct {
 	NextAction    string `json:"nextAction"`
 }
 
+type TopUpRequest struct {
+	Amount int64 `json:"amount"`
+}
+
 func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
@@ -56,10 +60,6 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 			"Error encoding response: "+err.Error(),
 		))
 	}
-}
-
-type TopUpRequest struct {
-	Amount int64 `json:"amount"`
 }
 
 func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request) {

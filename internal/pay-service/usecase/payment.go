@@ -1,6 +1,7 @@
 package payment
 
 import (
+	"retarget/internal/pay-service/entity"
 	"retarget/internal/pay-service/repo"
 )
 
@@ -20,7 +21,7 @@ func (u PaymentUsecase) GetBalanceByUserId(id int) (float64, error) {
 	return balance, nil
 }
 
-func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) (*repo.Transaction, error) {
+func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) (*entity.Transaction, error) {
 	if amount <= 0 {
 		return nil, repo.ErrInvalidAmount
 	}
@@ -33,6 +34,6 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) (*repo.Transact
 	return uc.PaymentRepository.GetLastTransaction(userID)
 }
 
-func (uc *PaymentUsecase) GetTransactionByID(transactionID string) (*repo.Transaction, error) {
+func (uc *PaymentUsecase) GetTransactionByID(transactionID string) (*entity.Transaction, error) {
 	return uc.PaymentRepository.GetTransactionByID(transactionID)
 }
