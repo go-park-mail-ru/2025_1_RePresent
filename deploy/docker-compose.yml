@@ -67,7 +67,6 @@ services:
       context: ../
       dockerfile: deploy/Dockerfile
       target: auth-service
-      parallel: true
     container_name: ReTargetApiAuth
     ports:
       - "8025:8025"
@@ -81,7 +80,6 @@ services:
       context: ../
       dockerfile: deploy/Dockerfile
       target: banner-service
-      parallel: true
     container_name: ReTargetApiBanner
     ports:
       - "8024:8024"
@@ -95,7 +93,6 @@ services:
       context: ../
       dockerfile: deploy/Dockerfile
       target: profile-service
-      parallel: true
     container_name: ReTargetApiProfile
     ports:
       - "8023:8023"
@@ -109,7 +106,6 @@ services:
       context: ../
       dockerfile: deploy/Dockerfile
       target: payment-service
-      parallel: true
     container_name: ReTargetApiPayment
     ports:
       - "8022:8022"
