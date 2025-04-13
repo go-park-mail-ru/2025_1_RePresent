@@ -30,7 +30,7 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.UpdateBanner))).Methods("PUT")
 	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.DeleteBanner))).Methods("DELETE")
 	//IFrame
-	muxRouter.Handle("/api/v1/banner/iframe/{banner_id:[0-9]+}", (http.HandlerFunc(bannerController.GetBannerIFrame))).Methods("GET")
+	muxRouter.Handle("/api/v1/banner/iframe/{banner_id:[0-9]+}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetBannerIFrame))).Methods("GET")
 	// Работа с картинками
 	muxRouter.Handle("/api/v1/banner/image/{image_id}", (http.HandlerFunc(bannerController.DownloadImage))).Methods("GET").Name("download_image")
 	muxRouter.Handle("/api/v1/banner/upload", (http.HandlerFunc(bannerController.UploadImageHandler))).Methods("PUT")
