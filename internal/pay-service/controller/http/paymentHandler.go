@@ -88,12 +88,12 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Amount"))
 		return
-
 	}
 
-	err, _ = h.PaymentUsecase.TopUpBalance(userID, req.Amount)
-	if err != nil {
-		handleTopUpError(w, err)
+	if _, err = h.PaymentUsecase.TopUpBalance(userID, req.Amount); err != nil {
+		// handleTopUpError(w, err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "TopUP error"))
 		return
 	}
 
