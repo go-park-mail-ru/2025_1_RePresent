@@ -94,7 +94,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, 
 
 func (r *PaymentRepository) CreateTransaction(tx *Transaction) error {
 	query := `
-        INSERT INTO external_transaction
+        INSERT INTO transaction
             (transaction_id, user_id, amount, type, status, created_at)
         VALUES 
             ($1, $2, $3, $4, $5, $6)
@@ -122,7 +122,7 @@ func (r *PaymentRepository) GetLastTransaction(userID int) (*Transaction, error)
 	var tx Transaction
 
 	err := r.db.QueryRow(
-		"SELECT * FROM external_transaction WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1",
+		"SELECT * FROM transaction WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1",
 		userID,
 	).Scan(&tx.ID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt)
 
@@ -137,7 +137,7 @@ func (r *PaymentRepository) GetTransactionByID(transactionID string) (*Transacti
 	var tx Transaction
 
 	err := r.db.QueryRow(
-		"SELECT * FROM external_transaction WHERE transaction_id = $1",
+		"SELECT * FROM transaction WHERE transaction_id = $1",
 		transactionID,
 	).Scan(&tx.ID, &tx.TransactionID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt)
 
