@@ -21,17 +21,18 @@ func (u PaymentUsecase) GetBalanceByUserId(id int) (float64, error) {
 	return balance, nil
 }
 
-func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) (*entity.Transaction, error) {
+func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) error {
 	if amount <= 0 {
-		return nil, repo.ErrInvalidAmount
+		return repo.ErrInvalidAmount
 	}
 
-	err := uc.PaymentRepository.TopUpAccount(userID, amount)
+	_, err := uc.PaymentRepository.UpdateBalance(userID, float64(amount))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return uc.PaymentRepository.GetLastTransaction(userID)
+	return nil
+	// return uc.PaymentRepository.GetLastTransaction(userID)
 }
 
 func (uc *PaymentUsecase) GetTransactionByID(transactionID string) (*entity.Transaction, error) {

@@ -49,8 +49,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 
 	responseData := map[string]interface{}{
-		"accountId": cookie.Value,
-		"balance":   balance,
+		"balance": balance,
 	}
 
 	if err := json.NewEncoder(w).Encode(responseData); err != nil {
@@ -90,7 +89,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if _, err = h.PaymentUsecase.TopUpBalance(userID, req.Amount); err != nil {
+	if err = h.PaymentUsecase.TopUpBalance(userID, req.Amount); err != nil {
 		// handleTopUpError(w, err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
