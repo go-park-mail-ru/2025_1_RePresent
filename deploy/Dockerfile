@@ -35,13 +35,13 @@ COPY pkg ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/profile-service
 
-# ---- Payment Service ----
-FROM deps AS payment-builder
-COPY cmd/payment-service ./cmd/payment-service
+# ---- pay Service ----
+FROM deps AS pay-builder
+COPY cmd/pay-service ./cmd/pay-service
 COPY internal/pay-service ./internal/pay-service
 COPY pkg ./pkg
 COPY configs ./configs
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/payment-service ./cmd/pay-service
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/pay-service ./cmd/pay-service
 
 # ===================================
 # Этап 3: Финальные образы
@@ -69,9 +69,9 @@ COPY --from=profile-builder /bin/profile-service ./
 COPY --from=profile-builder /app/configs ./configs
 ENTRYPOINT ["./profile-service"]
 
-# ---- Payment Service ----
-FROM alpine:latest AS payment-service
+# ---- pay Service ----
+FROM alpine:latest AS pay-service
 WORKDIR /app
-COPY --from=payment-builder /bin/payment-service ./
-COPY --from=payment-builder /app/configs ./configs
-ENTRYPOINT ["./payment-service"]
+COPY --from=pay-builder /bin/pay-service ./
+COPY --from=pay-builder /app/configs ./configs
+ENTRYPOINT ["./pay-service"]
