@@ -101,11 +101,11 @@ services:
     networks:
       - api_network
 
-  payment:
+  pay:
     build:
       context: ../
       dockerfile: deploy/Dockerfile
-      target: payment-service
+      target: pay-service
     container_name: ReTargetApiPayment
     ports:
       - "8022:8022"
