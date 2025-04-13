@@ -88,6 +88,19 @@ services:
     networks:
       - api_network
 
+  profile:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: profile-service
+    container_name: ReTargetApiProfile
+    ports:
+      - "8023:8023"
+    depends_on:
+      - postgresdb
+    networks:
+      - api_network
+
 volumes:
   pg_data:
 

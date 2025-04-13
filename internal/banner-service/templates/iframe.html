@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8">
   <style>
@@ -12,6 +13,7 @@
       height: 100vh;
       margin: 0;
     }
+
     .card {
       width: 300px;
       height: 300px;
@@ -23,6 +25,7 @@
       flex-direction: column;
       font-size: 14px;
     }
+
     .card-header {
       padding: 8px;
       font-size: 10px;
@@ -30,27 +33,33 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
     .card-image {
       background: #fff;
       width: 100%;
       position: relative;
-      padding-top: 56.25%; /* Соотношение сторон 16:9 (можно изменить) */
+      padding-top: 56.25%;
+      /* Соотношение сторон 16:9 (можно изменить) */
       overflow: hidden;
     }
+
     .card-image img {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover; /* ВАЖНО: сохранить пропорции и заполнить зону */
+      object-fit: cover;
+      /* ВАЖНО: сохранить пропорции и заполнить зону */
     }
+
     .card-body {
       background: #1a1a1a;
       color: white;
       padding: 16px;
       flex: 1;
     }
+
     .card-body a {
       color: #aaa;
       font-size: 12px;
@@ -58,20 +67,24 @@
       margin-bottom: 8px;
       display: block;
     }
+
     .card-body h2 {
       font-size: 18px;
       margin: 8px 0;
       line-height: 1.2;
     }
+
     .card-body p {
       font-size: 16px;
       margin: 8px 0;
       font-weight: bold;
     }
+
     .card-footer {
       padding: 16px;
       background: #ffffff;
     }
+
     .card-footer button {
       width: 100%;
       background: #2f80ed;
@@ -83,9 +96,11 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+
     .card-footer button:hover {
       background: #1c60c7;
     }
+
     .button-link {
       display: block;
       width: 100%;
@@ -99,11 +114,13 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+
     .button-link:hover {
       background: #1c60c7;
     }
   </style>
 </head>
+
 <body>
   <a href="{{.Link}}" class="card-link" target="_blank">
     <div class="card">
@@ -111,14 +128,62 @@
         Реклама • 16+
       </div>
       <div class="card-image">
-        <img src="{{.ImageSrc}}" alt="Java Logo">
+        <img src="{{.ImageSrc}}" alt={{.Title}}>
       </div>
       <div class="card-body">
-        <a >{{.Link}}</a>
+        <a>{{.Link}}</a>
         <h2>{{.Title}}</h2>
         <p>{{.Description}}</p>
       </div>
     </div>
   </a>
 </body>
+<script>
+  "use strict";
+
+  const METRICS_URL = "https://your-ad-service.com/api/metrics";
+  const BANNER_ID = "123";
+  let startTime = Date.now();
+  let hasClicked = false;
+
+  function sendViewMetric() {
+    const duration = Math.round((Date.now() - startTime) / 1000);
+    const data = {
+      bannerId: BANNER_ID,
+      type: "view",
+      duration: duration,
+      timestamp: new Date().toISOString()
+    };
+
+    navigator.sendBeacon(METRICS_URL, JSON.stringify(data));
+  }
+
+  function handleClick() {
+    hasClicked = true;
+    const data = {
+      bannerId: BANNER_ID,
+      type: "click",
+      timestamp: new Date().toISOString()
+    };
+
+    fetch(METRICS_URL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+      keepalive: true
+    }).catch(e => console.error("Metrics error:", e));
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelector(".card-link").addEventListener("click", handleClick);
+
+    window.addEventListener("pagehide", sendViewMetric);
+    window.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        sendViewMetric();
+      }
+    });
+  });
+</script>
+
 </html>

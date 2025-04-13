@@ -2,9 +2,10 @@ package profile
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	entityProfile "retarget/internal/profile-service/entity/profile"
+
+	_ "github.com/lib/pq"
 )
 
 type ProfileRepositoryInterface interface {
@@ -15,12 +16,11 @@ type ProfileRepositoryInterface interface {
 
 type ProfileRepository struct {
 	db *sql.DB
-} // TODO: Переделать коннект в эндпойнт
+}
 
-func NewProfileRepository(username, password, dbname, host string, port int, sslmode string) *ProfileRepository {
+func NewProfileRepository(endPoint string) *ProfileRepository {
 	profileRepo := &ProfileRepository{}
-	db, err := sql.Open("postgres", fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=%s",
-		username, password, dbname, host, port, sslmode))
+	db, err := sql.Open("postgres", endPoint)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,14 +29,14 @@ func NewProfileRepository(username, password, dbname, host string, port int, ssl
 }
 
 func (r *ProfileRepository) UpdateProfileByID(userID int, username, description string) error {
-	_, err := r.db.Exec("UPDATE user SET username = $1, description = $2 WHERE id = $3",
+	_, err := r.db.Exec("UPDATE auth_user SET username = $1, description = $2 WHERE id = $3",
 		username, description, userID)
 	return err
 }
 
 func (r *ProfileRepository) GetProfileByID(userID int) (*entityProfile.Profile, error) {
 	var profile entityProfile.Profile
-	err := r.db.QueryRow("SELECT id, username, email, description, balance, role FROM user WHERE id = $1",
+	err := r.db.QueryRow("SELECT id, username, email, description, balance, role FROM auth_user WHERE id = $1",
 		userID).Scan(&profile.ID, &profile.Username, &profile.Email, &profile.Description, &profile.Balance, &profile.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {

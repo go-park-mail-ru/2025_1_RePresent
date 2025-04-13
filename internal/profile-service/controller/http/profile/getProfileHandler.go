@@ -34,11 +34,12 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	verdict := entity.NewResponse(false, "Sent")
 	response := struct {
-		Service entity.Response               `json:"service"`
+		Service *entity.ServiceResponse       `json:"service"`
 		Body    entityProfile.ProfileResponse `json:"body"`
 	}{
-		Service: entity.NewResponse(false, "Sent"),
+		Service: &verdict.Service,
 		Body:    *profile,
 	}
 

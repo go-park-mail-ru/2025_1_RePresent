@@ -9,7 +9,6 @@ import (
 	"retarget/internal/banner-service/repo"
 	authenticate "retarget/pkg/middleware/auth"
 
-	// repoSession "retarget/internal/banner-service/repo"
 	usecase "retarget/internal/banner-service/usecase"
 )
 
@@ -19,7 +18,7 @@ func Run(cfg *configs.Config) {
 		log.Fatal(err.Error())
 	}
 
-	imageRepository := repo.NewBannerImageRepository("ReTargetMiniO:9000", "minioadmin", "minioadmin", "", false, "avatar")
+	imageRepository := repo.NewBannerImageRepository(cfg.Minio.EndPoint, cfg.Minio.AccessKeyID, cfg.Minio.SecretAccesKey, cfg.Minio.Token, false, "image")
 	bannerRepository := repo.NewBannerRepository(cfg.Database.ConnectionString())
 	defer func() {
 		if err := bannerRepository.CloseConnection(); err != nil {
