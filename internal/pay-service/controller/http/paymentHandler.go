@@ -2,10 +2,11 @@ package payment
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"net/http"
 	"retarget/internal/pay-service/repo"
 	"retarget/pkg/entity"
+
+	"github.com/google/uuid"
 )
 
 type TransactionResponse struct {
@@ -26,6 +27,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		return
 	}
 	userID := userSession.UserID
 

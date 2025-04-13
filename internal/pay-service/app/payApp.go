@@ -28,5 +28,5 @@ func Run(cfg *configs.Config) {
 
 	mux := payAppHttp.SetupRoutes(authenticator, payUsecase)
 
-	log.Fatal(http.ListenAndServe(":8023", payMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8022", payMiddleware.CORS(mux)))
 }
