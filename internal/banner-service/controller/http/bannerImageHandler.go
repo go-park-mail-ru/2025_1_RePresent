@@ -10,27 +10,15 @@ import (
 )
 
 func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
+	const maxFileSize int64 = 10 << 20
 
-	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
-	// if !ok {
-	//      w.WriteHeader(http.StatusInternalServerError)
-	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
-	// }
-
-	// userID := user.UserID
-
-	if r.ContentLength > (10 << 20) {
+	if r.ContentLength > (maxFileSize) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
 		return
 	}
 
-	err := r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(maxFileSize)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
@@ -85,11 +73,6 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
 	vars := mux.Vars(r)
 	imageID := vars["image_id"]
 
@@ -130,15 +113,15 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek avatar"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=avatar")
+	w.Header().Set("Content-Disposition", "attachment; filename=image")
 	_, err = io.Copy(w, object)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download avatar"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
 		return
 	}
 }
