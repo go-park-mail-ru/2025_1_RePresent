@@ -38,10 +38,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/profile-serv
 # ---- Payment Service ----
 FROM deps AS payment-builder
 COPY cmd/payment-service ./cmd/payment-service
-COPY internal/payment-service ./internal/payment-service
+COPY internal/pay-service ./internal/pay-service
 COPY pkg ./pkg
 COPY configs ./configs
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/payment-service ./cmd/payment-service
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/payment-service ./cmd/pay-service
 
 # ===================================
 # Этап 3: Финальные образы
