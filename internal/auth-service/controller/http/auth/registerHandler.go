@@ -3,8 +3,8 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
-	entity "pkg/entity"
-	"pkg/utils/validator"
+	entity "retarget/pkg/entity"
+	"retarget/pkg/utils/validator"
 )
 
 type RegisterRequest struct {

@@ -3,8 +3,8 @@ package auth
 import (
 	"database/sql"
 	"errors"
-	entityAuth "retarget-authapp/entity/auth"
-	repoAuth "retarget-authapp/repo/auth"
+	entityAuth "retarget/internal/auth-service/entity/auth"
+	repoAuth "retarget/internal/auth-service/repo/auth"
 
 	"golang.org/x/crypto/bcrypt"
 )
