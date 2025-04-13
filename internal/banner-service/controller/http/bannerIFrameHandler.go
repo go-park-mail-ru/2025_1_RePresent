@@ -44,7 +44,6 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	url, err := h.LinkBuilder.BannerImageURL(banner.Content)
 	if err != nil {
 		// обработка ошибки
