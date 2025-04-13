@@ -101,6 +101,19 @@ services:
     networks:
       - api_network
 
+  payment:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: payment-service
+    container_name: ReTargetApiPayment
+    ports:
+      - "8022:8022"
+    depends_on:
+      - postgresdb
+    networks:
+      - api_network
+
 volumes:
   pg_data:
 

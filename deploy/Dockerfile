@@ -14,6 +14,8 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/auth-service ./cmd/auth-service
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/banner-service ./cmd/banner-service
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/profile-service
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/payment-service
+
 
 
 # ===================================
@@ -47,3 +49,12 @@ COPY --from=builder /bin/profile-service ./profile-service
 COPY --from=builder /app/configs ./configs
 
 ENTRYPOINT ["./profile-service"]
+
+# ---- Service 4 ----
+FROM alpine:latest AS payment-service
+
+WORKDIR /app
+COPY --from=builder /bin/payment-service ./payment-service
+COPY --from=builder /app/configs ./configs
+
+ENTRYPOINT ["./payment-service"]
