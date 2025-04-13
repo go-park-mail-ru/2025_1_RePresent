@@ -3,8 +3,9 @@ package repo
 import (
 	"database/sql"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	"log"
 	"retarget/internal/pay-service/entity"
@@ -57,7 +58,7 @@ func (r *PaymentRepository) GetBalanceByUserId(id int) (float64, error) {
 	var balance float64
 
 	err := r.db.QueryRow(
-		"SELECT balance FROM users WHERE id = $1",
+		"SELECT balance FROM auth_user WHERE id = $1",
 		id,
 	).Scan(&balance)
 
@@ -73,7 +74,7 @@ func (r *PaymentRepository) GetBalanceByUserId(id int) (float64, error) {
 
 func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, error) {
 	query := `
-        UPDATE user 
+        UPDATE auth_user 
         SET balance = balance + $1
         WHERE id = $2
         RETURNING balance
