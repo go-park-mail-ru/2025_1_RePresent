@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # ===================================
-# Этап 2: Отдельные builder-этапы для каждого сервиса
+# СБОРКА
 # ===================================
 
 # ---- Auth Service ----
@@ -42,12 +42,33 @@ COPY pkg/ ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/payment-service ./cmd/payment-service
 
-# ===================================
-# Этап 3: Финальные образы (остаётся без изменений)
-# ===================================
+# ===== ЗАПУСК =====
 
+# ---- Auth Service ----
 FROM alpine:latest AS auth-service
 WORKDIR /app
-COPY --from=auth-builder /bin/auth-service ./auth-service
-COPY --from=auth-builder /app/configs ./configs
+COPY --from=builder /bin/auth-service ./auth-service
+COPY --from=builder /app/configs ./configs
 ENTRYPOINT ["./auth-service"]
+
+# ---- Banner Service ----
+FROM alpine:latest AS banner-service
+WORKDIR /app
+COPY --from=builder /bin/banner-service ./banner-service
+COPY --from=builder /app/configs ./configs
+COPY --from=builder /app/internal/banner-service/templates ./templates
+ENTRYPOINT ["./banner-service"]
+
+# ---- Profile Service ----
+FROM alpine:latest AS profile-service
+WORKDIR /app
+COPY --from=builder /bin/profile-service ./profile-service
+COPY --from=builder /app/configs ./configs
+ENTRYPOINT ["./profile-service"]
+
+# ---- Payment Service ----
+FROM alpine:latest AS payment-service
+WORKDIR /app
+COPY --from=builder /bin/payment-service ./payment-service
+COPY --from=builder /app/configs ./configs
+ENTRYPOINT ["./payment-service"]
