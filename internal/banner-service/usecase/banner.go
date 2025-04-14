@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"errors"
+	"math/rand"
 	"retarget/internal/banner-service/entity"
 	"retarget/internal/banner-service/repo"
+	"time"
 )
 
 type BannerUsecase struct {
@@ -40,6 +42,18 @@ func (b *BannerUsecase) GetBannerForIFrame(bannerID int) (*entity.Banner, error)
 		return nil, err
 	}
 	return banner, err
+}
+
+func (b *BannerUsecase) GetRandomBannerForIFrame(userID int) (*entity.Banner, error) {
+	rand.Seed(time.Now().UnixNano())
+	banners, err := b.BannerRepository.GetBannersByUserId(userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(banners) > 0 {
+		return &banners[rand.Intn(len(banners))], err
+	}
+	return &entity.DefaultBanner, nil
 }
 
 func (b *BannerUsecase) CreateBanner(userID int, banner entity.Banner) error {
