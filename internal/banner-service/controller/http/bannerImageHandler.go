@@ -10,11 +10,6 @@ import (
 )
 
 func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
 	const maxFileSize int64 = 10 << 20
 
 	if r.ContentLength > (maxFileSize) {
@@ -78,25 +73,13 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
 	vars := mux.Vars(r)
 	imageID := vars["image_id"]
-
-	// user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
-	// if !ok {
-	//      w.WriteHeader(http.StatusInternalServerError)
-	//      json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
-	// }
-	// userID := user.UserID
 
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
 		return
 	}
 	defer func() {
@@ -130,15 +113,15 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek avatar"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=avatar")
+	w.Header().Set("Content-Disposition", "attachment; filename=image")
 	_, err = io.Copy(w, object)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download avatar"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
 		return
 	}
 }

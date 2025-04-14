@@ -1,10 +1,10 @@
-FROM golang:1.22 AS deps
+FROM golang:1.24 AS deps
 
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-FROM golang:1.22 AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /app
 
@@ -23,6 +23,7 @@ FROM alpine:latest AS auth-service
 
 WORKDIR /app
 COPY --from=builder /bin/auth-service ./auth-service
+COPY --from=builder /app/configs ./configs
 
 ENTRYPOINT ["./auth-service"]
 
@@ -31,5 +32,7 @@ FROM alpine:latest AS banner-service
 
 WORKDIR /app
 COPY --from=builder /bin/banner-service ./banner-service
+COPY --from=builder /app/configs ./configs
+COPY --from=builder /app/internal/banner-service/templates ./templates
 
 ENTRYPOINT ["./banner-service"]

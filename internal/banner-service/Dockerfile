@@ -31,6 +31,8 @@ FROM alpine:latest
 
 COPY --from=builder /bannerapp/main /bannerapp/main
 
+COPY --from=builder /bannerworkspace/banner-service/templates /bannerapp/templates
+
 COPY --from=builder /bannerworkspace/banner-service/configs /bannerapp/configs
 
 RUN chmod +x /bannerapp/main
