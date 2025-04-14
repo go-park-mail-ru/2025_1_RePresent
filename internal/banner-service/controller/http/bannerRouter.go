@@ -35,6 +35,6 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	muxRouter.Handle("/api/v1/banner/image/{image_id}", (http.HandlerFunc(bannerController.DownloadImage))).Methods("GET").Name("download_image")
 	muxRouter.Handle("/api/v1/banner/upload", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.UploadImageHandler))).Methods("PUT")
 	// Рандомный айфрейм юзера
-	muxRouter.Handle("/api/v1/banner/{uniq_link}", (http.HandlerFunc(bannerController.RandomIFrame))).Methods("GET")
+	muxRouter.Handle("/api/v1/banner/uniq_link/{uniq_link}", (http.HandlerFunc(bannerController.RandomIFrame))).Methods("GET")
 	return muxRouter
 }
