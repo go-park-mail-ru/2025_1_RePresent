@@ -37,6 +37,7 @@ func (r *ProfileUsecase) GetProfile(userID int) (*entityProfile.ProfileResponse,
 		return nil, err
 	}
 	response := &entityProfile.ProfileResponse{
+		ID:          profile.ID,
 		Username:    profile.Username,
 		Email:       profile.Email,
 		Description: profile.Description,
