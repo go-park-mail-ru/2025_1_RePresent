@@ -24,7 +24,7 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	linkBuilder := NewLinkBuilder(muxRouter)
 	bannerController := NewBannerController(bannerUsecase, imageUsecase, linkBuilder)
 	// middleware.AuthMiddleware(authUsecase)()
-	muxRouter.Handle("/api/v1/banner/", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetUserBanners))).Methods("GET")
+	muxRouter.Handle("/api/v1/banner/", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GetUserBanners)))).Methods("GET")
 	// CRUD
 	muxRouter.Handle("/api/v1/banner/create", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.CreateBanner)))).Methods("POST")
 	muxRouter.Handle("/api/v1/banner/{banner_id:[0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.ReadBanner)))).Methods("GET")

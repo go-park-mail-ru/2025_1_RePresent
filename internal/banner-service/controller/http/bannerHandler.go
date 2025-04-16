@@ -21,7 +21,6 @@ type CreateUpdateBannerRequest struct {
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
-
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
