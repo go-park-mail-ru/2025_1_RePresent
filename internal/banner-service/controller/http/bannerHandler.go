@@ -16,7 +16,7 @@ type CreateUpdateBannerRequest struct {
 	Description string `json:"description" validate:"required,max=100"`
 	Content     string `json:"content" validate:"required,len=32"`
 	Link        string `json:"link" validate:"required,max=100"`
-	Status      int    `json:"status" validate:"required"`
+	Status      int    `json:"status" validate:"required,gte=0"`
 }
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
