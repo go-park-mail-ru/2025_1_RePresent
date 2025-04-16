@@ -5,6 +5,7 @@ import (
 	"net/http"
 	entity "retarget/internal/banner-service/entity"
 	response "retarget/pkg/entity"
+	validator "retarget/pkg/utils/validator"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -12,9 +13,9 @@ import (
 
 type CreateUpdateBannerRequest struct {
 	Title       string `json:"title" validate:"required,min=3,max=30"`
-	Description string `json:"description" validate:"required"`
-	Content     string `json:"content"`
-	Link        string `json:"link" validate:"required"`
+	Description string `json:"description" validate:"required,max=100"`
+	Content     string `json:"content" validate:"required,len=32"`
+	Link        string `json:"link" validate:"required,max=100"`
 	Status      int    `json:"status" validate:"required"`
 }
 
@@ -85,6 +86,13 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	validate_errors, err := validator.ValidateStruct(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
+		return
+	}
+
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -114,10 +122,16 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 
 func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) {
 	var req CreateUpdateBannerRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		return
+	}
+
+	if validate_errors, err := validator.ValidateStruct(req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
 		return
 	}
 
