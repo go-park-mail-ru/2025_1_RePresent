@@ -52,6 +52,7 @@ func (r *PaymentRepository) GetBalanceByUserId(id int, requestID string) (float6
 	query := "SELECT balance FROM auth_user WHERE id = $1"
 
 	r.logger.Debugw("Getting user balance",
+		"request_id", requestID,
 		"query", query,
 		"userID", id,
 	)
@@ -62,12 +63,14 @@ func (r *PaymentRepository) GetBalanceByUserId(id int, requestID string) (float6
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		r.logger.Debugw("User not found",
+			"request_id", requestID,
 			"userID", id,
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
 		)
 		return 0, fmt.Errorf("user with id %d not found", id)
 	case err != nil:
 		r.logger.Debugw("Failed to get balance",
+			"request_id", requestID,
 			"userID", id,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -94,6 +97,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID 
     `
 
 	r.logger.Debugw("Starting balance update",
+		"request_id", requestID,
 		"query", query,
 		"userID", userID,
 		"amount", amount,
@@ -105,6 +109,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			r.logger.Debugw("User not found for balance update",
+				"request_id", requestID,
 				"userID", userID,
 				"timeTakenMs", time.Since(startTime).Milliseconds(),
 			)
@@ -112,6 +117,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID 
 		}
 
 		r.logger.Debugw("Balance update failed",
+			"request_id", requestID,
 			"userID", userID,
 			"amount", amount,
 			"error", err.Error(),
