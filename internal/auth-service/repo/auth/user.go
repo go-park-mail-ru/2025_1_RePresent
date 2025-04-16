@@ -107,7 +107,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) 
 				"email", email,
 				"timeTakenMs", time.Since(startTime).Milliseconds(),
 			)
-			return nil, fmt.Errorf("user not found")
+			return nil, err
 		}
 
 		r.logger.Debugw("Database query failed",
@@ -154,7 +154,7 @@ func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, e
 				"username", username,
 				"timeTakenMs", time.Since(startTime).Milliseconds(),
 			)
-			return nil, fmt.Errorf("user not found")
+			return nil, err
 		}
 
 		r.logger.Debugw("Database query failed",
