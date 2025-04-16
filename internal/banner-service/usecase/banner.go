@@ -16,8 +16,8 @@ func NewBannerUsecase(bannerRepository *repo.BannerRepository) *BannerUsecase {
 	return &BannerUsecase{BannerRepository: bannerRepository}
 }
 
-func (b *BannerUsecase) GetBannersByUserID(userID int) ([]entity.Banner, error) {
-	banners, err := b.BannerRepository.GetBannersByUserId(userID)
+func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) ([]entity.Banner, error) {
+	banners, err := b.BannerRepository.GetBannersByUserId(userID, requestID)
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,8 @@ func (b *BannerUsecase) GetBannersByUserID(userID int) ([]entity.Banner, error) 
 	return banners, nil
 }
 
-func (b *BannerUsecase) GetBannerByID(userID, bannerID int) (*entity.Banner, error) {
-	banner, err := b.BannerRepository.GetBannerByID(bannerID)
+func (b *BannerUsecase) GetBannerByID(userID, bannerID int, requestID string) (*entity.Banner, error) {
+	banner, err := b.BannerRepository.GetBannerByID(bannerID, requestID)
 	if err != nil {
 		return nil, err
 	}
@@ -36,17 +36,17 @@ func (b *BannerUsecase) GetBannerByID(userID, bannerID int) (*entity.Banner, err
 	return banner, err
 }
 
-func (b *BannerUsecase) GetBannerForIFrame(bannerID int) (*entity.Banner, error) {
-	banner, err := b.BannerRepository.GetBannerByID(bannerID)
+func (b *BannerUsecase) GetBannerForIFrame(bannerID int, requestID string) (*entity.Banner, error) {
+	banner, err := b.BannerRepository.GetBannerByID(bannerID, requestID)
 	if err != nil {
 		return nil, err
 	}
 	return banner, err
 }
 
-func (b *BannerUsecase) GetRandomBannerForIFrame(userID int) (*entity.Banner, error) {
+func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (*entity.Banner, error) {
 	rand.Seed(time.Now().UnixNano())
-	banners, err := b.BannerRepository.GetBannersByUserId(userID)
+	banners, err := b.BannerRepository.GetBannersByUserId(userID, requestID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,24 +56,24 @@ func (b *BannerUsecase) GetRandomBannerForIFrame(userID int) (*entity.Banner, er
 	return &entity.DefaultBanner, nil
 }
 
-func (b *BannerUsecase) CreateBanner(userID int, banner entity.Banner) error {
-	err := b.BannerRepository.CreateNewBanner(banner)
+func (b *BannerUsecase) CreateBanner(userID int, banner entity.Banner, requestID string) error {
+	err := b.BannerRepository.CreateNewBanner(banner, requestID)
 	return err
 }
 
-func (b *BannerUsecase) UpdateBanner(userID int, banner entity.Banner) error {
-	oldBanner, err := b.BannerRepository.GetBannerByID(banner.ID)
+func (b *BannerUsecase) UpdateBanner(userID int, banner entity.Banner, requestID string) error {
+	oldBanner, err := b.BannerRepository.GetBannerByID(banner.ID, requestID)
 	if err != nil {
 		return err
 	}
 	if oldBanner.OwnerID != userID {
 		return errors.New("banner not Found")
 	}
-	err = b.BannerRepository.UpdateBanner(banner)
+	err = b.BannerRepository.UpdateBanner(banner, requestID)
 	return err
 }
 
-func (b *BannerUsecase) DeleteBannerByID(userID, bannerID int) error {
-	err := b.BannerRepository.DeleteBannerByID(userID, bannerID)
+func (b *BannerUsecase) DeleteBannerByID(userID, bannerID int, requestID string) error {
+	err := b.BannerRepository.DeleteBannerByID(userID, bannerID, requestID)
 	return err
 }

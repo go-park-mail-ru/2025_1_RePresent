@@ -20,6 +20,7 @@ type CreateUpdateBannerRequest struct {
 }
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
@@ -28,7 +29,7 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 	}
 	userID := userSession.UserID
 
-	banners, err := h.BannerUsecase.GetBannersByUserID(userID)
+	banners, err := h.BannerUsecase.GetBannersByUserID(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "+err.Error()))
@@ -45,6 +46,7 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 }
 
 func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -62,7 +64,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	banner, err := h.BannerUsecase.GetBannerByID(userID, bannerID)
+	banner, err := h.BannerUsecase.GetBannerByID(userID, bannerID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
@@ -78,6 +80,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	var req CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -110,7 +113,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		Status:      0,
 	}
 
-	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner); err != nil {
+	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner, requestID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
@@ -121,6 +124,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	var req CreateUpdateBannerRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -160,7 +164,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		Status:      req.Status,
 	}
 
-	if err := h.BannerUsecase.UpdateBanner(userID, banner); err != nil {
+	if err := h.BannerUsecase.UpdateBanner(userID, banner, requestID); err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
@@ -171,6 +175,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -187,7 +192,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.BannerUsecase.BannerRepository.DeleteBannerByID(userID, bannerID)
+	h.BannerUsecase.BannerRepository.DeleteBannerByID(userID, bannerID, requestID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 
