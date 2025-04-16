@@ -14,6 +14,7 @@ type UserResponse struct {
 }
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
@@ -27,7 +28,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 	userID := userSession.UserID
 
-	user, err := c.authUsecase.GetUser(userID)
+	user, err := c.authUsecase.GetUser(userID, requestID)
 	if err != nil {
 		panic("UNIMPLIMENTED")
 	}

@@ -30,8 +30,8 @@ func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.Ses
 	return &AuthUsecase{authRepository: userRepo, sessionRepository: sessionRepo}
 }
 
-func (a *AuthUsecase) Login(email string, password string, role int) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByEmail(email)
+func (a *AuthUsecase) Login(email string, password string, role int, requestID string) (*entityAuth.User, error) {
+	user, err := a.authRepository.GetUserByEmail(email, requestID)
 	if err != nil {
 		return nil, err
 	}
@@ -53,16 +53,16 @@ func (a *AuthUsecase) Logout(sessionId string) error {
 	return nil
 }
 
-func (a *AuthUsecase) GetUser(user_id int) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByID(user_id)
+func (a *AuthUsecase) GetUser(user_id int, requestID string) (*entityAuth.User, error) {
+	user, err := a.authRepository.GetUserByID(user_id, requestID)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (a *AuthUsecase) Register(username string, email string, password string, role int) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByEmail(email)
+func (a *AuthUsecase) Register(username string, email string, password string, role int, requestID string) (*entityAuth.User, error) {
+	user, err := a.authRepository.GetUserByEmail(email, requestID)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, errors.New("Пользователь с таким email уже существует")
 	}
 
-	user, err = a.authRepository.GetUserByUsername(username)
+	user, err = a.authRepository.GetUserByUsername(username, requestID)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, err
 	}
 
-	err = a.authRepository.CreateNewUser(user)
+	err = a.authRepository.CreateNewUser(user, requestID)
 	if err != nil {
 		return nil, err
 	}

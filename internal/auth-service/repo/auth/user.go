@@ -37,7 +37,7 @@ func NewAuthRepository(endPoint string, logger *zap.SugaredLogger) *AuthReposito
 	return userRepo
 }
 
-func (r *AuthRepository) GetUserByID(id int) (*authEntity.User, error) {
+func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User, error) {
 	startTime := time.Now()
 	query := "SELECT id, username, email, password, description, balance, role FROM auth_user WHERE id = $1"
 
@@ -59,12 +59,14 @@ func (r *AuthRepository) GetUserByID(id int) (*authEntity.User, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			r.logger.Debugw("User not found",
+				"request_id", requestID,
 				"id", id,
 				"timeTakenMs", time.Since(startTime).Milliseconds(),
 			)
 			return nil, fmt.Errorf("user not found")
 		}
 		r.logger.Debugw("Database query failed",
+			"request_id", requestID,
 			"id", id,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -72,6 +74,7 @@ func (r *AuthRepository) GetUserByID(id int) (*authEntity.User, error) {
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 	r.logger.Debugw("User retrieved successfully",
+		"request_id", requestID,
 		"userID", user.ID,
 		"username", user.Username,
 		"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -80,11 +83,12 @@ func (r *AuthRepository) GetUserByID(id int) (*authEntity.User, error) {
 	return user, nil
 }
 
-func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) {
+func (r *AuthRepository) GetUserByEmail(email string, requestID string) (*authEntity.User, error) {
 	startTime := time.Now()
 	query := "SELECT id, username, email, password, description, balance, role FROM auth_user WHERE email = $1"
 
 	r.logger.Debugw("Executing SQL query",
+		"request_id", requestID,
 		"query", query,
 		"email", email,
 	)
@@ -104,6 +108,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) 
 	if err != nil {
 		if err == sql.ErrNoRows {
 			r.logger.Debugw("User not found",
+				"request_id", requestID,
 				"email", email,
 				"timeTakenMs", time.Since(startTime).Milliseconds(),
 			)
@@ -111,6 +116,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) 
 		}
 
 		r.logger.Debugw("Database query failed",
+			"request_id", requestID,
 			"email", email,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -119,6 +125,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) 
 	}
 
 	r.logger.Debugw("User retrieved successfully",
+		"request_id", requestID,
 		"userID", user.ID,
 		"username", user.Username,
 		"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -127,11 +134,12 @@ func (r *AuthRepository) GetUserByEmail(email string) (*authEntity.User, error) 
 	return user, nil
 }
 
-func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, error) {
+func (r *AuthRepository) GetUserByUsername(username, requestID string) (*authEntity.User, error) {
 	startTime := time.Now()
 	query := "SELECT id, username, email, password, description, balance, role FROM auth_user WHERE username = $1"
 
 	r.logger.Debugw("Executing SQL query",
+		"request_id", requestID,
 		"query", query,
 		"username", username,
 	)
@@ -151,6 +159,7 @@ func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, e
 	if err != nil {
 		if err == sql.ErrNoRows {
 			r.logger.Debugw("User not found",
+				"request_id", requestID,
 				"username", username,
 				"timeTakenMs", time.Since(startTime).Milliseconds(),
 			)
@@ -158,6 +167,7 @@ func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, e
 		}
 
 		r.logger.Debugw("Database query failed",
+			"request_id", requestID,
 			"username", username,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -166,6 +176,7 @@ func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, e
 	}
 
 	r.logger.Debugw("User retrieved successfully",
+		"request_id", requestID,
 		"userID", user.ID,
 		"username", user.Username,
 		"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -174,11 +185,12 @@ func (r *AuthRepository) GetUserByUsername(username string) (*authEntity.User, e
 	return user, nil
 }
 
-func (r *AuthRepository) CreateNewUser(user *authEntity.User) error {
+func (r *AuthRepository) CreateNewUser(user *authEntity.User, requestID string) error {
 	startTime := time.Now()
 
 	// Логируем начало операции (без sensitive данных)
 	r.logger.Debugw("Starting user creation",
+		"request_id", requestID,
 		"username", user.Username,
 		"role", user.Role,
 	)
@@ -186,6 +198,7 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User) error {
 	err := authEntity.ValidateUser(user)
 	if err != nil {
 		r.logger.Debugw("User validation failed",
+			"request_id", requestID,
 			"username", user.Username,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -196,12 +209,14 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User) error {
 	query := "INSERT INTO auth_user (username, email, password, description, balance, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 
 	r.logger.Debugw("Preparing SQL query",
+		"request_id", requestID,
 		"query", query,
 	)
 
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		r.logger.Debugw("Prepare statement failed",
+			"request_id", requestID,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
 		)
@@ -221,6 +236,7 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User) error {
 
 	if err != nil {
 		r.logger.Debugw("User creation failed",
+			"request_id", requestID,
 			"username", user.Username,
 			"error", err.Error(),
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -231,6 +247,7 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User) error {
 	user.ID = int(id)
 
 	r.logger.Debugw("User created successfully",
+		"request_id", requestID,
 		"userID", user.ID,
 		"username", user.Username,
 		"timeTakenMs", time.Since(startTime).Milliseconds(),

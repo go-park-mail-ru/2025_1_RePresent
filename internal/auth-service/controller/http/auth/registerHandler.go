@@ -16,6 +16,7 @@ type RegisterRequest struct {
 }
 
 func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
@@ -39,7 +40,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 
 	// Login(данные пользователя), проверили данные, AddSession(user_id), поставили куки
 
-	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, 1)
+	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, 1, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))

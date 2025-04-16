@@ -12,7 +12,11 @@ import (
 )
 
 type BannerRepositoryInterface interface {
-	GerBannerByUserId(id int) ([]*entity.Banner, error)
+	GetBannerByUserId(id int) ([]*entity.Banner, error)
+	CreateNewBanner(banner entity.Banner)
+	UpdateBanner(banner entity.Banner)
+	GetBannerByID(id int) (*entity.Banner, error)
+	DeleteBannerByID(owner, id int) error
 }
 
 type BannerRepository struct {
