@@ -3,7 +3,7 @@ package profile
 import (
 	"net/http"
 	usecaseProfile "retarget/internal/profile-service/usecase/profile"
-
+	logger "retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
@@ -15,16 +15,16 @@ type ProfileController struct {
 	logger         *zap.SugaredLogger
 }
 
-func NewProfileController(profileUsecase *usecaseProfile.ProfileUsecase, logger *zap.SugaredLogger) *ProfileController {
-	return &ProfileController{profileUsecase: profileUsecase, logger: logger}
+func NewProfileController(profileUsecase *usecaseProfile.ProfileUsecase, sugar *zap.SugaredLogger) *ProfileController {
+	return &ProfileController{profileUsecase: profileUsecase, logger: sugar}
 }
 
-func SetupProfileRoutes(authenticator *authenticate.Authenticator, profileUsecase *usecaseProfile.ProfileUsecase, logger *zap.SugaredLogger) http.Handler {
+func SetupProfileRoutes(authenticator *authenticate.Authenticator, profileUsecase *usecaseProfile.ProfileUsecase, sugar *zap.SugaredLogger) http.Handler {
 	muxRouter := mux.NewRouter()
-	profileController := NewProfileController(profileUsecase, logger)
+	profileController := NewProfileController(profileUsecase, sugar)
 
-	muxRouter.Handle("/api/v1/profile/my", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(profileController.GetProfileHandler)))
-	muxRouter.Handle("/api/v1/profile/edit", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(profileController.EditProfileHandler)))
+	muxRouter.Handle("/api/v1/profile/my", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(profileController.GetProfileHandler))))
+	muxRouter.Handle("/api/v1/profile/edit", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(profileController.EditProfileHandler))))
 
 	return muxRouter
 }

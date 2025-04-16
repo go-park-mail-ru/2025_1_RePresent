@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	usecaseAuth "retarget/internal/auth-service/usecase/auth"
+	logger "retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
@@ -20,14 +21,14 @@ func SetupAuthRoutes(authenticator *authenticate.Authenticator, authUsecase *use
 	muxRouter := mux.NewRouter()
 	authController := NewAuthController(authUsecase)
 
-	muxRouter.Handle("/api/v1/auth/me", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler)))
-	muxRouter.Handle("/api/v1/auth/logout", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler)))
+	muxRouter.Handle("/api/v1/auth/me", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler))))
+	muxRouter.Handle("/api/v1/auth/logout", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler))))
 
-	muxRouter.HandleFunc("/api/v1/auth/login", authController.LoginHandler)
+	muxRouter.Handle("/api/v1/auth/login", logger.LogMiddleware(http.HandlerFunc(authController.LoginHandler)))
 	// muxRouter.HandleFunc("/api/v1/auth/login/mail", authController.LoginConfirmHandler)
 
-	muxRouter.HandleFunc("/api/v1/auth/signup", authController.RegisterHandler)
-	muxRouter.HandleFunc("/api/v1/auth/signup/mail", authController.RegisterConfirmHandler)
+	muxRouter.Handle("/api/v1/auth/signup", logger.LogMiddleware(http.HandlerFunc(authController.RegisterHandler)))
+	muxRouter.Handle("/api/v1/auth/signup/mail", logger.LogMiddleware(http.HandlerFunc(authController.RegisterConfirmHandler)))
 
 	// muxRouter.HandleFunc("/api/v1/auth/regain", authController.RegainHandler)
 	// muxRouter.HandleFunc("/api/v1/auth/regain/mail", authController.RegainConfirmHandler)

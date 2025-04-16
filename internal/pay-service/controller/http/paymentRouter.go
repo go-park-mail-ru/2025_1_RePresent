@@ -3,6 +3,7 @@ package payment
 import (
 	"net/http"
 	payment "retarget/internal/pay-service/usecase"
+	logger "retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
@@ -20,9 +21,9 @@ func SetupPaymentRoutes(authenticator *authenticate.Authenticator, PaymentUsecas
 	muxRouter := mux.NewRouter()
 	PaymentController := NewPaymentController(PaymentUsecase)
 	// middleware.AuthMiddleware(authUsecase)()
-	muxRouter.Handle("/api/v1/payment/balance", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetUserBalance)))
-	muxRouter.Handle("/api/v1/payment/accounts/topup", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.TopUpAccount)))
-	muxRouter.Handle("/api/v1/payment/transactions/{transactionid}", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetTransactionByID)))
+	muxRouter.Handle("/api/v1/payment/balance", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetUserBalance))))
+	muxRouter.Handle("/api/v1/payment/accounts/topup", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.TopUpAccount))))
+	muxRouter.Handle("/api/v1/payment/transactions/{transactionid}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetTransactionByID))))
 	//muxRouter.Handle("/api/v1/payment/transactions/{transactionid}/confirm", http.HandlerFunc(skibidi))
 
 	return muxRouter
