@@ -21,6 +21,7 @@ type IFrame struct {
 }
 
 func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	vars := mux.Vars(r)
@@ -32,7 +33,7 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	banner, err := h.BannerUsecase.GetBannerForIFrame(bannerID)
+	banner, err := h.BannerUsecase.GetBannerForIFrame(bannerID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
@@ -55,6 +56,7 @@ func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	vars := mux.Vars(r)
@@ -66,7 +68,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	banner, err := h.BannerUsecase.GetRandomBannerForIFrame(userID)
+	banner, err := h.BannerUsecase.GetRandomBannerForIFrame(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
