@@ -9,6 +9,7 @@ import (
 )
 
 func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
@@ -36,7 +37,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 		json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
 		return
 	}
-	err = c.profileUsecase.PutProfile(userID, profileRequest.Username, profileRequest.Description)
+	err = c.profileUsecase.PutProfile(userID, profileRequest.Username, profileRequest.Description, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))

@@ -52,7 +52,7 @@ func (r *AvatarRepository) createBacket(bucketName string) error {
 	return nil
 }
 
-func (r *AvatarRepository) DownloadFile(objectName string) (*minio.Object, error) {
+func (r *AvatarRepository) DownloadFile(objectName string, requestID string) (*minio.Object, error) {
 	object, err := r.minioClient.GetObject(context.Background(), r.bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
 		if errResp, ok := err.(minio.ErrorResponse); ok && errResp.Code == "NoSuchKey" {
@@ -63,7 +63,7 @@ func (r *AvatarRepository) DownloadFile(objectName string) (*minio.Object, error
 	return object, nil
 }
 
-func (r *AvatarRepository) UploadFile(objectName string, file multipart.File) error {
+func (r *AvatarRepository) UploadFile(objectName string, file multipart.File, requestID string) error {
 	/*
 		_, err := r.minioClient.StatObject(context.Background(), r.bucketName, objectName, minio.StatObjectOptions{})
 		if err != nil {

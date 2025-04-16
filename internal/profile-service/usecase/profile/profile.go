@@ -8,8 +8,8 @@ import (
 )
 
 type ProfileUsecaseInterface interface {
-	GetProfile(userID int) (*entityProfile.ProfileResponse, error)
-	PutProfile(userID int, username, description string) error
+	GetProfile(userID int, requestID string) (*entityProfile.ProfileResponse, error)
+	PutProfile(userID int, username, description string, requestID string) error
 }
 
 type ProfileUsecase struct {
@@ -20,16 +20,16 @@ func NewProfileUsecase(profileRepo *repoProfile.ProfileRepository) *ProfileUseca
 	return &ProfileUsecase{profileRepository: profileRepo}
 }
 
-func (r *ProfileUsecase) PutProfile(userID int, username, description string) error {
-	err := r.profileRepository.UpdateProfileByID(userID, username, description)
+func (r *ProfileUsecase) PutProfile(userID int, username, description string, requestID string) error {
+	err := r.profileRepository.UpdateProfileByID(userID, username, description, requestID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *ProfileUsecase) GetProfile(userID int) (*entityProfile.ProfileResponse, error) {
-	profile, err := r.profileRepository.GetProfileByID(userID)
+func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfile.ProfileResponse, error) {
+	profile, err := r.profileRepository.GetProfileByID(userID, requestID)
 	if err != nil {
 		if errors.Is(err, entityProfile.ErrProfileNotFound) {
 			return nil, nil

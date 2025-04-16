@@ -12,8 +12,8 @@ import (
 )
 
 type ProfileRepositoryInterface interface {
-	UpdateProfileByID(userID int, username, description string) error
-	GetProfileByID(userID int) (*entityProfile.Profile, error)
+	UpdateProfileByID(userID int, username, description string, requestID string) error
+	GetProfileByID(userID int, requestID string) (*entityProfile.Profile, error)
 	CloseConnection() error
 }
 
@@ -33,7 +33,7 @@ func NewProfileRepository(endPoint string, logger *zap.SugaredLogger) *ProfileRe
 	return profileRepo
 }
 
-func (r *ProfileRepository) UpdateProfileByID(userID int, username, description string) error {
+func (r *ProfileRepository) UpdateProfileByID(userID int, username, description string, requestID string) error {
 	query := "UPDATE auth_user SET username = $1, description = $2 WHERE id = $3"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "query", query, "userID", userID)
 	startTime := time.Now()
@@ -47,7 +47,7 @@ func (r *ProfileRepository) UpdateProfileByID(userID int, username, description 
 	return nil
 }
 
-func (r *ProfileRepository) GetProfileByID(userID int) (*entityProfile.Profile, error) {
+func (r *ProfileRepository) GetProfileByID(userID int, requestID string) (*entityProfile.Profile, error) {
 	query := "SELECT id, username, email, description, balance, role FROM auth_user WHERE id = $1"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "query", query, "userID", userID)
 	var profile entityProfile.Profile
