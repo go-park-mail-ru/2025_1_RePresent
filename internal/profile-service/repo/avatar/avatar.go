@@ -5,9 +5,11 @@ import (
 	"errors"
 	"log"
 	"mime/multipart"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"go.uber.org/zap"
 )
 
 type AvatarRepositoryInterface interface {
@@ -20,9 +22,10 @@ type AvatarRepositoryInterface interface {
 type AvatarRepository struct {
 	minioClient *minio.Client
 	bucketName  string
+	logger      *zap.SugaredLogger
 }
 
-func NewAvatarRepository(endpoint, accessKeyID, secretAccessKey, token string, useSSL bool, bucketName string) *AvatarRepository {
+func NewAvatarRepository(endpoint, accessKeyID, secretAccessKey, token string, useSSL bool, bucketName string, logger *zap.SugaredLogger) *AvatarRepository {
 	avatarRepo := &AvatarRepository{bucketName: bucketName}
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, token),
@@ -37,7 +40,7 @@ func NewAvatarRepository(endpoint, accessKeyID, secretAccessKey, token string, u
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	avatarRepo.logger = logger
 	return avatarRepo
 }
 
@@ -86,10 +89,28 @@ func (r *AvatarRepository) UploadFile(objectName string, file multipart.File, re
 
 		return nil
 	*/
+	startTime := time.Now()
+	r.logger.Debugw("Put avatar in storage",
+		"request_id", requestID,
+		"bucket", r.bucketName,
+		"object", objectName,
+	)
 	_, err := r.minioClient.PutObject(context.Background(), r.bucketName, objectName, file, -1, minio.PutObjectOptions{})
 	if err != nil {
+		r.logger.Debugw("MINIO Put failed",
+			"request_id", requestID,
+			"bucket", r.bucketName,
+			"object", objectName,
+			"error", err.Error(),
+			"timeTakenMs", time.Since(startTime).Milliseconds(),
+		)
 		return err
 	}
-
+	r.logger.Debugw("MINIO Put success",
+		"request_id", requestID,
+		"bucket", r.bucketName,
+		"object", objectName,
+		"timeTakenMs", time.Since(startTime).Milliseconds(),
+	)
 	return nil
 }

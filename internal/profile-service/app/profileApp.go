@@ -29,7 +29,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 			log.Println(err)
 		}
 	}()
-	avatarRepository := repoAvatar.NewAvatarRepository(cfg.Minio.EndPoint, cfg.Minio.AccessKeyID, cfg.Minio.SecretAccesKey, cfg.Minio.Token, false, "avatar")
+	avatarRepository := repoAvatar.NewAvatarRepository(cfg.Minio.EndPoint, cfg.Minio.AccessKeyID, cfg.Minio.SecretAccesKey, cfg.Minio.Token, false, "avatar", logger)
 	profileUsecase := usecaseProfile.NewProfileUsecase(profileRepository)
 	avatarUsecase := usecaseAvatar.NewAvatarUsecase(avatarRepository)
 

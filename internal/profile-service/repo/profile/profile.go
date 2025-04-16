@@ -35,21 +35,21 @@ func NewProfileRepository(endPoint string, logger *zap.SugaredLogger) *ProfileRe
 
 func (r *ProfileRepository) UpdateProfileByID(userID int, username, description string, requestID string) error {
 	query := "UPDATE auth_user SET username = $1, description = $2 WHERE id = $3"
-	r.logger.Debugw("Executing SQL query GetProfileByID", "query", query, "userID", userID)
+	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", userID)
 	startTime := time.Now()
 	_, err := r.db.Exec(query, username, description, userID)
 	duration := time.Since(startTime)
 	if err != nil {
-		r.logger.Infow("SQL Error", "userID", userID, "duration", duration)
+		r.logger.Infow("SQL Error", "request_id", requestID, "userID", userID, "duration", duration)
 		return err
 	}
-	r.logger.Infow("SQL query executed successfully", "userID", userID, "duration", duration)
+	r.logger.Infow("SQL query executed successfully", "request_id", requestID, "userID", userID, "duration", duration)
 	return nil
 }
 
 func (r *ProfileRepository) GetProfileByID(userID int, requestID string) (*entityProfile.Profile, error) {
 	query := "SELECT id, username, email, description, balance, role FROM auth_user WHERE id = $1"
-	r.logger.Debugw("Executing SQL query GetProfileByID", "query", query, "userID", userID)
+	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", userID)
 	var profile entityProfile.Profile
 	startTime := time.Now()
 	err := r.db.QueryRow(query,
@@ -57,13 +57,13 @@ func (r *ProfileRepository) GetProfileByID(userID int, requestID string) (*entit
 	duration := time.Since(startTime)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			r.logger.Infow("Profile not found", "userID", userID, "duration", duration)
+			r.logger.Infow("Profile not found", "request_id", requestID, "userID", userID, "duration", duration)
 			return nil, entityProfile.ErrProfileNotFound
 		}
-		r.logger.Infow("SQL Error", "userID", userID, "duration", duration)
+		r.logger.Infow("SQL Error", "request_id", requestID, "userID", userID, "duration", duration)
 		return nil, err
 	}
-	r.logger.Infow("SQL query executed successfully", "userID", userID, "duration", duration)
+	r.logger.Infow("SQL query executed successfully", "request_id", requestID, "userID", userID, "duration", duration)
 	return &profile, nil
 }
 
