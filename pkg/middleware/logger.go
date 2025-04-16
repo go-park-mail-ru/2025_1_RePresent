@@ -7,14 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"retarget/pkg/entity"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 var logger *logrus.Logger
-
-type ctxKeyRequestID struct{}
 
 type responseWriter struct {
 	http.ResponseWriter
@@ -56,7 +55,7 @@ func LogMiddleware(next http.Handler) http.Handler {
 		var written bool
 		mw := &responseWriter{w, &written, 0}
 		requestID := generateRequestId()
-		ctx := context.WithValue(r.Context(), ctxKeyRequestID{}, requestID)
+		ctx := context.WithValue(r.Context(), entity.СtxKeyRequestID{}, requestID)
 		r = r.WithContext(ctx)
 
 		defer func() {
