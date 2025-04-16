@@ -11,9 +11,11 @@ import (
 	usecaseAuth "retarget/internal/auth-service/usecase/auth"
 	authenticate "retarget/pkg/middleware/auth"
 	"time"
+
+	"go.uber.org/zap"
 )
 
-func Run(cfg *configs.Config) {
+func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	authenticator, err := authenticate.NewAuthenticator(cfg.AuthRedis.EndPoint, cfg.AuthRedis.Password, cfg.AuthRedis.Database)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -23,7 +25,7 @@ func Run(cfg *configs.Config) {
 		cfg.AuthRedis.EndPoint,
 		cfg.AuthRedis.Password,
 		cfg.AuthRedis.Database,
-		30*time.Minute,
+		24*time.Hour,
 	)
 	defer func() {
 		if err := sessionRepository.CloseConnection(); err != nil {
@@ -31,8 +33,7 @@ func Run(cfg *configs.Config) {
 		}
 	}()
 
-	// userRepository := repoAuth.NewAuthRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode)
-	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString())
+	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString(), logger)
 	defer func() {
 		if err := userRepository.CloseConnection(); err != nil {
 			log.Println(err)

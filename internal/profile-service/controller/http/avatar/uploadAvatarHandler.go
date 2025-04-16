@@ -74,6 +74,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload avatar"))
+		c.logger.Errorw("Failed to upload avatar", "err", err)
 		return
 	}
 
