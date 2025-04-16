@@ -47,7 +47,7 @@ func NewPaymentRepository(username, password, dbname, host string, port int, ssl
 	return paymentRepo
 }
 
-func (r *PaymentRepository) GetBalanceByUserId(id int) (float64, error) {
+func (r *PaymentRepository) GetBalanceByUserId(id int, requestID string) (float64, error) {
 	startTime := time.Now()
 	query := "SELECT balance FROM auth_user WHERE id = $1"
 
@@ -75,6 +75,7 @@ func (r *PaymentRepository) GetBalanceByUserId(id int) (float64, error) {
 		return 0, fmt.Errorf("error getting balance: %w", err)
 	default:
 		r.logger.Debugw("Balance retrieved successfully",
+			"request_id", requestID,
 			"userID", id,
 			"balance", balance,
 			"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -83,7 +84,7 @@ func (r *PaymentRepository) GetBalanceByUserId(id int) (float64, error) {
 	}
 }
 
-func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, error) {
+func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID string) (float64, error) {
 	startTime := time.Now()
 	query := `
         UPDATE auth_user 
@@ -120,6 +121,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, 
 	}
 
 	r.logger.Debugw("Balance updated successfully",
+		"request_id", requestID,
 		"userID", userID,
 		"newBalance", newBalance,
 		"timeTakenMs", time.Since(startTime).Milliseconds(),
@@ -128,7 +130,7 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, 
 	return newBalance, nil
 }
 
-func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction) error {
+func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction, requestID string) error {
 	query := `
         INSERT INTO transaction
             (transaction_id, user_id, amount, type, status, created_at)
@@ -141,7 +143,7 @@ func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction) error {
 	return err
 }
 
-func (r *PaymentRepository) TopUpAccount(userID int, amount int64) error {
+func (r *PaymentRepository) TopUpAccount(userID int, amount int64, requestID string) error {
 	transactionID := uuid.New().String()
 
 	return r.CreateTransaction(&entity.Transaction{
@@ -151,10 +153,10 @@ func (r *PaymentRepository) TopUpAccount(userID int, amount int64) error {
 		Type:          "topup",
 		Status:        "completed",
 		CreatedAt:     time.Now(),
-	})
+	}, requestID)
 }
 
-func (r *PaymentRepository) GetLastTransaction(userID int) (*entity.Transaction, error) {
+func (r *PaymentRepository) GetLastTransaction(userID int, requestID string) (*entity.Transaction, error) {
 	var tx entity.Transaction
 
 	err := r.db.QueryRow(
@@ -169,7 +171,7 @@ func (r *PaymentRepository) GetLastTransaction(userID int) (*entity.Transaction,
 	return &tx, nil
 }
 
-func (r *PaymentRepository) GetTransactionByID(transactionID string) (*entity.Transaction, error) {
+func (r *PaymentRepository) GetTransactionByID(transactionID string, requestID string) (*entity.Transaction, error) {
 	var tx entity.Transaction
 
 	err := r.db.QueryRow(
