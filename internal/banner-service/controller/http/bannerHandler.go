@@ -13,7 +13,7 @@ import (
 
 type CreateUpdateBannerRequest struct {
 	Title       string `json:"title" validate:"required,min=3,max=30"`
-	Description string `json:"description" validate:"required,max=100"`
+	Description string `json:"description" validate:"max=100"`
 	Content     string `json:"content" validate:"required,len=32"`
 	Link        string `json:"link" validate:"required,max=100"`
 	Status      int    `json:"status"`
