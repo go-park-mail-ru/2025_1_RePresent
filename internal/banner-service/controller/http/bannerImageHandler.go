@@ -92,7 +92,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Read(buf)
 	if err != nil && err != io.EOF {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read avatar: "+err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
 		return
 	}
 

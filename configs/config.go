@@ -30,10 +30,19 @@ type AuthRedisConfig struct {
 	Database int    `yaml:"DB_NUMBER"`
 }
 
+type MinioConfig struct {
+	EndPoint       string `yaml:"ENDPOINT"`
+	AccessKeyID    string `yaml:"ACCESS_KEY_ID"`
+	SecretAccesKey string `yaml:"SECRET_ACCESS_KEY"`
+	Token          string `yaml:"TOKEN"`
+	UseSSL         string `yaml:"USE_SSL"`
+}
+
 type Config struct {
 	Database  DatabaseConfig  `yaml:"database"`
 	Email     MailConfig      `yaml:"smtp_server"`
 	AuthRedis AuthRedisConfig `yaml:"auth_redis"`
+	Minio     MinioConfig     `yaml:"object_storage"`
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -41,6 +50,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Database  DatabaseConfig  `yaml:"database"`
 		Email     MailConfig      `yaml:"smtp_server"`
 		AuthRedis AuthRedisConfig `yaml:"auth_redis"`
+		Minio     MinioConfig     `yaml:"object_storage"`
 	}
 	if err := unmarshal(&aux); err != nil {
 		return err
@@ -48,6 +58,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Database = aux.Database
 	c.Email = aux.Email
 	c.AuthRedis = aux.AuthRedis
+	c.Minio = aux.Minio
 	return nil
 }
 func LoadConfigs(paths ...string) (*Config, error) {
