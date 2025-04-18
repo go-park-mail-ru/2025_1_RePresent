@@ -1,0 +1,444 @@
+openapi: 3.0.0
+
+info:
+
+  title: Advertising Payment Service API
+
+  version: 1.0.0
+
+  description: |
+
+    Микросервис для управления платежами и балансом в рекламной платформе.
+
+    Основные функции:
+
+    - Пополнение баланса счета
+
+    - Проведение платежей за рекламные кампании
+
+    - Отслеживание статуса транзакций
+
+    - Возврат средств
+
+  contact:
+
+    name: Техническая поддержка
+
+    email: payments-support@represent-team.ru
+
+  license:
+
+    name: Proprietary
+
+
+servers:
+
+  - url: http://localhost:8080
+
+
+tags:
+
+  - name: Account
+
+    description: Управление балансом счета
+
+  - name: Transactions
+
+    description: Операции с платежами и транзакциями
+
+
+paths:
+
+  /accounts/{accountId}/balance:
+
+    get:
+
+      tags: [ Account ]
+
+      summary: Получение текущего баланса
+
+      description: Возвращает текущий баланс и валюту счета
+
+      parameters:
+
+        - $ref: '#/components/parameters/accountId'
+
+      responses:
+
+        '200':
+
+          description: Успешное получение баланса
+
+          content:
+
+            application/json:
+
+              schema:
+
+                $ref: '#/components/schemas/Balance'
+
+        '404':
+
+          $ref: '#/components/responses/NotFound'
+
+        '401':
+
+          $ref: '#/components/responses/Unauthorized'
+
+
+  /accounts/{accountId}/topup:
+
+    post:
+
+      tags: [ Account ]
+
+      summary: Пополнение баланса
+
+      description: Создание запроса на пополнение счета
+
+      parameters:
+
+        - $ref: '#/components/parameters/accountId'
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              $ref: '#/components/schemas/TopUpRequest'
+
+      responses:
+
+        '202':
+
+          description: Запрос на пополнение принят
+
+          content:
+
+            application/json:
+
+              schema:
+
+                $ref: '#/components/schemas/Transaction'
+
+        '400':
+
+          $ref: '#/components/responses/BadRequest'
+
+        '401':
+
+          $ref: '#/components/responses/Unauthorized'
+
+
+  /transactions/{transactionId}:
+
+    get:
+
+      tags: [ Transactions ]
+
+      summary: Статус транзакции
+
+      description: Получение текущего статуса платежа/пополнения
+
+      parameters:
+
+        - $ref: '#/components/parameters/transactionId'
+
+      responses:
+
+        '200':
+
+          description: Информация о транзакции
+
+          content:
+
+            application/json:
+
+              schema:
+
+                $ref: '#/components/schemas/TransactionDetails'
+
+        '404':
+
+          $ref: '#/components/responses/NotFound'
+
+
+  /transactions/{transactionId}/confirm:
+
+    post:
+
+      tags: [ Transactions ]
+
+      summary: Подтверждение платежа
+
+      description: Подтверждение успешной оплаты от платежного шлюза
+
+      parameters:
+
+        - $ref: '#/components/parameters/transactionId'
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              $ref: '#/components/schemas/PaymentConfirmation'
+
+      responses:
+
+        '200':
+
+          description: Платеж подтвержден
+
+          content:
+
+            application/json:
+
+              schema:
+
+                $ref: '#/components/schemas/TransactionDetails'
+
+        '400':
+
+          $ref: '#/components/responses/BadRequest'
+
+
+components:
+
+  schemas:
+
+    Balance:
+
+      type: object
+
+      properties:
+
+        accountId:
+
+          type: string
+
+          example: "ABC123"
+
+        amount:
+
+          type: number
+
+          format: float
+
+          example: 1500.50
+
+
+    TopUpRequest:
+
+      type: object
+
+      required: [ amount, paymentMethod ]
+
+      properties:
+
+        amount:
+
+          type: number
+
+          minimum: 1
+
+          example: 1000.00
+
+        paymentMethod:
+
+          type: string
+
+          enum: [ credit_card, bank_transfer, e-wallet ]
+
+          example: credit_card
+
+
+    Transaction:
+
+      type: object
+
+      properties:
+
+        transactionId:
+
+          type: string
+
+          example: "9A8B7C6D"
+
+        status:
+
+          type: string
+
+          enum: [ pending, processing, completed, failed ]
+
+          example: pending
+
+        nextAction:
+
+          type: string
+
+          example: "redirect_to_payment_gateway"
+
+
+    TransactionDetails:
+
+      allOf:
+
+        - $ref: '#/components/schemas/Transaction'
+
+        - type: object
+
+          properties:
+
+            amount:
+
+              type: number
+
+              example: 1000.00
+
+            timestamp:
+
+              type: string
+
+              format: date-time
+
+              example: "2000-01-20T14:30:00Z"
+
+            paymentMethod:
+
+              type: string
+
+              example: credit_card
+
+
+    PaymentConfirmation:
+
+      type: object
+
+      required: [ gatewayTransactionId ]
+
+      properties:
+
+        gatewayTransactionId:
+
+          type: string
+
+          example: "GATEWAY1"
+
+        confirmedAmount:
+
+          type: number
+
+          example: 1000.00
+
+
+  parameters:
+
+    accountId:
+
+      name: accountId
+
+      in: path
+
+      required: true
+
+      schema:
+
+        type: string
+
+      description: Уникальный идентификатор аккаунта
+
+      example: "ABC123"
+
+
+    transactionId:
+
+      name: transactionId
+
+      in: path
+
+      required: true
+
+      schema:
+
+        type: string
+
+      description: Идентификатор транзакции
+
+      example: "9A8B7C6D"
+
+
+  responses:
+
+    BadRequest:
+
+      description: Невалидный запрос
+
+      content:
+
+        application/json:
+
+          schema:
+
+            type: object
+
+            properties:
+
+              error:
+
+                type: string
+
+                example: "Invalid amount value"
+
+
+    Unauthorized:
+
+      description: Требуется аутентификация
+
+      headers:
+
+        WWW-Authenticate:
+
+          schema:
+
+            type: string
+
+            example: Bearer
+
+
+    NotFound:
+
+      description: Ресурс не найден
+
+      content:
+
+        application/json:
+
+          schema:
+
+            type: object
+
+            properties:
+
+              error:
+
+                type: string
+
+                example: "Account not found"
+
+
+  securitySchemes:
+
+    BearerAuth:
+
+      type: http

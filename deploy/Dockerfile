@@ -1,49 +1,77 @@
+# ===================================
+# Этап 1: Общие зависимости
+# ===================================
 FROM golang:1.24 AS deps
-
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-FROM golang:1.24 AS builder
+# ===================================
+# Этап 2: Сборка сервисов (каждый в своем этапе)
+# ===================================
 
-WORKDIR /app
-
-COPY --from=deps /go/pkg /go/pkg
-COPY . .
-
+# ---- Auth Service ----
+FROM deps AS auth-builder
+COPY cmd/auth-service ./cmd/auth-service
+COPY internal/auth-service ./internal/auth-service
+COPY pkg ./pkg
+COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/auth-service ./cmd/auth-service
+
+# ---- Banner Service ----
+FROM deps AS banner-builder
+COPY cmd/banner-service ./cmd/banner-service
+COPY internal/banner-service ./internal/banner-service
+COPY pkg ./pkg
+COPY configs ./configs
+COPY internal/banner-service/templates ./internal/banner-service/templates
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/banner-service ./cmd/banner-service
+
+# ---- Profile Service ----
+FROM deps AS profile-builder
+COPY cmd/profile-service ./cmd/profile-service
+COPY internal/profile-service ./internal/profile-service
+COPY pkg ./pkg
+COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/profile-service
 
+# ---- pay Service ----
+FROM deps AS pay-builder
+COPY cmd/pay-service ./cmd/pay-service
+COPY internal/pay-service ./internal/pay-service
+COPY pkg ./pkg
+COPY configs ./configs
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/pay-service ./cmd/pay-service
 
 # ===================================
-# Этап 3: Минимальные образы для сервисов
+# Этап 3: Финальные образы
 # ===================================
 
-# ---- Service 1 ----
+# ---- Auth Service ----
 FROM alpine:latest AS auth-service
-
 WORKDIR /app
-COPY --from=builder /bin/auth-service ./auth-service
-COPY --from=builder /app/configs ./configs
-
+COPY --from=auth-builder /bin/auth-service ./
+COPY --from=auth-builder /app/configs ./configs
 ENTRYPOINT ["./auth-service"]
 
-# ---- Service 2 ----
+# ---- Banner Service ----
 FROM alpine:latest AS banner-service
-
 WORKDIR /app
-COPY --from=builder /bin/banner-service ./banner-service
-COPY --from=builder /app/configs ./configs
-COPY --from=builder /app/internal/banner-service/templates ./templates
-
+COPY --from=banner-builder /bin/banner-service ./
+COPY --from=banner-builder /app/configs ./configs
+COPY --from=banner-builder /app/internal/banner-service/templates ./templates
 ENTRYPOINT ["./banner-service"]
 
-# ---- Service 3 ----
+# ---- Profile Service ----
 FROM alpine:latest AS profile-service
-
 WORKDIR /app
-COPY --from=builder /bin/profile-service ./profile-service
-COPY --from=builder /app/configs ./configs
-
+COPY --from=profile-builder /bin/profile-service ./
+COPY --from=profile-builder /app/configs ./configs
 ENTRYPOINT ["./profile-service"]
+
+# ---- pay Service ----
+FROM alpine:latest AS pay-service
+WORKDIR /app
+COPY --from=pay-builder /bin/pay-service ./
+COPY --from=pay-builder /app/configs ./configs
+ENTRYPOINT ["./pay-service"]
