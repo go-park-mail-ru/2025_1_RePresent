@@ -68,16 +68,11 @@
       display: block;
     }
 
-    .card-body h2 {
-      font-size: 18px;
-      margin: 8px 0;
-      line-height: 1.2;
-    }
-
+    .card-body h2,
     .card-body p {
-      font-size: 16px;
-      margin: 8px 0;
-      font-weight: bold;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .card-footer {
