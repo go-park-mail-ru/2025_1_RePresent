@@ -109,7 +109,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		Content:     req.Content,
 		Link:        req.Link,
 		Balance:     0,
-		Status:      0,
+		Status:      req.Status,
 	}
 
 	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner, requestID); err != nil {
