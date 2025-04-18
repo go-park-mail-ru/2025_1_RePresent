@@ -15,7 +15,7 @@ func ValidateUser(user *User) error {
 
 type User struct {
 	ID          int    `json:"id"`
-	Username    string `json:"username" validate:"required,min=3,max=20"`
+	Username    string `json:"username" validate:"required,min=3,max=30"`
 	Email       string `json:"email" validate:"email,required"`
 	Password    []byte `json:"password" validate:"required,min=8"`
 	Description string `json:"description"`
