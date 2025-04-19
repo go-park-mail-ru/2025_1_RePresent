@@ -31,7 +31,7 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 	banners, err := h.BannerUsecase.GetBannersByUserID(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "+err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "))
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 
 	if err := json.NewEncoder(w).Encode(banners); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Error encoding banners: "+err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error encoding banners: "))
 	}
 }
 
@@ -74,7 +74,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(banner); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.NewResponse(true, "error encoding banners: "+err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "error encoding banners"))
 	}
 }
 
@@ -84,7 +84,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error with JSON"))
 		return
 	}
 
@@ -114,7 +114,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 
 	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner, requestID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Create Banner Error"))
 		return
 	}
 

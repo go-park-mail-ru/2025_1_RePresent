@@ -25,13 +25,13 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
-	errors, err := validator.ValidateStruct(req)
+	_, err = validator.ValidateStruct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, errors))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
 
@@ -39,14 +39,14 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Login error"))
 		return
 	}
 
 	session, err := c.authUsecase.AddSession(user.ID, user.Role)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Sessions error"))
 		return
 	}
 

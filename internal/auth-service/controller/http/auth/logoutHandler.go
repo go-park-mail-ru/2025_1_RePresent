@@ -23,7 +23,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad cookie"))
 		return
 	}
 
@@ -42,7 +42,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = c.authUsecase.Logout(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad cookie"))
 		return
 	}
 

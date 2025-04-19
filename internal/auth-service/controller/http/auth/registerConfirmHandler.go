@@ -22,14 +22,14 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
 
-	validate_errors, err := validator.ValidateStruct(req)
+	_, err = validator.ValidateStruct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
 	// GetUserByEmail, если нет то отправляем код

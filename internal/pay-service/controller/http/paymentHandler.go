@@ -42,7 +42,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(entity.NewResponse(
 			true,
-			"Error fetching balance: "+err.Error(),
+			"Error fetching balance",
 		))
 		return
 	}
@@ -58,7 +58,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(
 			true,
-			"Error encoding response: "+err.Error(),
+			"Error encoding response",
 		))
 	}
 }
@@ -95,7 +95,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	if err = h.PaymentUsecase.TopUpBalance(userID, req.Amount, requestID); err != nil {
 		// handleTopUpError(w, err)
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
 
@@ -125,7 +125,7 @@ func handleTopUpError(w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(
 			true,
-			"Internal Server Error: "+err.Error(),
+			"Internal Server Error",
 		))
 	}
 }
@@ -137,7 +137,7 @@ func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Re
 	tx, err := h.PaymentUsecase.GetTransactionByID(transactionID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Server Error"))
 		return
 	}
 

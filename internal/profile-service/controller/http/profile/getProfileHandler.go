@@ -31,7 +31,7 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad JSON"))
 		return
 	}
 

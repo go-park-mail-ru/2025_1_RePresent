@@ -71,7 +71,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 	banner, err := h.BannerUsecase.GetRandomBannerForIFrame(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error get banner"))
 		return
 	}
 	url, err := h.LinkBuilder.BannerImageURL(banner.Content)

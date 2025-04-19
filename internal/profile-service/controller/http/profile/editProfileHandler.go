@@ -40,7 +40,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	err = c.profileUsecase.PutProfile(userID, profileRequest.Username, profileRequest.Description, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Server Error"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)

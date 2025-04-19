@@ -27,7 +27,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
 
@@ -43,14 +43,14 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, 1, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Wrong JSON"))
 		return
 	}
 
 	session, err := c.authUsecase.AddSession(user.ID, 1)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Session Error"))
 		return
 	}
 
