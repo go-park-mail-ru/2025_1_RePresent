@@ -114,6 +114,20 @@ services:
     networks:
       - api_network
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ReTargetGrafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_HTTP_ADDR=0.0.0.0
+      - GF_SERVER_DOMAIN=localhost
+    networks:
+      - api_network
+    restart: unless-stopped
+
 volumes:
   pg_data:
 
