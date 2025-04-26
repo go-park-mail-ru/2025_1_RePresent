@@ -114,8 +114,23 @@ services:
     networks:
       - api_network
 
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123"
+      - "9123:9123"
+
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_USER: user
+      CLICKHOUSE_PASSWORD: 123456
+      CLICKHOUSE_DB: csat
+
 volumes:
   pg_data:
+  clickhouse_data:
 
 networks:
   api_network:
