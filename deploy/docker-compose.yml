@@ -119,7 +119,7 @@ services:
       context: ../
       dockerfile: deploy/Dockerfile
       target: csat-service
-    container_name: ReTargetApiCSAT
+    container_name: ReTargetApiCsat
     ports:
       - "8035:8035"
     depends_on:
