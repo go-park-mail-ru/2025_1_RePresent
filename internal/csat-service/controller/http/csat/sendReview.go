@@ -3,7 +3,6 @@ package csat
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	entity "retarget/internal/csat-service/entity/csat"
 	response "retarget/pkg/entity"
@@ -42,12 +41,12 @@ func (c *CsatController) SendReview(w http.ResponseWriter, r *http.Request) {
 	userID := userSession.UserID
 
 	review := entity.Review{
-		UserID:    userID,
-		Question:  req.Question,
-		Rating:    req.Rating,
-		Comment:   req.Comment,
-		Page:      req.Page,
-		CreatedAt: time.Now(),
+		UserID:   userID,
+		Question: req.Question,
+		Rating:   req.Rating,
+		Comment:  req.Comment,
+		Page:     req.Page,
+		// CreatedAt: time.Now(),
 	}
 
 	if err := c.csatUsecase.CreateReview(review); err != nil {

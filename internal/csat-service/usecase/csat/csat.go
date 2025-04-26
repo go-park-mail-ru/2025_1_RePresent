@@ -34,7 +34,7 @@ func (a *CsatUsecase) GetQuestionByPage(page string) (string, error) {
 func (a *CsatUsecase) CreateReview(review entity.Review) error {
 	err := a.csatRepository.AddReview(review)
 	if err != nil {
-		return fmt.Errorf("Error add review")
+		return err
 	}
 	return nil
 }
