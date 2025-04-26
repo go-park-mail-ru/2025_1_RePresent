@@ -133,8 +133,8 @@ services:
     image: yandex/clickhouse-server:latest
     container_name: ReTargetClickHouse
     ports:
-      - "8123:8123"  # HTTP
-      - "9000:9000"  # TCP
+      - "8124:8124"  # HTTP
+      - "9124:9124"  # TCP
 
     volumes:
       - ./requests/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
