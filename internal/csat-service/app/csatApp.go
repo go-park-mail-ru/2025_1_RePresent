@@ -17,7 +17,7 @@ func Run(cfg *configs.Config) {
 		log.Fatal(err.Error())
 	}
 
-	dsn := "clickhouse://ReTargetClickHouse:9000?username=user&password=123456&database=csat"
+	dsn := "clickhouse://user:123456@ReTargetClickHouse:9000/csat"
 	csatRepository := repoCsat.NewCsatRepository(dsn)
 	defer func() {
 		if err := csatRepository.CloseConnection(); err != nil {
