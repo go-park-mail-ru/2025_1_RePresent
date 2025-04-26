@@ -27,5 +27,5 @@ func (c *CsatController) ShowQuestionByPageID(w http.ResponseWriter, r *http.Req
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response.NewResponseWithBody(false, "Error of authenticator", question))
+	json.NewEncoder(w).Encode(response.NewResponseWithBody(false, "Success send", question))
 }
