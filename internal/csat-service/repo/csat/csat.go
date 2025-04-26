@@ -160,30 +160,27 @@ func (r *CsatRepository) GetReviewsByUser(userID int) ([]csatEntity.Review, erro
 }
 
 func (r *CsatRepository) GetQuestionsByPage(page string) ([]string, error) {
-	const query = `
-		SELECT DISTINCT question
-		FROM reviews
-		WHERE page = ?
-		ORDER BY question
-	`
-
-	rows, err := r.db.Query(query, page)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query questions: %w", err)
-	}
-	defer rows.Close()
-
-	var questions []string
-	for rows.Next() {
-		var question string
-		if err := rows.Scan(&question); err != nil {
-			return nil, fmt.Errorf("failed to scan question: %w", err)
-		}
-		questions = append(questions, question)
+	pageQuestions := map[string][]string{
+		"Profile": {
+			"Насколько вам удобно пользоваться профилем?",
+			"Достаточно ли информации отображается в вашем профиле?",
+			"Хотели бы вы видеть дополнительные функции в профиле?",
+		},
+		"BannerEditor": {
+			"Насколько удобен интерфейс редактора баннеров?",
+			"Достаточно ли функций предоставляет редактор?",
+			"Как часто вы используете редактор баннеров?",
+		},
+		"Auth": {
+			"Насколько удобен процесс авторизации?",
+			"Как вы оцениваете безопасность системы авторизации?",
+			"Хотели бы вы видеть дополнительные способы входа?",
+		},
 	}
 
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows iteration error: %w", err)
+	questions, exists := pageQuestions[page]
+	if !exists {
+		return nil, fmt.Errorf("unknown page: %s", page)
 	}
 
 	return questions, nil
