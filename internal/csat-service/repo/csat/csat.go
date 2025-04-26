@@ -3,13 +3,16 @@ package csat
 import (
 	"database/sql"
 	"log"
+	csatEntity "retarget/internal/csat-service/entity/csat"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 )
 
 type CsatRepositoryInterface interface {
-	AddReview()     // TODO
-	GetAllReviews() // TODO
+	AddReview(csatEntity.Review) error                         // TODO
+	GetAllReviews() ([]csatEntity.Review, error)               // TODO
+	GetReviewsByUser(user_id int) ([]csatEntity.Review, error) // TODO
+	GetReviewsByPage(page string) ([]csatEntity.Review, error) // TODO
 
 	CloseConnection() error
 }
@@ -31,3 +34,5 @@ func NewCsatRepository(dsn string) *CsatRepository {
 func (r *CsatRepository) CloseConnection() error {
 	return r.db.Close()
 }
+
+func (r *CsatRepository) AddReview(csatEntity.Review) (*authEntity.User, error) {}
