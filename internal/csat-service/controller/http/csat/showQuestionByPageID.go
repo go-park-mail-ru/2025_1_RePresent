@@ -16,6 +16,7 @@ func (c *CsatController) ShowQuestionByPageID(w http.ResponseWriter, r *http.Req
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		return
 	}
 	vars := mux.Vars(r)
 	pageID := vars["page_id"]
@@ -23,6 +24,7 @@ func (c *CsatController) ShowQuestionByPageID(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response.NewResponseWithBody(false, "Error of authenticator", question))
