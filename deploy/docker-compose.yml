@@ -134,7 +134,7 @@ services:
     image: grafana/grafana:latest
     container_name: ReTargetGrafana
     ports:
-      - "3000:3000"
+      - "3000:8050"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
