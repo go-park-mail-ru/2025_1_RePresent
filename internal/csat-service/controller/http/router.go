@@ -1,8 +1,8 @@
 package controller
 
 import (
-	handlerCsat "retarget/internal/csat-serivce/controller/http/csat"
-	usecaseCsat "retarget/internal/csat-serivce/usecase"
+	handlerCsat "retarget/internal/csat-service/controller/http/csat"
+	usecaseCsat "retarget/internal/csat-service/usecase/csat"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
