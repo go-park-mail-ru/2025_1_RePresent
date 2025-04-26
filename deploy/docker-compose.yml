@@ -72,6 +72,7 @@ services:
       - "8025:8025"
     depends_on:
       - postgresdb
+      - redis0
     networks:
       - retarget_network
 
@@ -85,6 +86,7 @@ services:
       - "8024:8024"
     depends_on:
       - postgresdb
+      - redis0
     networks:
       - retarget_network
 
@@ -98,6 +100,7 @@ services:
       - "8023:8023"
     depends_on:
       - postgresdb
+      - redis0
     networks:
       - retarget_network
 
@@ -111,6 +114,7 @@ services:
       - "8022:8022"
     depends_on:
       - postgresdb
+      - redis0
     networks:
       - retarget_network
 
@@ -123,8 +127,8 @@ services:
     ports:
       - "8035:8035"
     depends_on:
-      - redis0
       - clickhouse
+      - redis0
     networks:
       - retarget_network
 
@@ -158,6 +162,8 @@ services:
     restart: unless-stopped
     volumes:
       - grafana_data:/var/lib/grafana
+    depends_on:
+      - clickhouse
     networks:
       - retarget_network
 
