@@ -2,6 +2,7 @@ package csat
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	csatEntity "retarget/internal/csat-service/entity/csat"
 
@@ -9,10 +10,10 @@ import (
 )
 
 type CsatRepositoryInterface interface {
-	AddReview(csatEntity.Review) error                         // TODO
+	AddReview(review csatEntity.Review) error                  // TODO
 	GetAllReviews() ([]csatEntity.Review, error)               // TODO
 	GetReviewsByUser(user_id int) ([]csatEntity.Review, error) // TODO
-	GetReviewsByPage(page string) ([]csatEntity.Review, error) // TODO
+	GetQuestionsByPage(page string) ([]string, error)          // TODO
 
 	CloseConnection() error
 }
@@ -35,4 +36,35 @@ func (r *CsatRepository) CloseConnection() error {
 	return r.db.Close()
 }
 
-func (r *CsatRepository) AddReview(csatEntity.Review) (*authEntity.User, error) {}
+func (r *CsatRepository) AddReview(review csatEntity.Review) (*csatEntity.Review, error) {
+	query := `
+        INSERT INTO reviews (
+            question, 
+            page, 
+            comment, 
+            rating,
+            user_id,       // если есть в структуре
+            created_at     // если нужно
+        ) VALUES (?, ?, ?, ?, ?, ?)
+    `
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare query: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		review.Question,
+		review.Page,
+		review.Comment,
+		review.Rating,
+		review.User_id,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert review: %w", err)
+	}
+
+	return &review, nil
+}
