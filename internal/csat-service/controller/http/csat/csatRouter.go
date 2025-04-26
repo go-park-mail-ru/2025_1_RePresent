@@ -1,11 +1,12 @@
 package csat
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
-	csat "retarget/internal/csat-serivce/usecase"
+	csat "retarget/internal/csat-service/usecase/csat"
 	logger "retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
+
+	"github.com/gorilla/mux"
 )
 
 type CsatController struct {
@@ -20,8 +21,10 @@ func SetupCsatRoutes(authenticator *authenticate.Authenticator, csatUsecase *csa
 	muxRouter := mux.NewRouter()
 	csatController := NewCsatController(csatUsecase)
 
-	muxRouter.Handle("/api/v1/csat/show/{page_id:[0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowQuestionByPageID)))).Methods("GET")
+	muxRouter.Handle("/api/v1/csat/show/{page_id:[a-zA-Z0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowQuestionByPageID)))).Methods("GET")
 	muxRouter.Handle("/api/v1/csat/send", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.SendReview)))).Methods("POST")
+
+	// muxRouter.Handle("/api/v1/csat/send", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.SendReview)))).Methods("POST")
 
 	return muxRouter
 }
