@@ -22,6 +22,7 @@ func SetupCsatRoutes(authenticator *authenticate.Authenticator, csatUsecase *csa
 	csatController := NewCsatController(csatUsecase)
 
 	muxRouter.Handle("/api/v1/csat/show/{page_id:[a-zA-Z0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowQuestionByPageID)))).Methods("GET")
+	muxRouter.Handle("/api/v1/csat/show/{page_id:[a-zA-Z0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowReviewsByUserID)))).Methods("GET")
 	muxRouter.Handle("/api/v1/csat/send", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.SendReview)))).Methods("POST")
 
 	// TODO Аналитика
