@@ -128,7 +128,8 @@ services:
       CLICKHOUSE_USER: user
       CLICKHOUSE_PASSWORD: 123456
       CLICKHOUSE_DB: csat
-
+    networks:
+      - api_network
 
   grafana:
     image: grafana/grafana:latest
