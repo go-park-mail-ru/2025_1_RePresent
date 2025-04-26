@@ -24,6 +24,7 @@ func Run(cfg *configs.Config) {
 			log.Printf("error closing CSAT repository: %v", err)
 		}
 	}()
+	log.Printf("app")
 
 	csatUsecase := usecaseCsat.NewCsatUsecase(csatRepository)
 

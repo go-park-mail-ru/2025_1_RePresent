@@ -1,6 +1,7 @@
 package csat
 
 import (
+	"log"
 	"net/http"
 	csat "retarget/internal/csat-service/usecase/csat"
 	logger "retarget/pkg/middleware"
@@ -19,6 +20,7 @@ func NewCsatController(csatUsecase *csat.CsatUsecase) CsatController {
 
 func SetupCsatRoutes(authenticator *authenticate.Authenticator, csatUsecase *csat.CsatUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
+	log.Printf("Router2")
 	csatController := NewCsatController(csatUsecase)
 
 	muxRouter.Handle("/api/v1/csat/show/{page_id:[a-zA-Z0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowQuestionByPageID)))).Methods("GET")
