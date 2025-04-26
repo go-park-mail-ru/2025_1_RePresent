@@ -2,6 +2,7 @@ package csat
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	// "retarget/csat-service/entity"
@@ -9,6 +10,7 @@ import (
 )
 
 func (c *CsatController) ShowAllReviews(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Handler")
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
