@@ -9,7 +9,7 @@ import (
 	response "retarget/pkg/entity"
 )
 
-func (c *CsatController) ShowReviewsByUserID(w http.ResponseWriter, r *http.Request) {
+func (c *CsatController) ShowAllReviews(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Handler")
 	_, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
