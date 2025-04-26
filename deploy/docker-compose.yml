@@ -135,11 +135,14 @@ services:
     container_name: ReTargetGrafana
     ports:
       - "3000:3000"
+      - "3001:3001"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SERVER_HTTP_ADDR=0.0.0.0
+      - GF_SERVER_HTTP_ADDR=109.120.190.243
     restart: unless-stopped
+    networks:
+      - api_network
 
 volumes:
   pg_data:
