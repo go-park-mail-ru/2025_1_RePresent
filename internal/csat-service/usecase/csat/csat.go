@@ -42,6 +42,17 @@ func (a *CsatUsecase) GetReviewsByUser(userID int) ([]entity.Review, error) {
 	return nil, fmt.Errorf("Question not found")
 }
 
+func (a *CsatUsecase) GetAllReviews() ([]entity.Review, error) {
+	res, err := a.csatRepository.GetAllReviews()
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching reviews")
+	}
+	if len(res) > 0 {
+		return res, nil
+	}
+	return nil, fmt.Errorf("Question not found")
+}
+
 func (a *CsatUsecase) CreateReview(review entity.Review) error {
 	err := a.csatRepository.AddReview(review)
 	if err != nil {

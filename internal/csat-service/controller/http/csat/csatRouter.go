@@ -23,6 +23,7 @@ func SetupCsatRoutes(authenticator *authenticate.Authenticator, csatUsecase *csa
 
 	muxRouter.Handle("/api/v1/csat/show/{page_id:[a-zA-Z0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowQuestionByPageID)))).Methods("GET")
 	muxRouter.Handle("/api/v1/csat/my-reviews", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowReviewsByUserID)))).Methods("GET")
+	muxRouter.Handle("/api/v1/csat/reviews", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowAllReviews)))).Methods("GET")
 	muxRouter.Handle("/api/v1/csat/show/iframe/{page_id:[a-zA-Z0-9]+}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.ShowQuestionIFrameByPageID)))).Methods("GET")
 	muxRouter.Handle("/api/v1/csat/send", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(csatController.SendReview)))).Methods("POST")
 
