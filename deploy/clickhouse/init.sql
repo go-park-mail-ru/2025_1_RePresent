@@ -1,5 +1,6 @@
 CREATE TABLE reviews (
     id UUID DEFAULT generateUUIDv4(),
+    user_id INT,
     question text,
     page text,
     comment VARCHAR(200),
