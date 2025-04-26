@@ -87,6 +87,6 @@ ENTRYPOINT ["./pay-service"]
 # ---- CSAT Service ----
 FROM alpine:latest AS csat-service
 WORKDIR /app
-COPY --from=pay-builder /bin/csat-service ./
-COPY --from=pay-builder /app/configs ./configs
+COPY --from=csat-builder /bin/csat-service ./
+COPY --from=csat-builder /app/configs ./configs
 ENTRYPOINT ["./csat-service"]
