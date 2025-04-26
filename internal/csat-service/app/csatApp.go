@@ -17,7 +17,7 @@ func Run(cfg *configs.Config) {
 		log.Fatal(err.Error())
 	}
 
-	dsn := "tcp://127.0.0.1:9123?username=user&password=123456&database=csat"
+	dsn := "tcp://127.0.0.1:9124?username=user&password=123456&database=csat"
 	csatRepository := repoCsat.NewCsatRepository(dsn)
 
 	csatUsecase := usecaseCsat.NewCsatUsecase(csatRepository)
