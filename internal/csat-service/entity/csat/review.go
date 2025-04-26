@@ -1,9 +1,13 @@
 package csat
 
+import "time"
+
 type Review struct {
-	Page     string `json:"page_id" validate:"required"`
-	Question string `json:"question" validate:"required"`
-	Rating   int    `json:"rating" validate:"required,gte=0,lte=10"`
-	Comment  string `json:"comment" validate:"lte=200"`
-	User_id  int    `json:"user_id" validate:"required,gte=0"`
+	ID        string    `json:"id,omitempty"`
+	UserID    int       `json:"user_id" validate:"required,gte=0"`
+	Question  string    `json:"question" validate:"required"`
+	Page      string    `json:"page" validate:"required"`
+	Comment   string    `json:"comment" validate:"lte=200"`
+	Rating    int       `json:"rating" validate:"required,gte=0,lte=10"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
