@@ -60,7 +60,7 @@ func (r *CsatRepository) scanReview(rows *sql.Rows) (*csatEntity.Review, error) 
 	return &review, nil
 }
 
-func (r *CsatRepository) AddReview(review csatEntity.Review) (*csatEntity.Review, error) {
+func (r *CsatRepository) AddReview(review csatEntity.Review) error {
 	const addQuery = `
 		INSERT INTO reviews (
 			user_id, 
@@ -80,10 +80,10 @@ func (r *CsatRepository) AddReview(review csatEntity.Review) (*csatEntity.Review
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert review: %w", err)
+		return fmt.Errorf("failed to insert review: %w", err)
 	}
 
-	return &review, nil
+	return nil
 }
 
 func (r *CsatRepository) GetAllReviews() ([]csatEntity.Review, error) {
