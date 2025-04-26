@@ -1,6 +1,7 @@
 package csat
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -29,6 +30,12 @@ func NewCsatRepository(dsn string) *CsatRepository {
 	db, err := sql.Open("clickhouse", dsn)
 	if err != nil {
 		log.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
+		log.Fatal("failed to ping DB: %w", err)
+		return nil
 	}
 	csatRepo.db = db
 	return csatRepo
