@@ -164,7 +164,7 @@ services:
 volumes:
   pg_data:
   clickhouse_data:
-  grafana:
+  grafana_data:
 
 networks:
   retarget_network:
