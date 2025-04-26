@@ -124,7 +124,6 @@ services:
       - "8035:8035"
     depends_on:
       - redis0
-      - clickhouse
     networks:
       - api_network
 
