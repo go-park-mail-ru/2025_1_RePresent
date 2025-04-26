@@ -11,7 +11,7 @@ services:
       - REDIS_DATABASE=0
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
-      - api_network
+      - retarget_network
     volumes:
       - ./auth-data:/data
     healthcheck:
@@ -37,7 +37,7 @@ services:
       "-c", "ssl=off"
     ]
     networks:
-      - api_network
+      - retarget_network
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
@@ -57,7 +57,7 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
     networks:
-      - api_network
+      - retarget_network
     volumes:
       - ./minio-data:/data
     command: server /data
@@ -73,7 +73,7 @@ services:
     depends_on:
       - postgresdb
     networks:
-      - api_network
+      - retarget_network
 
   banner:
     build:
@@ -86,7 +86,7 @@ services:
     depends_on:
       - postgresdb
     networks:
-      - api_network
+      - retarget_network
 
   profile:
     build:
@@ -99,7 +99,7 @@ services:
     depends_on:
       - postgresdb
     networks:
-      - api_network
+      - retarget_network
 
   pay:
     build:
@@ -112,7 +112,7 @@ services:
     depends_on:
       - postgresdb
     networks:
-      - api_network
+      - retarget_network
 
   csat:
     build:
@@ -124,8 +124,9 @@ services:
       - "8035:8035"
     depends_on:
       - redis0
+      - clickhouse
     networks:
-      - api_network
+      - retarget_network
 
   # docker exec -it ReTargetClickHouse clickhouse-client --user=user --password=123456 --database=csat
   clickhouse:
@@ -136,13 +137,14 @@ services:
       - "9124:9124"  # TCP
 
     volumes:
+      - clickhouse_data:/var/lib/clickhouse
       - ./requests/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       CLICKHOUSE_USER: user
       CLICKHOUSE_PASSWORD: 123456
       CLICKHOUSE_DB: csat
     networks:
-      - api_network
+      - retarget_network
 
   grafana:
     image: grafana/grafana:latest
@@ -154,13 +156,16 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SERVER_HTTP_ADDR=0.0.0.0
     restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
     networks:
-      - api_network
+      - retarget_network
 
 volumes:
   pg_data:
   clickhouse_data:
+  grafana:
 
 networks:
-  api_network:
-    driver: bridge
+  retarget_network:
+    external: true
