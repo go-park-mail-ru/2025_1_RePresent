@@ -2,6 +2,7 @@ package csat
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"path/filepath"
 	"text/template"
@@ -57,7 +58,7 @@ func (c *CsatController) ShowQuestionIFrameByPageID(w http.ResponseWriter, r *ht
 		Question: question,
 	}
 	if err := tmpl.Execute(w, data); err != nil {
-		// log.Println("template execute error:", err)
+		log.Println("template execute error:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
