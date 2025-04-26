@@ -24,5 +24,5 @@ func Run(cfg *configs.Config) {
 
 	mux := csatAppHttp.SetupRoutes(authenticator, csatUsecase)
 
-	log.Fatal(http.ListenAndServe(":8032", csatMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8035", csatMiddleware.CORS(mux)))
 }

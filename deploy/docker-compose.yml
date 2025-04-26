@@ -114,6 +114,20 @@ services:
     networks:
       - api_network
 
+  csat:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: csat-service
+    container_name: ReTargetApiCSAT
+    ports:
+      - "8035:8035"
+    depends_on:
+      - redis0
+      - clickhouse
+    networks:
+      - api_network
+
   # docker exec -it ReTargetClickHouse clickhouse-client --user=user --password=123456 --database=csat
   clickhouse:
     image: yandex/clickhouse-server:latest
