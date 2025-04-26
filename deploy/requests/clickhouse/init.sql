@@ -1,4 +1,6 @@
-CREATE TABLE reviews (
+CREATE DATABASE IF NOT EXISTS csat;
+
+CREATE TABLE IF NOT EXISTS csat.reviews (
     id UUID DEFAULT generateUUIDv4(),
     user_id INT,
     question text,
