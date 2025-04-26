@@ -1,6 +1,8 @@
 package csat
 
 import (
+	"fmt"
+	"math/rand"
 	repo "retarget/internal/csat-service/repo/csat"
 )
 
@@ -16,6 +18,13 @@ func NewCsatUsecase(csatRepo *repo.CsatRepository) *CsatUsecase {
 	return &CsatUsecase{csatRepository: csatRepo}
 }
 
-func (a *CsatUsecase) GetQuestionByPage(page string) error {
-	panic("unimplimented")
+func (a *CsatUsecase) GetQuestionByPage(page string) (string, error) {
+	res, err := a.csatRepository.GetQuestionsByPage(page)
+	if err != nil {
+		return " ", fmt.Errorf("Error fetching question")
+	}
+	if len(res) > 0 {
+		return res[rand.Intn(len(res))], nil
+	}
+	return " ", fmt.Errorf("Question not found")
 }
