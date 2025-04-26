@@ -137,7 +137,7 @@ services:
       - "9124:9124"  # TCP
 
     volumes:
-      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./requests/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       CLICKHOUSE_USER: user
       CLICKHOUSE_PASSWORD: 123456
