@@ -69,7 +69,7 @@ erDiagram
         text email
         bytea password
         text description
-        int balance
+        decimal balance
         timestamp created_at
         timestamp updated_at
         int role
@@ -79,7 +79,7 @@ erDiagram
         int id
         text transaction_id
         int user_id
-        double amount
+        decimal amount
         text type
         text status
         timestamp created_at
@@ -88,7 +88,7 @@ erDiagram
     payment {
         int id
         int owner_id
-        int amount
+        decimal amount
         timestamp created_at
         int status
         int balance
