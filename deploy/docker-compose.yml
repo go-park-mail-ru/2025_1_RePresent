@@ -27,26 +27,34 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     ports:
-      - "${PORT}:${INSIDE_PORT}"
+      - "${PORT}:5432"
     command: [
       "postgres",
-      "-c", "password_encryption=md5",
+      "-c", "password_encryption=scram-sha-256",
       "-c", "max_connections=200",
-      "-c", "log_statement=all",
-      "-c", "ssl=off"
+      "-c", "log_statement=all", # или dll
+      "-c", "ssl=off",
+      "-c", "shared_buffers=256MB",
+      "-c", "work_mem=16MB"
     ]
     networks:
       - retarget_network
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
+      - ./requests/postgre/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 5
-    restart: always
+      retries: 10
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   minio:
     image: minio/minio:latest
@@ -132,6 +140,21 @@ services:
     networks:
       - retarget_network
 
+  adv:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: adv-service
+    container_name: ReTargetApiAdv
+    ports:
+      - "8032:8032"
+    depends_on:
+      - clickhouse
+      - scylla
+      - redis0
+    networks:
+      - retarget_network
+
   # docker exec -it ReTargetClickHouse clickhouse-client --user=user --password=123456 --database=csat
   clickhouse:
     image: yandex/clickhouse-server:latest
@@ -167,10 +190,29 @@ services:
     networks:
       - retarget_network
 
+# docker-compose exec scylla cqlsh -e "SOURCE '/scylla_scripts/init.cql';" scylla 9042
+  scylla:
+    image: scylladb/scylla
+    container_name: ReTargetScylla
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylla_data:/var/lib/scylla
+      - ./requests/scylla/init.cql:/scylla_scripts/init.cql
+    environment:
+      CASSANDRA_PASSWORD: 12345678
+    command: [
+      "--developer-mode=1",
+      "--overprovisioned=0"
+    ]
+    networks:
+      - retarget_network
+
 volumes:
   pg_data:
   clickhouse_data:
   grafana_data:
+  scylla_data:
 
 networks:
   retarget_network:

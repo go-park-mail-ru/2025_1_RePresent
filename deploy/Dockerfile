@@ -51,6 +51,14 @@ COPY pkg ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/csat-service ./cmd/csat-service
 
+# ---- Adv Service ----
+FROM deps AS adv-builder
+COPY cmd/adv-service ./cmd/adv-service
+COPY internal/adv-service ./internal/adv-service
+COPY pkg ./pkg
+COPY configs ./configs
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/adv-service ./cmd/adv-service
+
 # ===================================
 # Этап 3: Финальные образы
 # ===================================
@@ -91,3 +99,10 @@ COPY --from=csat-builder /bin/csat-service ./
 COPY --from=csat-builder /app/configs ./configs
 COPY --from=csat-builder /app/internal/csat-service/templates ./templates
 ENTRYPOINT ["./csat-service"]
+
+# ---- Adv Service ----
+FROM alpine:latest AS adv-service
+WORKDIR /app
+COPY --from=adv-builder /bin/adv-service ./
+COPY --from=adv-builder /app/configs ./configs
+ENTRYPOINT ["./adv-service"]
