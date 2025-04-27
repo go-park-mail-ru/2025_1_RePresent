@@ -35,13 +35,21 @@ COPY pkg ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/profile-service ./cmd/profile-service
 
-# ---- pay Service ----
+# ---- Pay Service ----
 FROM deps AS pay-builder
 COPY cmd/pay-service ./cmd/pay-service
 COPY internal/pay-service ./internal/pay-service
 COPY pkg ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/pay-service ./cmd/pay-service
+
+# ---- CSAT Service ----
+FROM deps AS csat-builder
+COPY cmd/csat-service ./cmd/csat-service
+COPY internal/csat-service ./internal/csat-service
+COPY pkg ./pkg
+COPY configs ./configs
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/csat-service ./cmd/csat-service
 
 # ===================================
 # Этап 3: Финальные образы
@@ -69,9 +77,17 @@ COPY --from=profile-builder /bin/profile-service ./
 COPY --from=profile-builder /app/configs ./configs
 ENTRYPOINT ["./profile-service"]
 
-# ---- pay Service ----
+# ---- Pay Service ----
 FROM alpine:latest AS pay-service
 WORKDIR /app
 COPY --from=pay-builder /bin/pay-service ./
 COPY --from=pay-builder /app/configs ./configs
 ENTRYPOINT ["./pay-service"]
+
+# ---- CSAT Service ----
+FROM alpine:latest AS csat-service
+WORKDIR /app
+COPY --from=csat-builder /bin/csat-service ./
+COPY --from=csat-builder /app/configs ./configs
+COPY --from=csat-builder /app/internal/csat-service/templates ./templates
+ENTRYPOINT ["./csat-service"]
