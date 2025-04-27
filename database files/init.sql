@@ -19,7 +19,7 @@ CREATE TABLE banner (
     content TEXT NOT NULL,
     link TEXT NOT NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    status SMALLINT,
+    status SMALLINT
 );
 CREATE INDEX idx_banner_owner_id ON banner(owner_id);
 CREATE INDEX idx_banner_status ON banner(status);
