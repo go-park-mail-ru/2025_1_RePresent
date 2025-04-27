@@ -4,68 +4,84 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"retarget/internal/adv-service/entity/adv"
 	repoAdv "retarget/internal/adv-service/repo/adv"
 
 	"github.com/google/uuid"
 )
 
 type AdvUsecaseInterface interface {
-	GetLink(user_id int) (string, error)
-	CheckLink(platform_id string) error
-	PutLink(user_id int) (string, bool, error)
-	generateLink(user_id int) string
+	GetLinks(userID int) ([]adv.Link, error)
+	CheckLink(link string) error
+	PutLink(userID int, height, width int) (adv.Link, bool, error)
+	generateLink(userID int, height, width int) adv.Link
 }
 
 type AdvUsecase struct {
-	advRepository *repoAdv.AdvRepository
+	advRepository repoAdv.AdvRepositoryInterface
 }
 
-func NewAdvUsecase(advRepo *repoAdv.AdvRepository) *AdvUsecase {
+func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface) *AdvUsecase {
 	return &AdvUsecase{advRepository: advRepo}
 }
 
-func (a *AdvUsecase) GetLink(user_id int) (string, error) {
-	link, err := a.advRepository.FindLinkByUser(user_id)
+func (a *AdvUsecase) GetLinks(userID int) ([]adv.Link, error) {
+	links, err := a.advRepository.FindLinksByUser(userID)
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to get links: %w", err)
 	}
-	if link == "" {
-		return "", errors.New("Link by user_id not found")
+
+	if len(links) == 0 {
+		return nil, errors.New("links not found for this user")
 	}
-	return link, nil
+
+	return links, nil
 }
 
-func (a *AdvUsecase) CheckLink(secret_link string) error {
-	if secret_link == "" {
-		return errors.New("Link is empty")
+func (a *AdvUsecase) CheckLink(link string) error {
+	if link == "" {
+		return errors.New("link is empty")
 	}
-	if !regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(secret_link) {
-		return errors.New("Invalid link")
+	if !regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(link) {
+		return errors.New("invalid link format")
 	}
-	user, err := a.advRepository.FindUserByLink(secret_link)
+
+	userID, err := a.advRepository.FindUserByLink(link)
 	if err != nil {
-		return errors.New("link not found")
+		return fmt.Errorf("link verification failed: %w", err)
 	}
-	fmt.Println(user)
+
+	fmt.Printf("Link belongs to user ID: %d\n", userID)
 	return nil
 }
 
-func (a *AdvUsecase) PutLink(user_id int) (string, bool, error) {
-	link, err := a.advRepository.FindLinkByUser(user_id)
+func (a *AdvUsecase) PutLink(userID int, height, width int) (adv.Link, bool, error) {
+	existingLinks, err := a.advRepository.FindLinksByUser(userID)
 	if err != nil {
-		return "", false, err
+		return adv.Link{}, false, fmt.Errorf("failed to check existing links: %w", err)
 	}
-	if link != "" {
-		return link, false, err
+
+	newLink := a.generateLink(userID, height, width)
+
+	for _, link := range existingLinks {
+		if link.TextLink == newLink.TextLink {
+			return link, false, nil
+		}
 	}
-	new_link := a.generateLink(user_id)
-	err = a.advRepository.CreateLinkByUser(user_id, new_link)
+
+	err = a.advRepository.CreateLink(newLink)
 	if err != nil {
-		return "", false, err
+		return adv.Link{}, false, fmt.Errorf("failed to create link: %w", err)
 	}
-	return new_link, true, nil
+
+	return newLink, true, nil
 }
 
-func (a *AdvUsecase) generateLink(user_id int) string {
-	return uuid.NewString()
+func (a *AdvUsecase) generateLink(userID int, height, width int) adv.Link {
+	return adv.Link{
+		TextLink: uuid.NewString(),
+		UserID:   userID,
+		Height:   height,
+		Width:    width,
+	}
 }

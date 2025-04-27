@@ -3,13 +3,16 @@ package repo
 import (
 	"log"
 
+	"retarget/internal/adv-service/entity/adv"
+
 	"github.com/gocql/gocql"
 )
 
 type AdvRepositoryInterface interface {
-	FindUserByLink(secret_link string) (int, error)
-	CreateLinkByUser(user_id int, secret_link string) error
-	FindLinkByUser(user_id int) (string, error)
+	FindUserByLink(link string) (int, error)
+	CreateLink(link adv.Link) error
+	FindLinksByUser(userID int) ([]adv.Link, error)
+	DeleteLink(link string) error
 }
 
 type AdvRepository struct {
@@ -31,34 +34,47 @@ func NewAdvRepository(host string, port int, keyspace, username, password string
 	return &AdvRepository{session: session}
 }
 
-func (u *AdvRepository) FindUserByLink(secret_link string) (int, error) {
-	var user_id int
-	err := u.session.Query(`SELECT user_id FROM links WHERE link =?`, secret_link).Scan(&user_id)
+func (u *AdvRepository) FindUserByLink(link string) (int, error) {
+	var userID int
+	err := u.session.Query(`SELECT user_id FROM links WHERE link = ?`, link).Scan(&userID)
 	if err != nil {
 		if err == gocql.ErrNotFound {
-			return -1, gocql.ErrNotFound
+			return -1, nil
 		}
 		return 0, err
 	}
-	return user_id, nil
+	return userID, nil
 }
 
-func (u *AdvRepository) CreateLinkByUser(user_id int, secret_link string) error {
-	err := u.session.Query(`INSERT INTO links (link, user_id) VALUES (?,?)`, secret_link, user_id).Exec()
+func (u *AdvRepository) CreateLink(link adv.Link) error {
+	err := u.session.Query(`INSERT INTO links (link, user_id, height, width) VALUES (?, ?, ?, ?)`,
+		link.TextLink, link.UserID, link.Height, link.Width).Exec()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u *AdvRepository) FindLinkByUser(user_id int) (string, error) {
-	var secret_link string
-	err := u.session.Query(`SELECT link FROM links WHERE user_id =?`, user_id).Scan(&secret_link)
-	if err != nil {
-		if err == gocql.ErrNotFound {
-			return "", nil
-		}
-		return "", err
+func (u *AdvRepository) FindLinksByUser(userID int) ([]adv.Link, error) {
+	iter := u.session.Query(`SELECT link, user_id, height, width FROM links WHERE user_id = ?`, userID).Iter()
+
+	var links []adv.Link
+	var link adv.Link
+	for iter.Scan(&link.TextLink, &link.UserID, &link.Height, &link.Width) {
+		links = append(links, link)
 	}
-	return secret_link, nil
+
+	if err := iter.Close(); err != nil {
+		return nil, err
+	}
+
+	return links, nil
+}
+
+func (u *AdvRepository) DeleteLink(link string) error {
+	err := u.session.Query(`DELETE FROM links WHERE link = ?`, link).Exec()
+	if err != nil {
+		return err
+	}
+	return nil
 }

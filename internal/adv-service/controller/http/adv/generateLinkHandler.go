@@ -5,7 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	entity "retarget/pkg/entity"
+	response "retarget/pkg/entity"
 )
+
+type GenerateLinkRequest struct {
+	Height int `json:"height"`
+	Width  int `json:"width"`
+}
 
 func (c *AdvController) GenerateLinkHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
@@ -14,62 +20,45 @@ func (c *AdvController) GenerateLinkHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	/*cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unauthorized"))
-		return
-	}
-
-	// TODO: по gRPC получить user_id по cookie из auth-service
-	resp, err := http.Get("http://re-target.ru:/api/v1/auth/user-by-cookie?cookie=" + cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
-		return
-	}
-	defer resp.Body.Close()
-
-	var userData map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&userData)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
-		return
-	}
-
-	userID, ok := userData["user_id"].(string)
+	// requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unauthorized"))
-		return
-	}*/
-
-	userID := 1
-
-	secretLink, isCreated, err := c.advUsecase.PutLink(userID)
-	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+	}
+	userID := userSession.UserID
+
+	var req GenerateLinkRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponseWithBody(true, "Invalid request body", nil))
 		return
 	}
-	fullSecretLink := fmt.Sprintf("http://re-target.ru/api/v1/adv/iframe/%s", secretLink)
+
+	link, isCreated, err := c.advUsecase.PutLink(userID, req.Height, req.Width)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(entity.NewResponseWithBody(true, err.Error(), nil))
+		return
+	}
+
+	fullLink := fmt.Sprintf("http://re-target.ru/api/v1/adv/iframe/%s", link.TextLink)
+
+	responseBody := struct {
+		Link   string `json:"link"`
+		Height int    `json:"height"`
+		Width  int    `json:"width"`
+	}{
+		Link:   fullLink,
+		Height: link.Height,
+		Width:  link.Width,
+	}
 
 	if isCreated {
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"service": entity.NewResponse(false, "Created").Service,
-			"body": map[string]interface{}{
-				"secret-link": fullSecretLink,
-			},
-		})
-		return
+		json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Link created", responseBody))
+	} else {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Link already exists", responseBody))
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"service": entity.NewResponse(false, "Sent").Service,
-		"body": map[string]interface{}{
-			"secret-link": fullSecretLink,
-		},
-	})
 }

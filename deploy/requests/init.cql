@@ -4,7 +4,10 @@ USE link_space;
 
 CREATE TABLE IF NOT EXISTS links (
     link text PRIMARY KEY,
-    user_id int
+    user_id int,
+    height int,
+    width int
 );
+
 
 CREATE INDEX IF NOT EXISTS user_id_index ON links (user_id);
