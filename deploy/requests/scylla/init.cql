@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS slots (
     link uuid PRIMARY KEY,
     user_id int NOT NULL,
     format_code uuid NOT NULL,
-    min_price decimal(8,2) NOT NULL,
+    min_price decimal(12,2) NOT NULL,
     created_at timestamp
 );
 
