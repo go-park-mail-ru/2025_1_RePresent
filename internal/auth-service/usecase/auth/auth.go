@@ -6,6 +6,7 @@ import (
 	entityAuth "retarget/internal/auth-service/entity/auth"
 	repoAuth "retarget/internal/auth-service/repo/auth"
 
+	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -88,7 +89,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		Email:       email,
 		Password:    hashedPassword,
 		Description: "",
-		Balance:     0,
+		Balance:     decimal.Zero,
 		Role:        role,
 	}
 

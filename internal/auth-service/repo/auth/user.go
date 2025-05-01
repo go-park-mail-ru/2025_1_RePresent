@@ -24,7 +24,7 @@ type AuthRepositoryInterface interface {
 type AuthRepository struct {
 	db     *sql.DB
 	logger *zap.SugaredLogger
-} // TODO: Переделать коннект в эндпойнт
+}
 
 func NewAuthRepository(endPoint string, logger *zap.SugaredLogger) *AuthRepository {
 	userRepo := &AuthRepository{}
