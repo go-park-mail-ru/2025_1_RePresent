@@ -190,7 +190,7 @@ services:
     networks:
       - retarget_network
 
-# docker-compose exec scylla cqlsh -e "SOURCE '/scylla_scripts/init.cql';" scylla 9042
+# OR IF IN scylla_scripts: docker exec ReTargetScylla cqlsh -f /scylla_scripts/init.cql
   scylla:
     image: scylladb/scylla
     container_name: ReTargetScylla
@@ -201,9 +201,12 @@ services:
       - ./requests/scylla/init.cql:/scylla_scripts/init.cql
     environment:
       CASSANDRA_PASSWORD: 12345678
+      SCYLLA_LOGLEVEL: "error"
+      SCYLLA_LOGMODE: "none"
     command: [
       "--developer-mode=1",
-      "--overprovisioned=0"
+      "--overprovisioned=0",
+      "--default-log-level", "error",
     ]
     networks:
       - retarget_network

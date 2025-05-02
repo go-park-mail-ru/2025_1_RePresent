@@ -4,6 +4,7 @@ import (
 	"net/http"
 	AdvMiddleware "retarget/internal/adv-service/controller/http/middleware"
 	usecaseAdv "retarget/internal/adv-service/usecase/adv"
+	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
@@ -17,11 +18,11 @@ func NewAdvController(advUsecase *usecaseAdv.AdvUsecase) *AdvController {
 	return &AdvController{advUsecase: advUsecase}
 }
 
-func SetupAdvRoutes(authenticator *authenticate.Authenticator, advUsecase *usecaseAdv.AdvUsecase) http.Handler {
+func SetupAdvRoutes(authenticator *authenticate.Authenticator, advUsecase *usecaseAdv.AdvUsecase, slotUsecase *usecaseSlot.SlotUsecase) http.Handler {
 	muxRouter := mux.NewRouter()
 	advController := NewAdvController(advUsecase)
 
-	advMiddleware := AdvMiddleware.AdvMiddleware(advUsecase)
+	advMiddleware := AdvMiddleware.LinkMiddleware(slotUsecase)
 
 	muxRouter.Handle("/api/v1/adv/link/generate", http.HandlerFunc(advController.GenerateLinkHandler))
 	muxRouter.Handle("/api/v1/adv/link/my", http.HandlerFunc(advController.GetLinksHandler))
