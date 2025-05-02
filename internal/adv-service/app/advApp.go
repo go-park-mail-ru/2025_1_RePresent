@@ -20,9 +20,9 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	advRepository := repoAdv.NewAdvRepository("localhost", 9042, "slot_space", "cassandra", "12345678")
+	advRepository := repoAdv.NewAdvRepository("ReTargetScylla", 9042, "slot_space", "cassandra", "12345678")
 
-	slotRepository := repoSlot.NewSlotRepository("localhost", 9042, "slot_space", "cassandra", "12345678")
+	slotRepository := repoSlot.NewSlotRepository("ReTargetScylla", 9042, "slot_space", "cassandra", "12345678")
 	defer slotRepository.Close()
 
 	advUsecase := usecaseAdv.NewAdvUsecase(advRepository)
