@@ -6,8 +6,8 @@ import (
 	entityAuth "retarget/internal/auth-service/entity/auth"
 	repoAuth "retarget/internal/auth-service/repo/auth"
 
-	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/inf.v0"
 )
 
 type AuthUsecaseInterface interface {
@@ -89,7 +89,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		Email:       email,
 		Password:    hashedPassword,
 		Description: "",
-		Balance:     decimal.Zero,
+		Balance:     *inf.NewDec(0, 0),
 		Role:        role,
 	}
 

@@ -5,14 +5,14 @@ import (
 	"net/http"
 	entity "retarget/pkg/entity"
 
-	"github.com/shopspring/decimal"
+	"gopkg.in/inf.v0"
 )
 
 type UserResponse struct {
-	Username string          `json:"username"`
-	Email    string          `json:"email"`
-	Balance  decimal.Decimal `json:"balance"`
-	Role     int             `json:"role"`
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Balance  inf.Dec `json:"balance"`
+	Role     int     `json:"role"`
 }
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
