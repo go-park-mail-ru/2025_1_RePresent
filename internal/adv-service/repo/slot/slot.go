@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
+	"gopkg.in/inf.v0"
 )
 
 var (
@@ -23,6 +24,7 @@ type SlotRepositoryInterface interface {
 	GetCurrentFormats(ctx context.Context) ([]slot.Format, error)
 	GetUserByLink(ctx context.Context, link string) (int, time.Time, error)
 	HealthCheck(ctx context.Context) error
+	GetSlotInfoByLink(ctx context.Context, link string) (slot.Slot, error)
 }
 
 type SlotRepository struct {
@@ -189,6 +191,38 @@ func (r *SlotRepository) GetUserByLink(ctx context.Context, link string) (int, t
 		return -1, time.Time{}, err
 	}
 	return userID, createdAt, nil
+}
+
+func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (slot.Slot, error) {
+	var s slot.Slot
+	var minPriceDecimal string
+
+	err := r.session.Query(
+		`SELECT link, slot_name, format_code, min_price, is_active, created_at 
+		FROM slots WHERE link = ? LIMIT 1`,
+		link,
+	).WithContext(ctx).Scan(
+		&s.Link,
+		&s.SlotName,
+		&s.FormatCode,
+		&minPriceDecimal,
+		&s.IsActive,
+		&s.CreatedAt,
+	)
+
+	if err != nil {
+		if err == gocql.ErrNotFound {
+			return slot.Slot{}, ErrSlotNotFound
+		}
+		return slot.Slot{}, err
+	}
+
+	s.MinPrice = *inf.NewDec(0, 0)
+	if _, ok := s.MinPrice.SetString(minPriceDecimal); !ok {
+		return slot.Slot{}, errors.New("failed to parse min_price")
+	}
+
+	return s, nil
 }
 
 func (r *SlotRepository) HealthCheck(ctx context.Context) error {
