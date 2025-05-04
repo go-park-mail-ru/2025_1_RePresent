@@ -47,7 +47,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	session, err := c.authUsecase.AddSession(user.ID, 1)
+	session, err := c.authUsecase.AddSession(user.ID, user.Role)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))

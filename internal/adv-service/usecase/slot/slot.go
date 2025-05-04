@@ -42,8 +42,6 @@ func NewSlotUsecase(repo repoSlot.SlotRepositoryInterface) *SlotUsecase {
 }
 
 func (uc *SlotUsecase) CreateSlot(ctx context.Context, req dto.CreateRequest, userID int) (slot.Slot, error) {
-	fmt.Println(req.MinPrice)
-
 	s := slot.Slot{
 		Link:       uuid.New().String(),
 		SlotName:   req.SlotName,
@@ -56,7 +54,6 @@ func (uc *SlotUsecase) CreateSlot(ctx context.Context, req dto.CreateRequest, us
 }
 
 func (uc *SlotUsecase) UpdateSlot(ctx context.Context, req dto.UpdateRequest, userID int) (slot.Slot, error) {
-
 	user_id, created_at, err := uc.repo.GetUserByLink(ctx, req.Link.String())
 	if err != nil {
 		return slot.Slot{}, ErrSlotNotFound
