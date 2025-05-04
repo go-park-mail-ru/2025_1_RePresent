@@ -40,16 +40,16 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 
 	// Login(данные пользователя), проверили данные, AddSession(user_id), поставили куки
 
-	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, 1, requestID)
+	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, req.Role, requestID)
 	if err != nil {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
 
 	session, err := c.authUsecase.AddSession(user.ID, user.Role)
 	if err != nil {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
