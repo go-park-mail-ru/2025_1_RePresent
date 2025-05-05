@@ -89,7 +89,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		Email:       email,
 		Password:    hashedPassword,
 		Description: "",
-		Balance:     *inf.NewDec(0, 0),
+		Balance:     inf.NewDec(0, 0),
 		Role:        role,
 	}
 
