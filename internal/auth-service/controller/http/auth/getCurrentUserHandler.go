@@ -38,7 +38,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	userResponse := &UserResponse{
 		Username: user.Username,
 		Email:    user.Email,
-		Balance:  *user.Balance,
+		Balance:  *user.Balance.Dec,
 		Role:     user.Role,
 	}
 
