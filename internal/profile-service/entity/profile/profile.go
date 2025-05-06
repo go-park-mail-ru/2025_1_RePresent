@@ -44,6 +44,13 @@ func (d *Decimal) Scan(value interface{}) error {
 	}
 }
 
+func (d Decimal) MarshalJSON() ([]byte, error) {
+	if d.Dec == nil {
+		return []byte(`"0"`), nil
+	}
+	return []byte(`"` + d.String() + `"`), nil
+}
+
 type Profile struct {
 	ID          int     `json:"id"`
 	Username    string  `json:"username" validate:"required,min=5,max=50"`
