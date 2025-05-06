@@ -10,7 +10,6 @@ import (
 
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
-	"gopkg.in/inf.v0"
 )
 
 type AuthRepositoryInterface interface {
@@ -49,22 +48,15 @@ func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User
 	row := r.db.QueryRow(query, id)
 	user := &authEntity.User{}
 
-	var strBalance string
 	err := row.Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
 		&user.Password,
 		&user.Description,
-		&strBalance,
+		&user.Balance,
 		&user.Role,
 	)
-
-	dec, ok := inf.NewDec(0, 0).SetString(strBalance)
-	if !ok {
-		return nil, fmt.Errorf("failed to parse balance: %w", err)
-	}
-	user.Balance = *dec
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -103,8 +95,6 @@ func (r *AuthRepository) GetUserByEmail(email string, requestID string) (*authEn
 		"email", email,
 	)
 
-	var strBalance string
-
 	row := r.db.QueryRow(query, email)
 	user := &authEntity.User{}
 	err := row.Scan(
@@ -113,7 +103,7 @@ func (r *AuthRepository) GetUserByEmail(email string, requestID string) (*authEn
 		&user.Email,
 		&user.Password,
 		&user.Description,
-		&strBalance,
+		&user.Balance,
 		&user.Role,
 	)
 
@@ -135,13 +125,6 @@ func (r *AuthRepository) GetUserByEmail(email string, requestID string) (*authEn
 		)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
-
-	dec, ok := inf.NewDec(0, 0).SetString(strBalance)
-	if !ok {
-		return nil, fmt.Errorf("failed to parse balance: %w", err)
-	}
-	user.Balance = *dec
-
 	r.logger.Debugw("User retrieved successfully",
 		"request_id", requestID,
 		"userID", user.ID,
@@ -164,14 +147,13 @@ func (r *AuthRepository) GetUserByUsername(username, requestID string) (*authEnt
 
 	row := r.db.QueryRow(query, username)
 	user := &authEntity.User{}
-	var strBalance string
 	err := row.Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
 		&user.Password,
 		&user.Description,
-		&strBalance,
+		&user.Balance,
 		&user.Role,
 	)
 
@@ -193,12 +175,6 @@ func (r *AuthRepository) GetUserByUsername(username, requestID string) (*authEnt
 		)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
-
-	dec, ok := inf.NewDec(0, 0).SetString(strBalance)
-	if !ok {
-		return nil, fmt.Errorf("failed to parse balance: %w", err)
-	}
-	user.Balance = *dec
 
 	r.logger.Debugw("User retrieved successfully",
 		"request_id", requestID,
