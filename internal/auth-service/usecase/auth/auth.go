@@ -34,14 +34,11 @@ func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.Ses
 func (a *AuthUsecase) Login(email string, password string, role int, requestID string) (*entityAuth.User, error) {
 	user, err := a.authRepository.GetUserByEmail(email, requestID)
 	if err != nil {
-		return nil, err
-	}
-	if user.Role != role {
 		return nil, errors.New("Incorrect user data")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Incorrect user data")
 	}
 	return user, nil
 }
