@@ -41,7 +41,7 @@ func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfil
 		Username:    profile.Username,
 		Email:       profile.Email,
 		Description: profile.Description,
-		Balance:     *profile.Balance.Dec,
+		Balance:     profile.Balance.Dec,
 		Role:        profile.Role,
 	}
 	validationErrors, err := validator.ValidateStruct(profile)
