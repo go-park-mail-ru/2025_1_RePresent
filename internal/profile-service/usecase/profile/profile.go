@@ -2,6 +2,7 @@ package profile
 
 import (
 	"errors"
+	"fmt"
 	entityProfile "retarget/internal/profile-service/entity/profile"
 	repoProfile "retarget/internal/profile-service/repo/profile"
 	"retarget/pkg/utils/validator"
@@ -36,6 +37,7 @@ func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfil
 		}
 		return nil, err
 	}
+	fmt.Println("юзкейс перед сбором респонса")
 	response := &entityProfile.ProfileResponse{
 		ID:          profile.ID,
 		Username:    profile.Username,
@@ -44,6 +46,7 @@ func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfil
 		Balance:     *profile.Balance.Dec,
 		Role:        profile.Role,
 	}
+	fmt.Println("юзкейс собрал респонс")
 	validationErrors, err := validator.ValidateStruct(profile)
 	if err != nil {
 		return nil, errors.New(validationErrors)
