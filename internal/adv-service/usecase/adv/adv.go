@@ -38,6 +38,11 @@ func (a *AdvUsecase) GetLinks(userID int) ([]adv.Link, error) {
 	return links, nil
 }
 
+func (a *AdvUsecase) GetIframe(key string) ([]adv.Link, error) {
+
+	return links, nil
+}
+
 func (a *AdvUsecase) CheckLink(link string) error {
 	if link == "" {
 		return errors.New("link is empty")

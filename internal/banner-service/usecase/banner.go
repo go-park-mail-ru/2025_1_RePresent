@@ -56,6 +56,18 @@ func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (
 	return &entity.DefaultBanner, nil
 }
 
+func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string) (*entity.Banner, error) {
+	rand.Seed(time.Now().UnixNano())
+	banner, err := b.BannerRepository.GetRandomBanner()
+	if err != nil {
+		return nil, err
+	}
+	if banner == nil {
+		return &entity.DefaultBanner, nil
+	}
+	return banner, err
+}
+
 func (b *BannerUsecase) CreateBanner(userID int, banner entity.Banner, requestID string) error {
 	err := b.BannerRepository.CreateNewBanner(banner, requestID)
 	return err

@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"retarget/internal/banner-service/entity"
 	"time"
@@ -64,6 +65,36 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 	}
 	r.logger.Debugw("SQL  query executed successfully", "request_id", requestID, "userID", id, "duration", duration, "error", err)
 	return banners, nil
+}
+
+func (r *BannerRepository) GetRandomBanner() (*entity.Banner, error) {
+	query := `
+        SELECT b.id, b.title, b.content, b.description, b.link, b.owner_id
+        FROM banners b
+        JOIN users u ON b.owner_id = u.id
+        WHERE b.status = 'active' AND u.balance > 0
+        ORDER BY RANDOM()
+        LIMIT 1
+    `
+
+	var banner entity.Banner
+	err := r.db.QueryRow(query).Scan(
+		&banner.ID,
+		&banner.Title,
+		&banner.Content,
+		&banner.Description,
+		&banner.Link,
+		&banner.OwnerID,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("no active banners with valid owners found")
+		}
+		return nil, fmt.Errorf("failed to get random banner: %w", err)
+	}
+
+	return &banner, nil
 }
 
 func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID string) error {

@@ -9,6 +9,7 @@ import (
 	"retarget/internal/banner-service/repo"
 	authenticate "retarget/pkg/middleware/auth"
 
+	server "retarget/internal/banner-service/grpc"
 	usecase "retarget/internal/banner-service/usecase"
 
 	"go.uber.org/zap"
@@ -34,4 +35,5 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	mux := controller.SetupRoutes(authenticator, banner, image)
 
 	log.Fatal(http.ListenAndServe(":8024", middleware.CORS(mux)))
+	server.RunGRPCServer(*banner)
 }
