@@ -28,7 +28,7 @@ func (r *ProfileUsecase) PutProfile(userID int, username, description string, re
 	return nil
 }
 
-func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfile.ProfileResponse, error) {
+func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfile.Profile, error) {
 	profile, err := r.profileRepository.GetProfileByID(userID, requestID)
 	if err != nil {
 		if errors.Is(err, entityProfile.ErrProfileNotFound) {
@@ -36,17 +36,17 @@ func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfil
 		}
 		return nil, err
 	}
-	response := &entityProfile.ProfileResponse{
-		ID:          profile.ID,
-		Username:    profile.Username,
-		Email:       profile.Email,
-		Description: profile.Description,
-		Balance:     profile.Balance,
-		Role:        profile.Role,
-	}
-	validationErrors, err := validator.ValidateStruct(response)
+	// response := &entityProfile.ProfileResponse{
+	// 	ID:          profile.ID,
+	// 	Username:    profile.Username,
+	// 	Email:       profile.Email,
+	// 	Description: profile.Description,
+	// 	Balance:     profile.Balance,
+	// 	Role:        profile.Role,
+	// }
+	validationErrors, err := validator.ValidateStruct(profile)
 	if err != nil {
 		return nil, errors.New(validationErrors)
 	}
-	return response, nil
+	return profile, nil
 }
