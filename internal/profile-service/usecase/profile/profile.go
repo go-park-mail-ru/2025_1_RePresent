@@ -5,7 +5,6 @@ import (
 	"fmt"
 	entityProfile "retarget/internal/profile-service/entity/profile"
 	repoProfile "retarget/internal/profile-service/repo/profile"
-	"retarget/pkg/utils/validator"
 )
 
 type ProfileUsecaseInterface interface {
@@ -47,9 +46,9 @@ func (r *ProfileUsecase) GetProfile(userID int, requestID string) (*entityProfil
 		Role:        profile.Role,
 	}
 	fmt.Println("юзкейс собрал респонс")
-	validationErrors, err := validator.ValidateStruct(profile)
-	if err != nil {
-		return nil, errors.New(validationErrors)
-	}
+	// validationErrors, err := validator.ValidateStruct(profile)
+	// if err != nil {
+	// 	return nil, errors.New(validationErrors)
+	// }
 	return response, nil
 }
