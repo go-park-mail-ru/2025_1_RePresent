@@ -18,7 +18,7 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 
 	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := user.UserID
@@ -30,7 +30,7 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 			json.NewEncoder(w).Encode(entity.NewResponse(true, "Profile not found"))
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
