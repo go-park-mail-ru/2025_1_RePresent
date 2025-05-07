@@ -2,7 +2,7 @@ package adv
 
 import (
 	"net/http"
-	// AdvMiddleware "retarget/internal/adv-service/controller/http/middleware"
+	AdvMiddleware "retarget/internal/adv-service/controller/http/middleware"
 	usecaseAdv "retarget/internal/adv-service/usecase/adv"
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 	authenticate "retarget/pkg/middleware/auth"
@@ -22,9 +22,9 @@ func SetupAdvRoutes(authenticator *authenticate.Authenticator, advUsecase *useca
 	muxRouter := mux.NewRouter()
 	advController := NewAdvController(advUsecase)
 
-	// advMiddleware := AdvMiddleware.LinkMiddleware(slotUsecase)
+	advMiddleware := AdvMiddleware.LinkMiddleware(slotUsecase)
 
-	muxRouter.Handle("/api/v1/adv/iframe/{link}", http.HandlerFunc(advController.IframeHandler)).Methods("GET")
+	muxRouter.Handle("/api/v1/adv/iframe/{link}", advMiddleware(http.HandlerFunc(advController.IframeHandler))).Methods("GET")
 
 	muxRouter.Handle("/api/v1/adv/link/generate", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(advController.GenerateLinkHandler)))
 	muxRouter.Handle("/api/v1/adv/link/my", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(advController.GetLinksHandler)))
