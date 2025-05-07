@@ -79,7 +79,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 		// обработка ошибки
 	}
 	data := IFrame{
-		ImageSrc:    "" + url,
+		ImageSrc:    url,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
