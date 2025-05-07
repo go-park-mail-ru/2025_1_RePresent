@@ -69,7 +69,7 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 
 func (r *BannerRepository) GetRandomBanner() (*entity.Banner, error) {
 	query := `
-        SELECT b.id, b.title, b.content, b.description, b.link, b.status, b.owner_id
+        SELECT b.id, b.title, b.content, b.description, b.link, b.owner_id
         FROM banner b
         JOIN auth_user u ON b.owner_id = u.id
         WHERE b.status = 1 AND u.balance > 0
