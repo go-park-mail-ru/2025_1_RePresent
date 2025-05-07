@@ -27,7 +27,7 @@ func NewPaymentServer(paymentUC usecase.PaymentUsecase) *PaymentServer {
 }
 
 func RunGRPCServer(paymentUC usecase.PaymentUsecase) {
-	lis, err := net.Listen("tcp", ":5054")
+	lis, err := net.Listen("tcp", ":8054")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -35,7 +35,7 @@ func RunGRPCServer(paymentUC usecase.PaymentUsecase) {
 	s := grpc.NewServer()
 	paymentpb.RegisterPaymentServiceServer(s, NewPaymentServer(paymentUC))
 
-	log.Printf("gRPC server started on :5054")
+	log.Printf("gRPC server started on :8054")
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

@@ -121,6 +121,7 @@ services:
     container_name: ReTargetApiPayment
     ports:
       - "8022:8022"
+      - "8054:8054"
     depends_on:
       - postgresdb
       - redis0
