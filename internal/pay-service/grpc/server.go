@@ -42,7 +42,7 @@ func RunGRPCServer(paymentUC usecase.PaymentUsecase) {
 }
 
 func (s *PaymentServer) RegUserActivity(ctx context.Context, req *paymentpb.PaymentRequest) (*paymentpb.PaymentResponse, error) {
-	err := s.paymentUC.RegUserActivity(int(req.GetFromUserId()), int(req.GetToUserId()), int(req.GetAmount()))
+	err := s.paymentUC.RegUserActivity(int(req.GetToUserId()), int(req.GetFromUserId()), int(req.GetAmount()))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to process payment: %v", err)
 	}
