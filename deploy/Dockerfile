@@ -24,7 +24,7 @@ COPY cmd/banner-service ./cmd/banner-service
 COPY internal/banner-service ./internal/banner-service
 COPY pkg ./pkg
 COPY configs ./configs
-COPY internal/banner-service/templates ./internal/banner-service/templates
+# COPY pkg/templates ./internal/banner-service/templates
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/banner-service ./cmd/banner-service
 
 # ---- Profile Service ----
