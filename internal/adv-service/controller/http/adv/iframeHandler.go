@@ -1,12 +1,15 @@
 package adv
 
 import (
+	"context"
 	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 	entity "retarget/pkg/entity"
+	protoPayment "retarget/pkg/proto/payment"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -37,4 +40,9 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("template execute error:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+	ctx := context.Background()
+	owner, _ := strconv.Atoi(banner.OwnerID)
+	userID, _, _ := c.advUsecase.SlotsRepository.GetUserByLink(ctx, secret_link)
+	request := protoPayment.PaymentRequest{FromUserId: int32(owner), ToUserId: int32(userID), Amount: 1}
+	c.advUsecase.PaymentClient.RegUserActivity(ctx, &request)
 }

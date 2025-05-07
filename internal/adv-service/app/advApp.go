@@ -12,6 +12,7 @@ import (
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 	authenticate "retarget/pkg/middleware/auth"
 	pb "retarget/pkg/proto"
+	protoPayment "retarget/pkg/proto/payment"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -33,9 +34,16 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	}
 	defer conn.Close()
 
-	c := pb.NewBannerServiceClient(conn)
+	connPayment, err := grpc.Dial("ReTargetApiPayment:8054", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer connPayment.Close()
 
-	advUsecase := usecaseAdv.NewAdvUsecase(advRepository, c)
+	cBanner := pb.NewBannerServiceClient(conn)
+	cPayment := protoPayment.NewPaymentServiceClient(connPayment)
+
+	advUsecase := usecaseAdv.NewAdvUsecase(advRepository, cBanner, cPayment, slotRepository)
 
 	slotUsecase := usecaseSlot.NewSlotUsecase(slotRepository)
 

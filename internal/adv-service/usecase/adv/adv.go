@@ -7,7 +7,9 @@ import (
 	"regexp"
 	"retarget/internal/adv-service/entity/adv"
 	repoAdv "retarget/internal/adv-service/repo/adv"
+	repoSlots "retarget/internal/adv-service/repo/slot"
 	pb "retarget/pkg/proto"
+	protoPayment "retarget/pkg/proto/payment"
 
 	"github.com/google/uuid"
 )
@@ -20,12 +22,19 @@ type AdvUsecaseInterface interface {
 }
 
 type AdvUsecase struct {
-	advRepository repoAdv.AdvRepositoryInterface
-	bannerClient  pb.BannerServiceClient
+	SlotsRepository repoSlots.SlotRepositoryInterface
+	advRepository   repoAdv.AdvRepositoryInterface
+	bannerClient    pb.BannerServiceClient
+	PaymentClient   protoPayment.PaymentServiceClient
 }
 
-func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface, bannerClient pb.BannerServiceClient) *AdvUsecase {
-	return &AdvUsecase{advRepository: advRepo, bannerClient: bannerClient}
+func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface, bannerClient pb.BannerServiceClient, paymentClient protoPayment.PaymentServiceClient, slotsRepository repoSlots.SlotRepositoryInterface) *AdvUsecase {
+	return &AdvUsecase{
+		advRepository:   advRepo,
+		bannerClient:    bannerClient,
+		PaymentClient:   paymentClient,
+		SlotsRepository: slotsRepository,
+	}
 }
 
 func (a *AdvUsecase) GetLinks(userID int) ([]adv.Link, error) {
