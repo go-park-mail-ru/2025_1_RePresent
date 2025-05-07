@@ -71,8 +71,8 @@ func (r *BannerRepository) GetRandomBanner() (*entity.Banner, error) {
 	query := `
         SELECT b.id, b.title, b.content, b.description, b.link, b.owner_id
         FROM banner b
-        JOIN users u ON b.owner_id = u.id
-        WHERE b.status = 'active' AND u.balance > 0
+        JOIN auth_user u ON b.owner_id = u.id
+        WHERE b.status = 1 AND u.balance > 0
         ORDER BY RANDOM()
         LIMIT 1
     `
