@@ -24,10 +24,11 @@ func SetupAdvRoutes(authenticator *authenticate.Authenticator, advUsecase *useca
 
 	// advMiddleware := AdvMiddleware.LinkMiddleware(slotUsecase)
 
+	muxRouter.Handle("/api/v1/slot/iframe/{link}", http.HandlerFunc(advController.IframeHandler))
+
 	muxRouter.Handle("/api/v1/adv/link/generate", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(advController.GenerateLinkHandler)))
 	muxRouter.Handle("/api/v1/adv/link/my", authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(advController.GetLinksHandler)))
 
-	muxRouter.Handle("/api/v1/slot/iframe/{link}", http.HandlerFunc(advController.IframeHandler))
 	muxRouter.Handle("/api/v1/adv/metrics/{link}", http.HandlerFunc(advController.MetricsHandler))
 
 	return muxRouter
