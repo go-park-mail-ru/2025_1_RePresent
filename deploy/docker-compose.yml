@@ -92,6 +92,7 @@ services:
     container_name: ReTargetApiBanner
     ports:
       - "8024:8024"
+      - "50051:50051"
     depends_on:
       - postgresdb
       - redis0

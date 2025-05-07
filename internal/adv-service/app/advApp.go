@@ -11,8 +11,10 @@ import (
 	usecaseAdv "retarget/internal/adv-service/usecase/adv"
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 	authenticate "retarget/pkg/middleware/auth"
+	pb "retarget/pkg/proto"
 
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
@@ -25,7 +27,15 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	slotRepository := repoSlot.NewSlotRepository("ReTargetScylla", 9042, "slot_space", "cassandra", "12345678")
 	defer slotRepository.Close()
 
-	advUsecase := usecaseAdv.NewAdvUsecase(advRepository)
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	c := pb.NewBannerServiceClient(conn)
+
+	advUsecase := usecaseAdv.NewAdvUsecase(advRepository, c)
 
 	slotUsecase := usecaseSlot.NewSlotUsecase(slotRepository)
 

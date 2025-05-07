@@ -1,11 +1,13 @@
 package adv
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
 	"retarget/internal/adv-service/entity/adv"
 	repoAdv "retarget/internal/adv-service/repo/adv"
+	pb "retarget/pkg/proto"
 
 	"github.com/google/uuid"
 )
@@ -19,10 +21,11 @@ type AdvUsecaseInterface interface {
 
 type AdvUsecase struct {
 	advRepository repoAdv.AdvRepositoryInterface
+	bannerClient  pb.BannerServiceClient
 }
 
-func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface) *AdvUsecase {
-	return &AdvUsecase{advRepository: advRepo}
+func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface, bannerClient pb.BannerServiceClient) *AdvUsecase {
+	return &AdvUsecase{advRepository: advRepo, bannerClient: bannerClient}
 }
 
 func (a *AdvUsecase) GetLinks(userID int) ([]adv.Link, error) {
@@ -38,9 +41,14 @@ func (a *AdvUsecase) GetLinks(userID int) ([]adv.Link, error) {
 	return links, nil
 }
 
-func (a *AdvUsecase) GetIframe(key string) ([]adv.Link, error) {
-
-	return links, nil
+func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
+	emptyReq := &pb.Empty{}
+	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
+	banner, err := a.bannerClient.GetRandomBanner(ctx, emptyReq)
+	if err != nil {
+		return nil, err
+	}
+	return banner, nil
 }
 
 func (a *AdvUsecase) CheckLink(link string) error {

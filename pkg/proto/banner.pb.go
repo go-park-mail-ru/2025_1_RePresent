@@ -135,10 +135,11 @@ const file_pkg_proto_banner_proto_rawDesc = "" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04link\x18\x04 \x01(\tR\x04link\"\a\n" +
-	"\x05Empty2@\n" +
+	"\x05Empty2v\n" +
 	"\rBannerService\x12/\n" +
 	"\n" +
-	"SendBanner\x12\x10.bannerpb.Banner\x1a\x0f.bannerpb.EmptyB$Z\"retarget/pkg/proto/banner;bannerpbb\x06proto3"
+	"SendBanner\x12\x10.bannerpb.Banner\x1a\x0f.bannerpb.Empty\x124\n" +
+	"\x0fGetRandomBanner\x12\x0f.bannerpb.Empty\x1a\x10.bannerpb.BannerB$Z\"retarget/pkg/proto/banner;bannerpbb\x06proto3"
 
 var (
 	file_pkg_proto_banner_proto_rawDescOnce sync.Once
@@ -159,9 +160,11 @@ var file_pkg_proto_banner_proto_goTypes = []any{
 }
 var file_pkg_proto_banner_proto_depIdxs = []int32{
 	0, // 0: bannerpb.BannerService.SendBanner:input_type -> bannerpb.Banner
-	1, // 1: bannerpb.BannerService.SendBanner:output_type -> bannerpb.Empty
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: bannerpb.BannerService.GetRandomBanner:input_type -> bannerpb.Empty
+	1, // 2: bannerpb.BannerService.SendBanner:output_type -> bannerpb.Empty
+	0, // 3: bannerpb.BannerService.GetRandomBanner:output_type -> bannerpb.Banner
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
