@@ -55,7 +55,6 @@ func (h *BannerController) GetBannerIFrameByID(w http.ResponseWriter, r *http.Re
 	}
 }
 
-// Нахуй
 func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -80,7 +79,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 		// обработка ошибки
 	}
 	data := IFrame{
-		ImageSrc:    url,
+		ImageSrc:    "" + url,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,

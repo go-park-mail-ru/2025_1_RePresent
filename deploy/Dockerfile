@@ -75,7 +75,7 @@ FROM alpine:latest AS banner-service
 WORKDIR /app
 COPY --from=banner-builder /bin/banner-service ./
 COPY --from=banner-builder /app/configs ./configs
-COPY --from=banner-builder /app/internal/banner-service/templates ./templates
+COPY --from=banner-builder /app/pkg/templates ./templates
 ENTRYPOINT ["./banner-service"]
 
 # ---- Profile Service ----
@@ -105,4 +105,5 @@ FROM alpine:latest AS adv-service
 WORKDIR /app
 COPY --from=adv-builder /bin/adv-service ./
 COPY --from=adv-builder /app/configs ./configs
+COPY --from=banner-builder /app/pkg/templates ./templates
 ENTRYPOINT ["./adv-service"]

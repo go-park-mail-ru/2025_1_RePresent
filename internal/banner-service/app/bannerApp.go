@@ -1,6 +1,7 @@
 package authApp
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	configs "retarget/configs"
@@ -34,6 +35,24 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 
 	mux := controller.SetupRoutes(authenticator, banner, image)
 
-	server.RunGRPCServer(*banner)
-	log.Fatal(http.ListenAndServe(":8024", middleware.CORS(mux)))
+	errChan := make(chan error)
+
+	// Запуск gRPC-сервера в горутине
+	go func() {
+		log.Println("Starting gRPC server...")
+		server.RunGRPCServer(*banner)
+	}()
+
+	// Запуск HTTP-сервера в горутине
+	go func() {
+		log.Println("Starting HTTP server on :8024...")
+		if err := http.ListenAndServe(":8024", middleware.CORS(mux)); err != nil {
+			errChan <- fmt.Errorf("HTTP server failed: %v", err)
+		}
+	}()
+
+	// Ожидание ошибки из любого сервера
+	err = <-errChan
+	log.Fatalf("Server error: %v", err)
+
 }
