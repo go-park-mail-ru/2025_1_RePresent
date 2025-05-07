@@ -8,6 +8,7 @@ import (
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 
 	// middleware "retarget/pkg/middleware"
+	"retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
@@ -16,7 +17,7 @@ import (
 func SetupRoutes(authenticator *authenticate.Authenticator, advUsecase *usecaseAdv.AdvUsecase, slotUsecase *usecaseSlot.SlotUsecase) *mux.Router {
 	r := mux.NewRouter()
 
-	// r.Use(middleware.LogMiddleware)
+	r.Use(middleware.LogMiddleware)
 
 	advRoutes := handlerAdv.SetupAdvRoutes(authenticator, advUsecase, slotUsecase)
 	r.PathPrefix("/api/v1/adv/").Handler(advRoutes)
