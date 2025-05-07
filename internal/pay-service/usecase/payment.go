@@ -13,20 +13,20 @@ func NewPayUsecase(payRepository *repo.PaymentRepository) *PaymentUsecase {
 	return &PaymentUsecase{PaymentRepository: payRepository}
 }
 
-func (u PaymentUsecase) GetBalanceByUserId(id int) (float64, error) {
-	balance, err := u.PaymentRepository.GetBalanceByUserId(id)
+func (u PaymentUsecase) GetBalanceByUserId(id int, requestID string) (float64, error) {
+	balance, err := u.PaymentRepository.GetBalanceByUserId(id, requestID)
 	if err != nil {
 		return 0, err
 	}
 	return balance, nil
 }
 
-func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) error {
+func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID string) error {
 	if amount <= 0 {
 		return repo.ErrInvalidAmount
 	}
 
-	_, err := uc.PaymentRepository.UpdateBalance(userID, float64(amount))
+	_, err := uc.PaymentRepository.UpdateBalance(userID, float64(amount), requestID)
 	if err != nil {
 		return err
 	}
@@ -35,6 +35,10 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64) error {
 	// return uc.PaymentRepository.GetLastTransaction(userID)
 }
 
-func (uc *PaymentUsecase) GetTransactionByID(transactionID string) (*entity.Transaction, error) {
-	return uc.PaymentRepository.GetTransactionByID(transactionID)
+func (uc *PaymentUsecase) GetTransactionByID(transactionID string, requestID string) (*entity.Transaction, error) {
+	return uc.PaymentRepository.GetTransactionByID(transactionID, requestID)
+}
+
+func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id, amount int) error {
+	return uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
 }

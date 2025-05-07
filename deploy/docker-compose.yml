@@ -11,7 +11,7 @@ services:
       - REDIS_DATABASE=0
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
-      - api_network
+      - retarget_network
     volumes:
       - ./auth-data:/data
     healthcheck:
@@ -27,26 +27,34 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     ports:
-      - "${PORT}:${INSIDE_PORT}"
+      - "${PORT}:5432"
     command: [
       "postgres",
-      "-c", "password_encryption=md5",
+      "-c", "password_encryption=scram-sha-256",
       "-c", "max_connections=200",
-      "-c", "log_statement=all",
-      "-c", "ssl=off"
+      "-c", "log_statement=all", # или dll
+      "-c", "ssl=off",
+      "-c", "shared_buffers=256MB",
+      "-c", "work_mem=16MB"
     ]
     networks:
-      - api_network
+      - retarget_network
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./requests/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
+      - ./requests/postgre/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 5
-    restart: always
+      retries: 10
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   minio:
     image: minio/minio:latest
@@ -57,7 +65,7 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
     networks:
-      - api_network
+      - retarget_network
     volumes:
       - ./minio-data:/data
     command: server /data
@@ -72,8 +80,9 @@ services:
       - "8025:8025"
     depends_on:
       - postgresdb
+      - redis0
     networks:
-      - api_network
+      - retarget_network
 
   banner:
     build:
@@ -83,10 +92,12 @@ services:
     container_name: ReTargetApiBanner
     ports:
       - "8024:8024"
+      - "50051:50051"
     depends_on:
       - postgresdb
+      - redis0
     networks:
-      - api_network
+      - retarget_network
 
   profile:
     build:
@@ -98,8 +109,9 @@ services:
       - "8023:8023"
     depends_on:
       - postgresdb
+      - redis0
     networks:
-      - api_network
+      - retarget_network
 
   pay:
     build:
@@ -109,14 +121,104 @@ services:
     container_name: ReTargetApiPayment
     ports:
       - "8022:8022"
+      - "8054:8054"
     depends_on:
       - postgresdb
+      - redis0
     networks:
-      - api_network
+      - retarget_network
+
+  csat:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: csat-service
+    container_name: ReTargetApiCsat
+    ports:
+      - "8035:8035"
+    depends_on:
+      - clickhouse
+      - redis0
+    networks:
+      - retarget_network
+
+  adv:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: adv-service
+    container_name: ReTargetApiAdv
+    ports:
+      - "8032:8032"
+    depends_on:
+      - clickhouse
+      - scylla
+      - redis0
+    networks:
+      - retarget_network
+
+  # docker exec -it ReTargetClickHouse clickhouse-client --user=user --password=123456 --database=csat
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    container_name: ReTargetClickHouse
+    ports:
+      - "8124:8124"  # HTTP
+      - "9124:9124"  # TCP
+
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./requests/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      CLICKHOUSE_USER: user
+      CLICKHOUSE_PASSWORD: 123456
+      CLICKHOUSE_DB: csat
+    networks:
+      - retarget_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ReTargetGrafana
+    ports:
+      - "8050:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_HTTP_ADDR=0.0.0.0
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - clickhouse
+    networks:
+      - retarget_network
+
+# OR IF IN scylla_scripts: docker exec ReTargetScylla cqlsh -f /scylla_scripts/init.cql
+  scylla:
+    image: scylladb/scylla
+    container_name: ReTargetScylla
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylla_data:/var/lib/scylla
+      - ./requests/scylla/init.cql:/scylla_scripts/init.cql
+    environment:
+      CASSANDRA_PASSWORD: 12345678
+      SCYLLA_LOGLEVEL: "error"
+      SCYLLA_LOGMODE: "none"
+    command: [
+      "--developer-mode=1",
+      "--overprovisioned=0",
+      "--default-log-level", "error",
+    ]
+    networks:
+      - retarget_network
 
 volumes:
   pg_data:
+  clickhouse_data:
+  grafana_data:
+  scylla_data:
 
 networks:
-  api_network:
-    driver: bridge
+  retarget_network:
+    external: true

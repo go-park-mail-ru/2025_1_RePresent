@@ -13,8 +13,8 @@ import (
 
 type AvatarUsecaseInterface interface {
 	generateAvatarName(id int) string
-	DownloadAvatar(userID int) (*minio.Object, error)
-	UploadAvatar(userID int, file multipart.File) error
+	DownloadAvatar(userID int, requestID string) (*minio.Object, error)
+	UploadAvatar(userID int, file multipart.File, requestID string) error
 }
 
 type AvatarUsecase struct {
@@ -31,17 +31,17 @@ func (r *AvatarUsecase) generateAvatarName(id int) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (r *AvatarUsecase) DownloadAvatar(userID int) (*minio.Object, error) {
+func (r *AvatarUsecase) DownloadAvatar(userID int, requestID string) (*minio.Object, error) {
 	objectName := r.generateAvatarName(userID)
-	return r.avatarRepository.DownloadFile(objectName)
+	return r.avatarRepository.DownloadFile(objectName, requestID)
 }
 
-func (r *AvatarUsecase) UploadAvatar(userID int, file multipart.File) error {
+func (r *AvatarUsecase) UploadAvatar(userID int, file multipart.File, requestID string) error {
 	if file == nil {
 		return errors.New("Uploaded file is nil")
 	}
 	objectName := r.generateAvatarName(userID)
-	err := r.avatarRepository.UploadFile(objectName, file)
+	err := r.avatarRepository.UploadFile(objectName, file, requestID)
 	if err != nil {
 		return err
 	}

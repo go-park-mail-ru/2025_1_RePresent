@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 
 	"log"
 	entity "retarget/internal/pay-service/entity"
@@ -30,59 +31,115 @@ type PaymentRepositoryInterface interface {
 }
 
 type PaymentRepository struct {
-	db *sql.DB
+	db         *sql.DB
+	logger     *zap.SugaredLogger
+	clickhouse *sql.DB
 }
 
-func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string) *PaymentRepository {
+func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string, logger *zap.SugaredLogger) *PaymentRepository {
 	paymentRepo := &PaymentRepository{}
 	db, err := sql.Open("postgres", fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=%s",
 		username, password, dbname, host, port, sslmode))
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	paymentRepo.logger = logger
 	paymentRepo.db = db
 	return paymentRepo
 }
 
-func (r *PaymentRepository) GetBalanceByUserId(id int) (float64, error) {
-	var balance float64
+func (r *PaymentRepository) GetBalanceByUserId(id int, requestID string) (float64, error) {
+	startTime := time.Now()
+	query := "SELECT balance FROM auth_user WHERE id = $1"
 
-	err := r.db.QueryRow(
-		"SELECT balance FROM auth_user WHERE id = $1",
-		id,
-	).Scan(&balance)
+	r.logger.Debugw("Getting user balance",
+		"request_id", requestID,
+		"query", query,
+		"userID", id,
+	)
+
+	var balance float64
+	err := r.db.QueryRow(query, id).Scan(&balance)
 
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
+		r.logger.Debugw("User not found",
+			"request_id", requestID,
+			"userID", id,
+			"timeTakenMs", time.Since(startTime).Milliseconds(),
+		)
 		return 0, fmt.Errorf("user with id %d not found", id)
 	case err != nil:
+		r.logger.Debugw("Failed to get balance",
+			"request_id", requestID,
+			"userID", id,
+			"error", err.Error(),
+			"timeTakenMs", time.Since(startTime).Milliseconds(),
+		)
 		return 0, fmt.Errorf("error getting balance: %w", err)
 	default:
+		r.logger.Debugw("Balance retrieved successfully",
+			"request_id", requestID,
+			"userID", id,
+			"balance", balance,
+			"timeTakenMs", time.Since(startTime).Milliseconds(),
+		)
 		return balance, nil
 	}
 }
 
-func (r *PaymentRepository) UpdateBalance(userID int, amount float64) (float64, error) {
+func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID string) (float64, error) {
+	startTime := time.Now()
 	query := `
         UPDATE auth_user 
         SET balance = balance + $1
         WHERE id = $2
         RETURNING balance
     `
+
+	r.logger.Debugw("Starting balance update",
+		"request_id", requestID,
+		"query", query,
+		"userID", userID,
+		"amount", amount,
+	)
+
 	var newBalance float64
 	err := r.db.QueryRow(query, amount, userID).Scan(&newBalance)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Debugw("User not found for balance update",
+				"request_id", requestID,
+				"userID", userID,
+				"timeTakenMs", time.Since(startTime).Milliseconds(),
+			)
 			return 0, ErrUserNotFound
 		}
-		return 0, fmt.Errorf("update balance failed: %w", err)
 
+		r.logger.Debugw("Balance update failed",
+			"request_id", requestID,
+			"userID", userID,
+			"amount", amount,
+			"error", err.Error(),
+			"timeTakenMs", time.Since(startTime).Milliseconds(),
+		)
+		return 0, fmt.Errorf("update balance failed: %w", err)
 	}
+
+	r.logger.Debugw("Balance updated successfully",
+		"request_id", requestID,
+		"userID", userID,
+		"newBalance", newBalance,
+		"timeTakenMs", time.Since(startTime).Milliseconds(),
+	)
+
 	return newBalance, nil
 }
 
-func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction) error {
+func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction, requestID string) error {
 	query := `
         INSERT INTO transaction
             (transaction_id, user_id, amount, type, status, created_at)
@@ -95,7 +152,7 @@ func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction) error {
 	return err
 }
 
-func (r *PaymentRepository) TopUpAccount(userID int, amount int64) error {
+func (r *PaymentRepository) TopUpAccount(userID int, amount int64, requestID string) error {
 	transactionID := uuid.New().String()
 
 	return r.CreateTransaction(&entity.Transaction{
@@ -105,10 +162,10 @@ func (r *PaymentRepository) TopUpAccount(userID int, amount int64) error {
 		Type:          "topup",
 		Status:        "completed",
 		CreatedAt:     time.Now(),
-	})
+	}, requestID)
 }
 
-func (r *PaymentRepository) GetLastTransaction(userID int) (*entity.Transaction, error) {
+func (r *PaymentRepository) GetLastTransaction(userID int, requestID string) (*entity.Transaction, error) {
 	var tx entity.Transaction
 
 	err := r.db.QueryRow(
@@ -123,7 +180,7 @@ func (r *PaymentRepository) GetLastTransaction(userID int) (*entity.Transaction,
 	return &tx, nil
 }
 
-func (r *PaymentRepository) GetTransactionByID(transactionID string) (*entity.Transaction, error) {
+func (r *PaymentRepository) GetTransactionByID(transactionID string, requestID string) (*entity.Transaction, error) {
 	var tx entity.Transaction
 
 	err := r.db.QueryRow(
@@ -138,6 +195,40 @@ func (r *PaymentRepository) GetTransactionByID(transactionID string) (*entity.Tr
 		return nil, err
 	}
 	return &tx, nil
+}
+
+func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount int) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	_, err = tx.Exec(`
+        UPDATE auth_user 
+        SET balance = balance - $1 
+        WHERE id = $2`,
+		amount,
+		user_slot_id)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to update first user balance: %w", err)
+	}
+
+	_, err = tx.Exec(`
+        UPDATE auth_user 
+        SET balance = balance + $1 
+        WHERE id = $2`,
+		amount,
+		user_banner_id)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to update second user balance: %w", err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
 }
 
 func (r *PaymentRepository) CloseConnection() error {

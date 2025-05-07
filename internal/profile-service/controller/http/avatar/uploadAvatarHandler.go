@@ -8,6 +8,7 @@ import (
 )
 
 func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
@@ -70,10 +71,11 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = c.avatarUsecase.UploadAvatar(userID, file)
+	err = c.avatarUsecase.UploadAvatar(userID, file, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload avatar"))
+		c.logger.Errorw("Failed to upload avatar", "err", err)
 		return
 	}
 

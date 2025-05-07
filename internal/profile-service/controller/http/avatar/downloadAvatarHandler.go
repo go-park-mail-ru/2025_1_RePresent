@@ -8,6 +8,7 @@ import (
 )
 
 func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
@@ -21,7 +22,7 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	}
 	userID := user.UserID
 
-	object, err := c.avatarUsecase.DownloadAvatar(userID)
+	object, err := c.avatarUsecase.DownloadAvatar(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found"))

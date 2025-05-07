@@ -9,17 +9,18 @@ import (
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
-func SetupRoutes(authenticator *authenticate.Authenticator, profileUsecase *usecaseProfile.ProfileUsecase, avatarUsecase *usecaseAvatar.AvatarUsecase) *mux.Router {
+func SetupRoutes(authenticator *authenticate.Authenticator, profileUsecase *usecaseProfile.ProfileUsecase, avatarUsecase *usecaseAvatar.AvatarUsecase, logger *zap.SugaredLogger) *mux.Router {
 	r := mux.NewRouter()
 
 	r.Use(middleware.LogMiddleware)
 
-	profileRoutes := handlerProfile.SetupProfileRoutes(authenticator, profileUsecase)
+	profileRoutes := handlerProfile.SetupProfileRoutes(authenticator, profileUsecase, logger)
 	r.PathPrefix("/api/v1/profile/").Handler(profileRoutes)
 
-	avatarRoutes := handlerAvatar.SetupAvatarRoutes(authenticator, avatarUsecase)
+	avatarRoutes := handlerAvatar.SetupAvatarRoutes(authenticator, avatarUsecase, logger)
 	r.PathPrefix("/api/v1/avatar/").Handler(avatarRoutes)
 
 	return r

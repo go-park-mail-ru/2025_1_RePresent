@@ -14,6 +14,7 @@ type LoginRequest struct {
 }
 
 func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
@@ -34,7 +35,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.authUsecase.Login(req.Email, req.Password, req.Role)
+	user, err := c.authUsecase.Login(req.Email, req.Password, req.Role, requestID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -7,6 +7,7 @@ import (
 	repoAuth "retarget/internal/auth-service/repo/auth"
 
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/inf.v0"
 )
 
 type AuthUsecaseInterface interface {
@@ -30,17 +31,14 @@ func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.Ses
 	return &AuthUsecase{authRepository: userRepo, sessionRepository: sessionRepo}
 }
 
-func (a *AuthUsecase) Login(email string, password string, role int) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByEmail(email)
+func (a *AuthUsecase) Login(email string, password string, role int, requestID string) (*entityAuth.User, error) {
+	user, err := a.authRepository.GetUserByEmail(email, requestID)
 	if err != nil {
-		return nil, err
-	}
-	if user.Role != role {
 		return nil, errors.New("Incorrect user data")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Incorrect user data")
 	}
 	return user, nil
 }
@@ -53,16 +51,16 @@ func (a *AuthUsecase) Logout(sessionId string) error {
 	return nil
 }
 
-func (a *AuthUsecase) GetUser(user_id int) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByID(user_id)
+func (a *AuthUsecase) GetUser(user_id int, requestID string) (*entityAuth.User, error) {
+	user, err := a.authRepository.GetUserByID(user_id, requestID)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (a *AuthUsecase) Register(username string, email string, password string, role int) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByEmail(email)
+func (a *AuthUsecase) Register(username string, email string, password string, role int, requestID string) (*entityAuth.User, error) {
+	user, err := a.authRepository.GetUserByEmail(email, requestID)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -70,7 +68,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, errors.New("Пользователь с таким email уже существует")
 	}
 
-	user, err = a.authRepository.GetUserByUsername(username)
+	user, err = a.authRepository.GetUserByUsername(username, requestID)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -88,7 +86,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		Email:       email,
 		Password:    hashedPassword,
 		Description: "",
-		Balance:     0,
+		Balance:     entityAuth.Decimal{Dec: inf.NewDec(0, 0)},
 		Role:        role,
 	}
 
@@ -97,7 +95,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		return nil, err
 	}
 
-	err = a.authRepository.CreateNewUser(user)
+	err = a.authRepository.CreateNewUser(user, requestID)
 	if err != nil {
 		return nil, err
 	}

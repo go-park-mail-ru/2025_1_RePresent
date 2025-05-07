@@ -1,15 +1,25 @@
 package middleware
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"log"
 	"net/http"
 	"os"
+	"retarget/pkg/entity"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 var logger *logrus.Logger
+
+type responseWriter struct {
+	http.ResponseWriter
+	written *bool
+	status  int
+}
 
 func init() {
 	logger = logrus.New()
@@ -18,10 +28,15 @@ func init() {
 	logger.SetFormatter(&logrus.JSONFormatter{})
 }
 
-type responseWriter struct {
-	http.ResponseWriter
-	written *bool
-	status  int
+func generateRequestId() string {
+	bytes := make([]byte, 16)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		panic(err)
+	}
+	// Превращаем байты в строку
+	randomString := hex.EncodeToString(bytes)
+	return randomString
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
@@ -39,6 +54,9 @@ func LogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var written bool
 		mw := &responseWriter{w, &written, 0}
+		requestID := generateRequestId()
+		ctx := context.WithValue(r.Context(), entity.СtxKeyRequestID{}, requestID)
+		r = r.WithContext(ctx)
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -66,6 +84,7 @@ func LogMiddleware(next http.Handler) http.Handler {
 				"status":     mw.status,
 				"latency":    latency,
 				"user_agent": r.UserAgent(),
+				"request_id": requestID,
 			}).Info("Request")
 		} else {
 			log.Println("Logger is nil")

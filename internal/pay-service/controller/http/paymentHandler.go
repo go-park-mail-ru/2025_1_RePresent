@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"retarget/internal/pay-service/repo"
-	"retarget/pkg/entity"
+	entity "retarget/pkg/entity"
+	response "retarget/pkg/entity"
 
 	"github.com/google/uuid"
 )
@@ -20,6 +21,7 @@ type TopUpRequest struct {
 }
 
 func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -35,7 +37,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	}
 	userID := userSession.UserID
 
-	balance, err := h.PaymentUsecase.GetBalanceByUserId(userID)
+	balance, err := h.PaymentUsecase.GetBalanceByUserId(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(entity.NewResponse(
@@ -62,6 +64,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -89,7 +92,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err = h.PaymentUsecase.TopUpBalance(userID, req.Amount); err != nil {
+	if err = h.PaymentUsecase.TopUpBalance(userID, req.Amount, requestID); err != nil {
 		// handleTopUpError(w, err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
@@ -128,9 +131,10 @@ func handleTopUpError(w http.ResponseWriter, err error) {
 }
 
 func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	transactionID := r.URL.Query().Get("transactionId")
 
-	tx, err := h.PaymentUsecase.GetTransactionByID(transactionID)
+	tx, err := h.PaymentUsecase.GetTransactionByID(transactionID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
@@ -140,4 +144,8 @@ func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tx)
+}
+
+func (h *PaymentController) RegUserActivity(w http.ResponseWriter, r *http.Request) {
+
 }
