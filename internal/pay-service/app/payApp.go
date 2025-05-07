@@ -6,6 +6,7 @@ import (
 	"retarget/configs"
 	payAppHttp "retarget/internal/pay-service/controller"
 	payMiddleware "retarget/internal/pay-service/controller/http/middleware"
+	server "retarget/internal/pay-service/grpc"
 	repoPay "retarget/internal/pay-service/repo"
 	usecasePay "retarget/internal/pay-service/usecase"
 	authenticate "retarget/pkg/middleware/auth"
@@ -27,6 +28,11 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	}()
 
 	payUsecase := usecasePay.NewPayUsecase(payRepository)
+
+	go func() {
+		log.Println("Starting gRPC server...")
+		server.RunGRPCServer(*payUsecase)
+	}()
 
 	mux := payAppHttp.SetupRoutes(authenticator, payUsecase)
 
