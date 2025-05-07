@@ -43,6 +43,6 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	owner, _ := strconv.Atoi(banner.OwnerID)
 	userID, _, _ := c.advUsecase.SlotsRepository.GetUserByLink(ctx, secret_link)
-	request := protoPayment.PaymentRequest{FromUserId: int32(owner), ToUserId: int32(userID), Amount: 1}
+	request := protoPayment.PaymentRequest{FromUserId: int32(owner), ToUserId: int32(userID), Amount: int32(1)}
 	c.advUsecase.PaymentClient.RegUserActivity(ctx, &request)
 }
