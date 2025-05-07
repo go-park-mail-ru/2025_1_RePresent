@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"strconv"
 
 	"retarget/internal/banner-service/usecase" // Импорт usecase
 	bannerpb "retarget/pkg/proto"              // Импорт сгенерированного gRPC-кода
@@ -39,6 +40,7 @@ func (s *BannerServer) GetRandomBanner(
 		Content:     banner.Content,
 		Description: banner.Description,
 		Link:        banner.Link,
+		OwnerID:     strconv.Itoa(banner.OwnerID),
 	}, nil
 }
 
