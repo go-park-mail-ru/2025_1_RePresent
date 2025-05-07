@@ -20,7 +20,7 @@ func CORS(next http.Handler) http.Handler {
 
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
-
+		w.Header().Set("Content-Security-Policy", "frame-ancestors *;")
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
