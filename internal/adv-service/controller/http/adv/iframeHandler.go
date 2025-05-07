@@ -43,7 +43,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Начинаю работать с Толей")
 	ctx := context.Background()
 	owner, _ := strconv.Atoi(banner.OwnerID)
-	log.Println("строка в овнера перегналась")
+	log.Println("строка в овнера перегналась", banner.OwnerID)
 	userID, _, _ := c.advUsecase.SlotsRepository.GetUserByLink(ctx, secret_link)
 	log.Println("взяли юзера по строке: ", userID)
 	request := protoPayment.PaymentRequest{FromUserId: int32(owner), ToUserId: int32(userID), Amount: int32(1)}
