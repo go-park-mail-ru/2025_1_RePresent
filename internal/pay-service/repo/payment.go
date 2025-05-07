@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -37,25 +36,15 @@ type PaymentRepository struct {
 	clickhouse *sql.DB
 }
 
-func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string, dsn string, logger *zap.SugaredLogger) *PaymentRepository {
+func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string, logger *zap.SugaredLogger) *PaymentRepository {
 	paymentRepo := &PaymentRepository{}
 	db, err := sql.Open("postgres", fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=%s",
 		username, password, dbname, host, port, sslmode))
 
-	clickhouse, err := sql.Open("clickhouse", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := clickhouse.PingContext(ctx); err != nil {
-		log.Fatal("failed to ping DB: %w", err)
-		return nil
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	paymentRepo.clickhouse = clickhouse
+
 	paymentRepo.logger = logger
 	paymentRepo.db = db
 	return paymentRepo
