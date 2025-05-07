@@ -24,7 +24,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	banner, err := c.advUsecase.GetIframe(secret_link)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Not found"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 	}
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	data := IFrame{
