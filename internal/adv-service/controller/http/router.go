@@ -2,6 +2,7 @@ package http
 
 import (
 	// handlerAdv "retarget/internal/adv-service/controller/http/adv"
+	handlerAdv "retarget/internal/adv-service/controller/http/adv"
 	handlerSlot "retarget/internal/adv-service/controller/http/slot"
 	usecaseAdv "retarget/internal/adv-service/usecase/adv"
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
@@ -16,8 +17,8 @@ func SetupRoutes(authenticator *authenticate.Authenticator, advUsecase *usecaseA
 
 	r.Use(middleware.LogMiddleware)
 
-	//advRoutes := handlerAdv.SetupAdvRoutes(authenticator, advUsecase, slotUsecase)
-	//r.PathPrefix("/api/v1/adv/").Handler(advRoutes)
+	advRoutes := handlerAdv.SetupAdvRoutes(authenticator, advUsecase, slotUsecase)
+	r.PathPrefix("/api/v1/adv/").Handler(advRoutes)
 
 	slotRoutes := handlerSlot.SetupSlotRoutes(authenticator, slotUsecase)
 	r.PathPrefix("/api/v1/slot/").Handler(slotRoutes)
