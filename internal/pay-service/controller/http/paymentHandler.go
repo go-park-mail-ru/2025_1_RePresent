@@ -145,3 +145,7 @@ func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tx)
 }
+
+func (h *PaymentController) RegUserActivity(w http.ResponseWriter, r *http.Request) {
+
+}

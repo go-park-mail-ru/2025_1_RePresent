@@ -38,3 +38,7 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID strin
 func (uc *PaymentUsecase) GetTransactionByID(transactionID string, requestID string) (*entity.Transaction, error) {
 	return uc.PaymentRepository.GetTransactionByID(transactionID, requestID)
 }
+
+func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id, amount int) error {
+	return uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
+}
