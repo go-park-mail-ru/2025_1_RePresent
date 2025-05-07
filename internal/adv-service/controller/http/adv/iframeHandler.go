@@ -48,6 +48,6 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("взяли юзера по строке: ", userID)
 	request := protoPayment.PaymentRequest{FromUserId: int32(owner), ToUserId: int32(userID), Amount: int32(1)}
 	log.Println("реквест: ", request)
-	c.advUsecase.PaymentClient.RegUserActivity(ctx, &request)
-	log.Println("всё хорошо: ", request)
+	_, err = c.advUsecase.PaymentClient.RegUserActivity(ctx, &request)
+	log.Println("всё хорошо: ", err)
 }
