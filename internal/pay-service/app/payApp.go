@@ -19,7 +19,8 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		log.Fatal(err.Error())
 	}
 
-	payRepository := repoPay.NewPaymentRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode, logger)
+	dsn := "clickhouse://user:123456@ReTargetClickHouse:9000/csat"
+	payRepository := repoPay.NewPaymentRepository(cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode, dsn, logger)
 	defer func() {
 		if err := payRepository.CloseConnection(); err != nil {
 			log.Println(err)
