@@ -27,7 +27,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	slotRepository := repoSlot.NewSlotRepository("ReTargetScylla", 9042, "slot_space", "cassandra", "12345678")
 	defer slotRepository.Close()
 
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	conn, err := grpc.Dial("ReTargetApiBanner:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
