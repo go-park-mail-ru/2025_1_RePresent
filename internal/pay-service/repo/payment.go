@@ -197,10 +197,10 @@ func (r *PaymentRepository) GetTransactionByID(transactionID string, requestID s
 	return &tx, nil
 }
 
-func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount int) error {
+func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount int) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return -1, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
 	_, err = tx.Exec(`
@@ -211,7 +211,7 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount
 		user_slot_id)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("failed to update first user balance: %w", err)
+		return -1, fmt.Errorf("failed to update first user balance: %w", err)
 	}
 
 	_, err = tx.Exec(`
@@ -222,13 +222,13 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount
 		user_banner_id)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("failed to update second user balance: %w", err)
+		return -1, fmt.Errorf("failed to update second user balance: %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return -1, fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return nil
+	return user_banner_id, nil
 }
 
 func (r *PaymentRepository) CloseConnection() error {

@@ -8,6 +8,7 @@ import (
 	payMiddleware "retarget/internal/pay-service/controller/http/middleware"
 	server "retarget/internal/pay-service/grpc"
 	repoPay "retarget/internal/pay-service/repo"
+	repoNotice "retarget/internal/pay-service/repo/notice"
 	usecasePay "retarget/internal/pay-service/usecase"
 	authenticate "retarget/pkg/middleware/auth"
 
@@ -26,8 +27,9 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 			log.Println(err)
 		}
 	}()
+	noticeRepository := repoNotice.NewNoticeRepository("some conn endpoint")
 
-	payUsecase := usecasePay.NewPayUsecase(payRepository)
+	payUsecase := usecasePay.NewPayUsecase(payRepository, noticeRepository)
 
 	go func() {
 		log.Println("Starting gRPC server...")
