@@ -29,12 +29,12 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 			log.Println(err)
 		}
 	}()
-	noticeRepository := repoNotice.NewNoticeRepository([]string{"localhost:9092"}, "notifications", logger) // balance_notification_topic
+	noticeRepository := repoNotice.NewNoticeRepository([]string{"kafka:9092"}, "notifications", logger) // balance_notification_topic
 	if noticeRepository == nil {
 		logger.Fatal("failed to initialize NoticeRepository")
 	}
 	defer noticeRepository.Close()
-	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 24*time.Hour, 1)
+	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 24*time.Hour, cfg.AttemptRedis.Attempts)
 
 	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository)
 
