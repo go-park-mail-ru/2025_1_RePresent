@@ -16,6 +16,14 @@ type DatabaseConfig struct {
 	Sslmode  string
 }
 
+type ScyllaConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	LinkKeyspace string
+}
+
 type MailConfig struct {
 	SmtpServer string
 	Port       string
@@ -27,14 +35,14 @@ type MailConfig struct {
 type AuthRedisConfig struct {
 	EndPoint string
 	Password string
-	Database int
+	Database string
 }
 
 type AttemptRedisConfig struct {
 	EndPoint string
 	Password string
-	Database int
-	Attempts int
+	Database string
+	Attempts string
 }
 
 type MinioConfig struct {
@@ -54,7 +62,7 @@ type Config struct {
 }
 
 
-func LoadConfig() (Config, error) {
+func LoadConfig() (*Config, error) {
 	err := godotenv.Load("./configs/.env")
 	if err != nil {
 		return Config{}, fmt.Errorf("Error loading .env file")
@@ -62,37 +70,45 @@ func LoadConfig() (Config, error) {
 
 	config := Config{
 		Database: DatabaseConfig{
-			Host:     os.Getenv("HOST"),
-			Port:     parseEnvInt("PORT"),
-			Username: os.Getenv("POSTGRES_USER"),
-			Password: os.Getenv("POSTGRES_PASSWORD"),
-			Dbname:   os.Getenv("POSTGRES_DB"),
-			Sslmode:  os.Getenv("SSLMODE"),
+			Host:     os.Getenv("PSQL_HOST"),
+			Port:     os.Getenv("PSQL_PORT"),
+			Username: os.Getenv("PSQL_POSTGRES_USER"),
+			Password: os.Getenv("PSQL_POSTGRES_PASSWORD"),
+			Dbname:   os.Getenv("PSQL_POSTGRES_DB"),
+			Sslmode:  os.Getenv("PSQL_SSLMODE"),
 		},
 		Email: MailConfig{
 			SmtpServer: os.Getenv("SMTP_SERVER"),
-			Port:       os.Getenv("PORT"),
-			Username:   os.Getenv("USERNAME"),
-			Password:   os.Getenv("PASSWORD"),
-			Sender:     os.Getenv("SENDER"),
+			Port:       os.Getenv("SMTP_PORT"),
+			Username:   os.Getenv("SMTP_USERNAME"),
+			Password:   os.Getenv("SMTP_PASSWORD"),
+			Sender:     os.Getenv("SMTP_SENDER"),
 		},
 		AuthRedis: AuthRedisConfig{
-			EndPoint: os.Getenv("ENDPOINT"),
-			Password: os.Getenv("PASSWORD"),
-			Database: parseEnvInt("DB_NUMBER"),
+			EndPoint: os.Getenv("REDIS_ENDPOINT"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+			Database: os.Getenv("REDIS_DB_NUMBER"),
 		},
 		AttemptRedis: AttemptRedisConfig{
-			EndPoint: os.Getenv("ENDPOINT"),
-			Password: os.Getenv("PASSWORD"),
-			Database: parseEnvInt("DB_NUMBER"),
-			Attempts: parseEnvInt("ATTEMPTS"),
+			EndPoint: os.Getenv("REDIS_ENDPOINT"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+			Database: os.Getenv("REDIS_DB_NUMBER"),
+			Attempts: os.Getenv("REDIS_ATTEMPTS"),
 		},
 		Minio: MinioConfig{
-			EndPoint:       os.Getenv("ENDPOINT"),
-			AccessKeyID:    os.Getenv("ACCESS_KEY_ID"),
-			SecretAccesKey: os.Getenv("SECRET_ACCESS_KEY"),
-			Token:          os.Getenv("TOKEN"),
-			UseSSL:         os.Getenv("USE_SSL"),
+			EndPoint:       os.Getenv("MINIO_ENDPOINT"),
+			AccessKeyID:    os.Getenv("MINIO_ACCESS_KEY_ID"),
+			SecretAccesKey: os.Getenv("MINIO_SECRET_ACCESS_KEY"),
+			Token:          os.Getenv("MINIO_TOKEN"),
+			UseSSL:         os.Getenv("MINIO_USE_SSL"),
+		},
+		
+		Scylla: ScyllaConfig{
+			Host:       os.Getenv("SCYLLA_HOST"),
+			Port:    os.Getenv("SCYLLA_PORT"),
+			Username: os.Getenv("SCYLLA_USERNAME"),
+			Password:          os.Getenv("MINIO_TOKEN"),
+			LinkKeyspace:         os.Getenv("SCYLLA_PASSWORD"),
 		},
 	}
 	return config, nil
