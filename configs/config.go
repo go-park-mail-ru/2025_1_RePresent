@@ -17,10 +17,10 @@ type DatabaseConfig struct {
 }
 
 type ScyllaConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host         string
+	Port         int
+	Username     string
+	Password     string
 	LinkKeyspace string
 }
 
@@ -35,13 +35,13 @@ type MailConfig struct {
 type AuthRedisConfig struct {
 	EndPoint string
 	Password string
-	Database string
+	Database int
 }
 
 type AttemptRedisConfig struct {
 	EndPoint string
 	Password string
-	Database string
+	Database int
 	Attempts string
 }
 
@@ -59,19 +59,19 @@ type Config struct {
 	AuthRedis    AuthRedisConfig
 	AttemptRedis AttemptRedisConfig
 	Minio        MinioConfig
+	Scylla       ScyllaConfig
 }
 
-
-func LoadConfig() (*Config, error) {
+func LoadConfigs() (*Config, error) {
 	err := godotenv.Load("./configs/.env")
 	if err != nil {
-		return Config{}, fmt.Errorf("Error loading .env file")
+		return &Config{}, fmt.Errorf("Error loading .env file")
 	}
 
 	config := Config{
 		Database: DatabaseConfig{
 			Host:     os.Getenv("PSQL_HOST"),
-			Port:     os.Getenv("PSQL_PORT"),
+			Port:     parseEnvInt("PSQL_PORT"),
 			Username: os.Getenv("PSQL_POSTGRES_USER"),
 			Password: os.Getenv("PSQL_POSTGRES_PASSWORD"),
 			Dbname:   os.Getenv("PSQL_POSTGRES_DB"),
@@ -87,12 +87,12 @@ func LoadConfig() (*Config, error) {
 		AuthRedis: AuthRedisConfig{
 			EndPoint: os.Getenv("REDIS_ENDPOINT"),
 			Password: os.Getenv("REDIS_PASSWORD"),
-			Database: os.Getenv("REDIS_DB_NUMBER"),
+			Database: parseEnvInt("REDIS_DB_NUMBER"),
 		},
 		AttemptRedis: AttemptRedisConfig{
 			EndPoint: os.Getenv("REDIS_ENDPOINT"),
 			Password: os.Getenv("REDIS_PASSWORD"),
-			Database: os.Getenv("REDIS_DB_NUMBER"),
+			Database: parseEnvInt("REDIS_DB_NUMBER"),
 			Attempts: os.Getenv("REDIS_ATTEMPTS"),
 		},
 		Minio: MinioConfig{
@@ -102,17 +102,28 @@ func LoadConfig() (*Config, error) {
 			Token:          os.Getenv("MINIO_TOKEN"),
 			UseSSL:         os.Getenv("MINIO_USE_SSL"),
 		},
-		
+
 		Scylla: ScyllaConfig{
-			Host:       os.Getenv("SCYLLA_HOST"),
-			Port:    os.Getenv("SCYLLA_PORT"),
-			Username: os.Getenv("SCYLLA_USERNAME"),
-			Password:          os.Getenv("MINIO_TOKEN"),
-			LinkKeyspace:         os.Getenv("SCYLLA_PASSWORD"),
+			Host:         os.Getenv("SCYLLA_HOST"),
+			Port:         parseEnvInt("SCYLLA_PORT"),
+			Username:     os.Getenv("SCYLLA_USERNAME"),
+			Password:     os.Getenv("MINIO_TOKEN"),
+			LinkKeyspace: os.Getenv("SCYLLA_PASSWORD"),
 		},
 	}
-	return config, nil
+	return &config, nil
 }
+
+func parseEnvInt(key string) int {
+	value := os.Getenv(key)
+	// Преобразуем строку в int, если нужно. Если ошибка, возвращаем 0
+	var result int
+	if _, err := fmt.Sscanf(value, "%d", &result); err != nil {
+		return 0
+	}
+	return result
+}
+
 // func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // 	var aux struct {
 // 		Database     DatabaseConfig     `yaml:"database"`
@@ -150,9 +161,9 @@ func LoadConfig() (*Config, error) {
 // 	return &cfg, nil
 // }
 
-// func (d DatabaseConfig) ConnectionString() string {
-// 	return fmt.Sprintf(
-// 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-// 		d.Host, d.Port, d.Username, d.Password, d.Dbname, d.Sslmode,
-// 	)
-// }
+func (d DatabaseConfig) ConnectionString() string {
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		d.Host, d.Port, d.Username, d.Password, d.Dbname, d.Sslmode,
+	)
+}
