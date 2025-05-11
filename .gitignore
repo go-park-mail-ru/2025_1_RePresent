@@ -31,3 +31,7 @@ deploy/*.txt
 deploy/requests/*.sql
 __pycache__
 sensitive
+deploy/minio-data
+deploy/auth-data
+deploy/venv
+deploy/index.html
