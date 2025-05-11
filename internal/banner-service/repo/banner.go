@@ -170,7 +170,7 @@ func (r *BannerRepository) UpdateBanner(banner entity.Banner, requestID string) 
 func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Banner, error) {
 	startTime := time.Now()
 	query := `
-		SELECT owner_id, title, description, content, balance, link, status
+		SELECT owner_id, title, description, content, balance, link, status, max_price
 		FROM banner
 		WHERE id = $1 AND deleted = FALSE;
 		`
@@ -190,6 +190,7 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Bann
 		&banner.Balance,
 		&banner.Link,
 		&banner.Status,
+		&banner.MaxPrice,
 	)
 	if err != nil {
 		r.logger.Debugw("Failed to fetch banner",
@@ -228,7 +229,6 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) err
 		"ownerID", owner,
 	)
 
-	// Проверка существования баннера
 	var deleted bool
 	err := r.db.QueryRow(
 		"SELECT deleted FROM banner WHERE id = $1 AND owner_id = $2",
