@@ -57,8 +57,15 @@
 
 ## ER-диаграмма (mermaid)
 
+```mermaid
 erDiagram
-
+    auth_user ||--o| banner : "owns"
+    auth_user ||--o| payment : "owns"
+    auth_user ||--o| transaction : "made"
+    banner }|--|| auth_user : "belongs to"
+    payment }|--|| auth_user : "belongs to"
+    transaction }|--|| auth_user : "belongs to"
+    
     auth_user {
         integer id
         text username
@@ -101,10 +108,4 @@ erDiagram
         integer status
         timestamp created_at
     }
-
-    auth_user ||--o| banner : "owns"
-    auth_user ||--o| payment : "owns"
-    auth_user ||--o| transaction : "made"
-    banner }|--|| auth_user : "belongs to"
-    payment }|--|| auth_user : "belongs to"
-    transaction }|--|| auth_user : "belongs to"
+```
