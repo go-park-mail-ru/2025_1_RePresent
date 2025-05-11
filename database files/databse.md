@@ -59,51 +59,55 @@
 
 ```mermaid
 erDiagram
-    auth_user ||--o{ transaction : "has"
-    auth_user ||--o{ payment : "has"
-    auth_user ||--o{ banner : "owns"
-
     auth_user {
-        int id
+        integer id
         text username
         text email
         bytea password
         text description
-        decimal balance
+        numeric balance
         timestamp created_at
         timestamp updated_at
-        int role
+        integer role
+    }
+
+    banner {
+        integer id
+        integer owner_id
+        text title
+        text description
+        integer balance
+        text content
+        text link
+        boolean deleted
+        integer status
+        numeric max_price
+    }
+
+    payment {
+        integer id
+        integer owner_id
+        integer amount
+        timestamp created_at
+        integer status
+        double precision balance
     }
 
     transaction {
-        int id
+        integer id
         text transaction_id
-        int user_id
-        decimal amount
+        integer user_id
+        double precision amount
         text type
         text status
         timestamp created_at
     }
 
-    payment {
-        int id
-        int owner_id
-        decimal amount
-        timestamp created_at
-        int status
-        int balance
-    }
-
-    banner {
-        int id
-        text title
-        text description
-        int balance
-        text content
-        text link
-        boolean deleted
-        int status
-        int owner_id
-    }
+    auth_user ||--o| banner : "owns"
+    auth_user ||--o| payment : "owns"
+    auth_user ||--o| transaction : "made"
+    banner }|--|| auth_user : "belongs to"
+    payment }|--|| auth_user : "belongs to"
+    transaction }|--|| auth_user : "belongs to"
 ```
 
