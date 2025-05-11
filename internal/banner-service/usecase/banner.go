@@ -58,7 +58,7 @@ func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (
 
 func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string) (*entity.Banner, error) {
 	rand.Seed(time.Now().UnixNano())
-	banner, err := b.BannerRepository.GetRandomBanner()
+	banner, err := b.BannerRepository.GetMaxPriceBanner()
 	if err != nil {
 		return nil, err
 	}

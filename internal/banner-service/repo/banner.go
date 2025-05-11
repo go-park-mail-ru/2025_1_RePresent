@@ -67,17 +67,26 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 	return banners, nil
 }
 
-func (r *BannerRepository) GetRandomBanner() (*entity.Banner, error) {
+func (r *BannerRepository) GetMaxPriceBanner() (*entity.Banner, error) {
+
+	r.logger.Debugw("Executing SQL query GetMaxPriceBanner")
 	query := `
         SELECT b.id, b.title, b.content, b.description, b.link, b.owner_id
-        FROM banner b
-        JOIN auth_user u ON b.owner_id = u.id
-        WHERE b.status = 1 AND u.balance > 0
-        ORDER BY RANDOM()
-        LIMIT 1
+		FROM banner b
+		JOIN auth_user u ON b.owner_id = u.id
+		WHERE b.status = 1 AND u.balance > 0
+ 		 AND u.max_price = (
+			SELECT MAX(u2.max_price)
+			FROM banner b2
+			JOIN auth_user u2 ON b2.owner_id = u2.id
+			WHERE b2.status = 1 AND u2.balance > 0
+  		)	
+		ORDER BY RANDOM()
+		LIMIT 1;
     `
 
 	var banner entity.Banner
+	startTime := time.Now()
 	err := r.db.QueryRow(query).Scan(
 		&banner.ID,
 		&banner.Title,
@@ -88,11 +97,18 @@ func (r *BannerRepository) GetRandomBanner() (*entity.Banner, error) {
 	)
 
 	if err != nil {
+		r.logger.Debugw("Error executing query to get max price banner", "error", err)
+		return nil, err
+	}
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("no active banners with valid owners found")
 		}
 		return nil, fmt.Errorf("failed to get random banner: %w", err)
 	}
+
+	duration := time.Since(startTime)
+	r.logger.Debugw("Successfully created new banner", "bannerID", banner.ID, "duration", duration)
 
 	return &banner, nil
 }
