@@ -12,11 +12,12 @@ import (
 )
 
 type CreateUpdateBannerRequest struct {
-	Title       string `json:"title" validate:"required,min=3,max=30"`
-	Description string `json:"description" validate:"max=100"`
-	Content     string `json:"content" validate:"required,len=32"`
-	Link        string `json:"link" validate:"required,max=100"`
-	Status      int    `json:"status"`
+	Title       string         `json:"title" validate:"required,min=3,max=30"`
+	Description string         `json:"description" validate:"max=100"`
+	Content     string         `json:"content" validate:"required,len=32"`
+	Link        string         `json:"link" validate:"required,max=100"`
+	Status      int            `json:"status"`
+	MaxPrice    entity.Decimal `json:"max_price"`
 }
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
@@ -110,6 +111,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		Link:        req.Link,
 		Balance:     0,
 		Status:      req.Status,
+		MaxPrice:    req.MaxPrice,
 	}
 
 	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner, requestID); err != nil {
@@ -161,6 +163,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		Link:        req.Link,
 		Content:     req.Content,
 		Status:      req.Status,
+		MaxPrice:    req.MaxPrice,
 	}
 
 	if err := h.BannerUsecase.UpdateBanner(userID, banner, requestID); err != nil {

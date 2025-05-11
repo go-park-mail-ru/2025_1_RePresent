@@ -19,7 +19,7 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml", "configs/attempt-redis.yml")
+	cfg, err := configs.LoadConfigs()
 	if err != nil {
 		sugar.Fatal(err)
 	}
