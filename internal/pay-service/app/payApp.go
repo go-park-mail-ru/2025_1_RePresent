@@ -8,9 +8,11 @@ import (
 	payMiddleware "retarget/internal/pay-service/controller/http/middleware"
 	server "retarget/internal/pay-service/grpc"
 	repoPay "retarget/internal/pay-service/repo"
+	repoAttempt "retarget/internal/pay-service/repo/attempt"
 	repoNotice "retarget/internal/pay-service/repo/notice"
 	usecasePay "retarget/internal/pay-service/usecase"
 	authenticate "retarget/pkg/middleware/auth"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -27,9 +29,14 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 			log.Println(err)
 		}
 	}()
-	noticeRepository := repoNotice.NewNoticeRepository("some conn endpoint")
+	noticeRepository := repoNotice.NewNoticeRepository([]string{"localhost:9092"}, "notifications", logger) // balance_notification_topic
+	if noticeRepository == nil {
+		logger.Fatal("failed to initialize NoticeRepository")
+	}
+	defer noticeRepository.Close()
+	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 24*time.Hour, 1)
 
-	payUsecase := usecasePay.NewPayUsecase(payRepository, noticeRepository)
+	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository)
 
 	go func() {
 		log.Println("Starting gRPC server...")
