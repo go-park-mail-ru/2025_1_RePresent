@@ -57,6 +57,7 @@
 
 ## ER-диаграмма (mermaid)
 
+```mermaid
 erDiagram
     auth_user ||--o| banner : "owns"
     auth_user ||--o| payment : "owns"
@@ -107,3 +108,4 @@ erDiagram
         text status
         timestamp created_at
     }
+```
