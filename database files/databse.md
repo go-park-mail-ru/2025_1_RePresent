@@ -90,7 +90,6 @@ erDiagram
         integer amount
         timestamp created_at
         integer status
-        double precision balance
     }
 
     transaction {
