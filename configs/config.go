@@ -30,6 +30,13 @@ type AuthRedisConfig struct {
 	Database int    `yaml:"DB_NUMBER"`
 }
 
+type AttemptRedisConfig struct {
+	EndPoint string `yaml:"ENDPOINT"`
+	Password string `yaml:"PASSWORD"`
+	Database int    `yaml:"DB_NUMBER"`
+	Attempts int    `yaml:"ATTEMPTS"`
+}
+
 type MinioConfig struct {
 	EndPoint       string `yaml:"ENDPOINT"`
 	AccessKeyID    string `yaml:"ACCESS_KEY_ID"`
@@ -39,18 +46,20 @@ type MinioConfig struct {
 }
 
 type Config struct {
-	Database  DatabaseConfig  `yaml:"database"`
-	Email     MailConfig      `yaml:"smtp_server"`
-	AuthRedis AuthRedisConfig `yaml:"auth_redis"`
-	Minio     MinioConfig     `yaml:"object_storage"`
+	Database     DatabaseConfig     `yaml:"database"`
+	Email        MailConfig         `yaml:"smtp_server"`
+	AuthRedis    AuthRedisConfig    `yaml:"auth_redis"`
+	AttemptRedis AttemptRedisConfig `yaml:"attempt_redis"`
+	Minio        MinioConfig        `yaml:"object_storage"`
 }
 
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var aux struct {
-		Database  DatabaseConfig  `yaml:"database"`
-		Email     MailConfig      `yaml:"smtp_server"`
-		AuthRedis AuthRedisConfig `yaml:"auth_redis"`
-		Minio     MinioConfig     `yaml:"object_storage"`
+		Database     DatabaseConfig     `yaml:"database"`
+		Email        MailConfig         `yaml:"smtp_server"`
+		AuthRedis    AuthRedisConfig    `yaml:"auth_redis"`
+		AttemptRedis AttemptRedisConfig `yaml:"attempt_redis"`
+		Minio        MinioConfig        `yaml:"object_storage"`
 	}
 	if err := unmarshal(&aux); err != nil {
 		return err
@@ -58,6 +67,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Database = aux.Database
 	c.Email = aux.Email
 	c.AuthRedis = aux.AuthRedis
+	c.AttemptRedis = aux.AttemptRedis
 	c.Minio = aux.Minio
 	return nil
 }
