@@ -98,7 +98,7 @@ erDiagram
         integer user_id
         numeric amount
         text type
-        text status
+        integer status
         timestamp created_at
     }
 
