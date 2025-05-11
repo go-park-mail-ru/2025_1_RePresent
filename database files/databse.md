@@ -86,7 +86,7 @@ erDiagram
     payment {
         integer id
         integer owner_id
-        decimal(12,2) amount
+        float amount
         timestamp created_at
         integer status
     }
@@ -95,7 +95,7 @@ erDiagram
         integer id
         text transaction_id
         integer user_id
-        double precision amount
+        numeric amount
         text type
         text status
         timestamp created_at
@@ -106,4 +106,4 @@ erDiagram
     auth_user ||--o| transaction : "made"
     banner }|--|| auth_user : "belongs to"
     payment }|--|| auth_user : "belongs to"
-    transaction }|--|| auth_user  : "belongs to"
+    transaction }|--|| auth_user : "belongs to"
