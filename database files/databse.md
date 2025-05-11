@@ -58,6 +58,7 @@
 ## ER-диаграмма (mermaid)
 
 erDiagram
+
     auth_user {
         integer id
         text username
