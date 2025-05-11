@@ -2,6 +2,7 @@ package payment
 
 import (
 	"errors"
+	"fmt"
 	"retarget/internal/pay-service/entity"
 	"retarget/internal/pay-service/repo"
 	"retarget/internal/pay-service/repo/notice"
@@ -52,8 +53,9 @@ func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id, amount i
 	if err != nil {
 		return err
 	}
-	err = uc.CheckBalance(user_id)
+	balance, err := uc.CheckBalance(user_id)
 	if err == errTooLittleBalance {
+		fmt.Println(balance)
 		// Здесь будет вызов Kafka репозитория
 		return nil
 	}
@@ -63,13 +65,13 @@ func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id, amount i
 	return nil
 }
 
-func (uc *PaymentUsecase) CheckBalance(user_id int) error {
+func (uc *PaymentUsecase) CheckBalance(user_id int) (float64, error) {
 	balance, err := uc.PaymentRepository.GetBalanceByUserId(user_id, "UNIMPLEMENTED request_id")
 	if err != nil {
-		return err
+		return balance, err
 	}
 	if balance <= BalanceLimit {
-		return errTooLittleBalance
+		return balance, errTooLittleBalance
 	}
-	return nil
+	return balance, nil
 }
