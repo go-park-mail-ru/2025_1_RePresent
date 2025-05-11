@@ -57,7 +57,6 @@
 
 ## ER-диаграмма (mermaid)
 
-```mermaid
 erDiagram
     auth_user {
         integer id
@@ -87,7 +86,7 @@ erDiagram
     payment {
         integer id
         integer owner_id
-        integer amount
+        decimal(12,2) amount
         timestamp created_at
         integer status
     }
@@ -107,6 +106,4 @@ erDiagram
     auth_user ||--o| transaction : "made"
     banner }|--|| auth_user : "belongs to"
     payment }|--|| auth_user : "belongs to"
-    transaction }|--|| auth_user : "belongs to"
-```
-
+    transaction }|--|| auth_user  : "belongs to"
