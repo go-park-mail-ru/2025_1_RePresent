@@ -250,4 +250,5 @@ volumes:
 
 networks:
   retarget_network:
-    external: true
+    driver: bridge
+    name: retarget_network
