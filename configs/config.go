@@ -8,12 +8,13 @@ import (
 )
 
 type DatabaseConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Dbname   string
-	Sslmode  string
+	Host           string
+	Port           int
+	UsernameBanner string
+	UsernameAuth   string
+	Password       string
+	Dbname         string
+	Sslmode        string
 }
 
 type ScyllaConfig struct {
@@ -70,12 +71,13 @@ func LoadConfigs() (*Config, error) {
 
 	config := Config{
 		Database: DatabaseConfig{
-			Host:     os.Getenv("PSQL_HOST"),
-			Port:     parseEnvInt("PSQL_PORT"),
-			Username: os.Getenv("PSQL_POSTGRES_USER"),
-			Password: os.Getenv("PSQL_POSTGRES_PASSWORD"),
-			Dbname:   os.Getenv("PSQL_POSTGRES_DB"),
-			Sslmode:  os.Getenv("PSQL_SSLMODE"),
+			Host:           os.Getenv("PSQL_HOST"),
+			Port:           parseEnvInt("PSQL_PORT"),
+			UsernameBanner: os.Getenv("PSQL_USER_BANNER"),
+			UsernameAuth:   os.Getenv("PSQL_USER_AUTH"),
+			Password:       os.Getenv("PSQL_POSTGRES_PASSWORD"),
+			Dbname:         os.Getenv("PSQL_POSTGRES_DB"),
+			Sslmode:        os.Getenv("PSQL_SSLMODE"),
 		},
 		Email: MailConfig{
 			SmtpServer: os.Getenv("SMTP_SERVER"),
@@ -161,9 +163,15 @@ func parseEnvInt(key string) int {
 // 	return &cfg, nil
 // }
 
-func (d DatabaseConfig) ConnectionString() string {
+func (d DatabaseConfig) ConnectionString(login string) string {
+	var username string
+	if login == "auth" {
+		username = d.UsernameAuth
+	} else {
+		username = d.UsernameBanner
+	}
 	return fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		d.Host, d.Port, d.Username, d.Password, d.Dbname, d.Sslmode,
+		d.Host, d.Port, username, d.Password, d.Dbname, d.Sslmode,
 	)
 }
