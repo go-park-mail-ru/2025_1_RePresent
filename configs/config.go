@@ -24,7 +24,7 @@ type ScyllaConfig struct {
 	Port         int
 	Username     string
 	Password     string
-	LinkKeyspace string
+	SlotKeyspace string
 }
 
 type MailConfig struct {
@@ -112,8 +112,8 @@ func LoadConfigs() (*Config, error) {
 			Host:         os.Getenv("SCYLLA_HOST"),
 			Port:         parseEnvInt("SCYLLA_PORT"),
 			Username:     os.Getenv("SCYLLA_USERNAME"),
-			Password:     os.Getenv("MINIO_TOKEN"),
-			LinkKeyspace: os.Getenv("SCYLLA_PASSWORD"),
+			Password:     os.Getenv("SCYLLA_PASSWORD"),
+			SlotKeyspace: os.Getenv("SCYLLA_SLOT_KEYSPACE"),
 		},
 	}
 	return &config, nil

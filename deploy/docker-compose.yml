@@ -213,7 +213,7 @@ services:
       - scylla_data:/var/lib/scylla
       - ./requests/scylla/init.cql:/scylla_scripts/init.cql
     environment:
-      CASSANDRA_PASSWORD: 12345678
+      CASSANDRA_PASSWORD: ${SCYLLA_PASSWORD}
       SCYLLA_LOGLEVEL: "error"
       SCYLLA_LOGMODE: "none"
     command: [ "--developer-mode=1", "--overprovisioned=0", "--default-log-level", "error" ]

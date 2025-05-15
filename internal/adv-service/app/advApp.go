@@ -23,9 +23,9 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	advRepository := repoAdv.NewAdvRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.LinkKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
+	advRepository := repoAdv.NewAdvRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
 
-	slotRepository := repoSlot.NewSlotRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.LinkKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
+	slotRepository := repoSlot.NewSlotRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
 	defer slotRepository.Close()
 
 	conn, err := grpc.Dial("ReTargetApiBanner:50051", grpc.WithInsecure())
