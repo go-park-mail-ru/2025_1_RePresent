@@ -26,7 +26,7 @@ services:
     environment:
       POSTGRES_USER: ${PSQL_USER}
       POSTGRES_PASSWORD: ${PSQL_PASSWORD}
-      POSTGRES_DB: ${PSQL_DB}
+      POSTGRES_DB: ${PSQL_DB_NAME}
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     ports:
