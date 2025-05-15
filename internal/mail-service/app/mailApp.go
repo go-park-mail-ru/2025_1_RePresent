@@ -13,12 +13,12 @@ import (
 )
 
 func Run(cfg *configs.Config) {
-	log.Printf("Connecting to Kafka at: %v", "kafka:9092")
+	log.Printf("Connecting to Kafka at: %v", "localhost:9092")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	consumer := mailAppKafka.NewConsumer(
-		[]string{"kafka:9092"},
+		[]string{"localhost:9092"},
 		"on-sent-group",
 		"notifications",
 	)

@@ -29,7 +29,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 			log.Println(err)
 		}
 	}()
-	noticeRepository := repoNotice.NewNoticeRepository([]string{"kafka:9092"}, "notifications", logger) // balance_notification_topic
+	noticeRepository := repoNotice.NewNoticeRepository([]string{"localhost:9092"}, "notifications", logger) // balance_notification_topic
 	if noticeRepository == nil {
 		logger.Fatal("failed to initialize NoticeRepository")
 	}
