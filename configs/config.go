@@ -2,6 +2,7 @@ package configs
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -165,13 +166,18 @@ func parseEnvInt(key string) int {
 
 func (d DatabaseConfig) ConnectionString(login string) string {
 	var username string
-	if login == "auth" {
+	switch login {
+	case "auth":
 		username = d.UsernameAuth
-	} else {
+	case "banner":
 		username = d.UsernameBanner
+	default:
+		username = "postgres"
 	}
-	return fmt.Sprintf(
+	conString := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		d.Host, d.Port, username, d.Password, d.Dbname, d.Sslmode,
 	)
+	log.Println("Generated connection string:", conString)
+	return conString
 }
