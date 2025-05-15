@@ -173,8 +173,8 @@ services:
     image: yandex/clickhouse-server:latest
     container_name: ReTargetClickHouse
     ports:
-      - "8124:8124" # HTTP
-      - "9000:9000" # TCP
+      - "8123:8123" # HTTP
+      - "9124:9000" # TCP
 
     volumes:
       - clickhouse_data:/var/lib/clickhouse
