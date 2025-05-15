@@ -9,13 +9,14 @@ import (
 )
 
 type DatabaseConfig struct {
-	Host           string
-	Port           int
-	UsernameBanner string
-	UsernameAuth   string
-	Password       string
-	Dbname         string
-	Sslmode        string
+	Host            string
+	Port            int
+	UsernameDefault string
+	UsernameBanner  string
+	UsernameAuth    string
+	Password        string
+	Dbname          string
+	Sslmode         string
 }
 
 type ScyllaConfig struct {
@@ -72,13 +73,14 @@ func LoadConfigs() (*Config, error) {
 
 	config := Config{
 		Database: DatabaseConfig{
-			Host:           os.Getenv("PSQL_HOST"),
-			Port:           parseEnvInt("PSQL_INSIDE_PORT"),
-			UsernameBanner: os.Getenv("PSQL_USER_BANNER"),
-			UsernameAuth:   os.Getenv("PSQL_USER_AUTH"),
-			Password:       os.Getenv("PSQL_PASSWORD"),
-			Dbname:         os.Getenv("PSQL_DB_NAME"),
-			Sslmode:        os.Getenv("PSQL_SSLMODE"),
+			Host:            os.Getenv("PSQL_HOST"),
+			Port:            parseEnvInt("PSQL_INSIDE_PORT"),
+			UsernameDefault: "postgres",
+			UsernameBanner:  os.Getenv("PSQL_USER_BANNER"),
+			UsernameAuth:    os.Getenv("PSQL_USER_AUTH"),
+			Password:        os.Getenv("PSQL_PASSWORD"),
+			Dbname:          os.Getenv("PSQL_DB_NAME"),
+			Sslmode:         os.Getenv("PSQL_SSLMODE"),
 		},
 		Email: MailConfig{
 			SmtpServer: os.Getenv("SMTP_SERVER"),

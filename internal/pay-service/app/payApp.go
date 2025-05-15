@@ -23,7 +23,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		log.Fatal(err.Error())
 	}
 
-	payRepository := repoPay.NewPaymentRepository(cfg.Database.UsernameAuth, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode, logger)
+	payRepository := repoPay.NewPaymentRepository(cfg.Database.UsernameDefault, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Host, cfg.Database.Port, cfg.Database.Sslmode, logger)
 	defer func() {
 		if err := payRepository.CloseConnection(); err != nil {
 			log.Println(err)
