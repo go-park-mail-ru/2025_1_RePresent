@@ -23,7 +23,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	}
 
 	imageRepository := repo.NewBannerImageRepository(cfg.Minio.EndPoint, cfg.Minio.AccessKeyID, cfg.Minio.SecretAccesKey, cfg.Minio.Token, false, "image")
-	bannerRepository := repo.NewBannerRepository(cfg.Database.ConnectionString("banner"), logger)
+	bannerRepository := repo.NewBannerRepository(cfg.Database.ConnectionString("d"), logger)
 	defer func() {
 		if err := bannerRepository.CloseConnection(); err != nil {
 			log.Println(err)
