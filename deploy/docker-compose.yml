@@ -103,6 +103,7 @@ services:
     depends_on:
       - postgresdb
       - redis0
+      - minio
     networks:
       - retarget_network
 
@@ -117,6 +118,7 @@ services:
     depends_on:
       - postgresdb
       - redis0
+      - minio
     networks:
       - retarget_network
 
@@ -132,6 +134,7 @@ services:
     depends_on:
       - postgresdb
       - redis0
+      - banner
       - kafka
     networks:
       - retarget_network
