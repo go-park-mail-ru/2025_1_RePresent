@@ -242,11 +242,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
       KAFKA_KRAFT_CLUSTER_ID: Lf7k9sXqTgGJYhM8bNcDvw
-      healthcheck:
-        test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:9092" ]
-        interval: 10s
-        timeout: 5s
-        retries: 10
+    healthcheck:
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:9092" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       - retarget_network
 
