@@ -73,11 +73,11 @@ func LoadConfigs() (*Config, error) {
 	config := Config{
 		Database: DatabaseConfig{
 			Host:           os.Getenv("PSQL_HOST"),
-			Port:           parseEnvInt("PSQL_PORT"),
+			Port:           parseEnvInt("PSQL_INSIDE_PORT"),
 			UsernameBanner: os.Getenv("PSQL_USER_BANNER"),
 			UsernameAuth:   os.Getenv("PSQL_USER_AUTH"),
-			Password:       os.Getenv("PSQL_POSTGRES_PASSWORD"),
-			Dbname:         os.Getenv("PSQL_POSTGRES_DB"),
+			Password:       os.Getenv("PSQL_PASSWORD"),
+			Dbname:         os.Getenv("PSQL_DB_NAME"),
 			Sslmode:        os.Getenv("PSQL_SSLMODE"),
 		},
 		Email: MailConfig{
