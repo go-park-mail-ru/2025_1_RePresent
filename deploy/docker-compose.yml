@@ -30,7 +30,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     ports:
-      - "${PORT}:5432"
+      - "${PSQL_PORT}:5432"
     command:
       [
         "postgres",
