@@ -13,7 +13,7 @@ services:
     networks:
       - retarget_network
     volumes:
-      - ./auth-data:/data
+      - ./redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping" ]
       interval: 5s
@@ -74,7 +74,7 @@ services:
     networks:
       - retarget_network
     volumes:
-      - ./minio-data:/data
+      - ./minio_data:/data
     command: server /data
 
   auth:
@@ -255,6 +255,8 @@ volumes:
   clickhouse_data:
   grafana_data:
   scylla_data:
+  minio_data:
+  redis_data:
 
 
 networks:
