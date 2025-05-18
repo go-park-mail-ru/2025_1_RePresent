@@ -36,7 +36,9 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	defer noticeRepository.Close()
 	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 24*time.Hour, cfg.AttemptRedis.Attempts)
 
-	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository)
+	httpClient := &http.Client{Timeout: 10 * time.Second}
+
+	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository, cfg.YooShopID, cfg.YooSecretKey, httpClient)
 
 	go func() {
 		log.Println("Starting gRPC server...")
@@ -44,6 +46,5 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	}()
 
 	mux := payAppHttp.SetupRoutes(authenticator, payUsecase)
-
 	log.Fatal(http.ListenAndServe(":8022", payMiddleware.CORS(mux)))
 }

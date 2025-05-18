@@ -63,6 +63,8 @@ type Config struct {
 	AttemptRedis AttemptRedisConfig
 	Minio        MinioConfig
 	Scylla       ScyllaConfig
+	YooShopID    string
+	YooSecretKey string
 }
 
 func LoadConfigs() (*Config, error) {
@@ -115,6 +117,8 @@ func LoadConfigs() (*Config, error) {
 			Password:     os.Getenv("SCYLLA_PASSWORD"),
 			SlotKeyspace: os.Getenv("SCYLLA_SLOT_KEYSPACE"),
 		},
+		YooShopID:    os.Getenv("YOO_SHOP_ID"),
+		YooSecretKey: os.Getenv("YOO_SECRET_KEY"),
 	}
 	return &config, nil
 }

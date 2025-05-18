@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"retarget/internal/pay-service/repo"
-	entity "retarget/pkg/entity"
+	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
 
 	"github.com/google/uuid"
@@ -111,6 +111,38 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(responseData)
 
+}
+
+func (c *PaymentController) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Value          string `json:"value"`
+		Currency       string `json:"currency"`
+		ReturnURL      string `json:"return_url"`
+		Description    string `json:"description"`
+		IdempotenceKey string `json:"idempotence_key"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value("user_id").(int)
+
+	confirmationURL, err := c.PaymentUsecase.CreateYooMoneyPayment(
+		userID,
+		req.Value,
+		req.Currency,
+		req.ReturnURL,
+		req.Description,
+		req.IdempotenceKey,
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"confirmation_url": confirmationURL})
 }
 
 func handleTopUpError(w http.ResponseWriter, err error) {

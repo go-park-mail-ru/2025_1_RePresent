@@ -1,9 +1,12 @@
 package payment
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"retarget/internal/pay-service/entity"
 	"retarget/internal/pay-service/repo"
 	"retarget/internal/pay-service/repo/attempt"
@@ -26,18 +29,91 @@ type PaymentUsecase struct {
 	PaymentRepository *repo.PaymentRepository
 	NoticeRepository  *notice.NoticeRepository
 	AttemptRepository *attempt.AttemptRepository
+	shopID            string
+	secretKey         string
+	httpClient        *http.Client
 }
 
-func NewPayUsecase(zapLogger *zap.SugaredLogger, payRepository *repo.PaymentRepository, noticeRepository *notice.NoticeRepository, attemptRepository *attempt.AttemptRepository) *PaymentUsecase {
-	return &PaymentUsecase{logger: zapLogger, PaymentRepository: payRepository, NoticeRepository: noticeRepository, AttemptRepository: attemptRepository}
+func NewPayUsecase(
+	zapLogger *zap.SugaredLogger,
+	payRepository *repo.PaymentRepository,
+	noticeRepository *notice.NoticeRepository,
+	attemptRepository *attempt.AttemptRepository,
+	shopID, secretKey string,
+	httpClient *http.Client,
+) *PaymentUsecase {
+	return &PaymentUsecase{
+		logger:            zapLogger,
+		PaymentRepository: payRepository,
+		NoticeRepository:  noticeRepository,
+		AttemptRepository: attemptRepository,
+		shopID:            shopID,
+		secretKey:         secretKey,
+		httpClient:        httpClient,
+	}
 }
 
-func (u PaymentUsecase) GetBalanceByUserId(id int, requestID string) (float64, error) {
-	balance, err := u.PaymentRepository.GetBalanceByUserId(id, requestID)
+func (u *PaymentUsecase) GetBalanceByUserId(userID int, requestID string) (float64, error) {
+	_, err := u.PaymentRepository.GetBalanceByUserId(userID, requestID)
 	if err != nil {
 		return 0, err
 	}
-	return balance, nil
+
+	pending, err := u.PaymentRepository.GetPendingTransactions(userID)
+	if err != nil {
+		return 0, fmt.Errorf("error while loaing pending tx: %w", err)
+	}
+
+	for _, tx := range pending {
+		statusStr, err := u.getYooPaymentStatus(tx.TransactionID)
+		if err != nil {
+			continue
+		}
+		statusInt := mapYooStatus(statusStr)
+		if statusInt == 1 && tx.Status != 1 {
+			if _, err := u.PaymentRepository.UpdateBalance(userID, tx.Amount, requestID); err == nil {
+				_ = u.PaymentRepository.UpdateTransactionStatus(tx.TransactionID, statusInt)
+			}
+		}
+	}
+
+	return u.PaymentRepository.GetBalanceByUserId(userID, requestID)
+}
+
+func mapYooStatus(s string) int {
+	switch s {
+	case "pending":
+		return 0
+	case "succeeded":
+		return 1
+	case "canceled":
+		return 2
+	default:
+		return -1
+	}
+}
+
+func (u *PaymentUsecase) getYooPaymentStatus(paymentID string) (string, error) {
+	url := fmt.Sprintf("https://api.yookassa.ru/v3/payments/%s", paymentID)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", fmt.Errorf("create request: %w", err)
+	}
+	req.SetBasicAuth(u.shopID, u.secretKey)
+
+	resp, err := u.httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("call YooKassa: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var out struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return "", fmt.Errorf("decode status: %w", err)
+	}
+	return out.Status, nil
 }
 
 func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID string) error {
@@ -148,4 +224,88 @@ func (uc *PaymentUsecase) CheckBalance(user_id int) (float64, error) {
 		return balance, errTooLittleBalance
 	}
 	return balance, nil
+}
+
+type YooPaymentRequest struct {
+	Amount struct {
+		Value    string `json:"value"`
+		Currency string `json:"currency"`
+	} `json:"amount"`
+	PaymentMethodData struct {
+		Type string `json:"type"`
+	} `json:"payment_method_data"`
+	Confirmation struct {
+		Type      string `json:"type"`
+		ReturnURL string `json:"return_url"`
+	} `json:"confirmation"`
+	Description string `json:"description"`
+}
+
+type YooPaymentResponse struct {
+	ID           string `json:"id"`
+	Status       string `json:"status"`
+	Confirmation struct {
+		Type            string `json:"type"`
+		ConfirmationURL string `json:"confirmation_url"`
+	} `json:"confirmation"`
+	Amount struct {
+		Value    string `json:"value"`
+		Currency string `json:"currency"`
+	} `json:"amount"`
+}
+
+func (u *PaymentUsecase) CreateYooMoneyPayment(userID int, value, currency, returnURL, description, idempotenceKey string) (string, error) {
+	reqBody := YooPaymentRequest{Description: description}
+	reqBody.Amount.Value = value
+	reqBody.Amount.Currency = currency
+	reqBody.PaymentMethodData.Type = "yoo_money"
+	reqBody.Confirmation.Type = "redirect"
+	reqBody.Confirmation.ReturnURL = returnURL
+
+	payload, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, "https://api.yookassa.ru/v3/payments", bytes.NewBuffer(payload))
+	if err != nil {
+		return "", fmt.Errorf("create request: %w", err)
+	}
+	req.SetBasicAuth(u.shopID, u.secretKey)
+	req.Header.Set("Idempotence-Key", idempotenceKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := u.httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("request error: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		return "", fmt.Errorf("unexpected status %d", resp.StatusCode)
+	}
+
+	var out YooPaymentResponse
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return "", fmt.Errorf("decode response: %w", err)
+	}
+
+	amt, err := strconv.ParseFloat(out.Amount.Value, 64)
+	if err != nil {
+		return "", fmt.Errorf("parse amount: %w", err)
+	}
+
+	statusInt := mapYooStatus(out.Status)
+	trx := entity.Transaction{
+		TransactionID: out.ID,
+		UserID:        userID,
+		Amount:        amt,
+		Type:          "yoo_money",
+		Status:        statusInt,
+	}
+	if err := u.PaymentRepository.CreateTransaction(trx); err != nil {
+		return "", fmt.Errorf("save transaction: %w", err)
+	}
+
+	return out.Confirmation.ConfirmationURL, nil
 }

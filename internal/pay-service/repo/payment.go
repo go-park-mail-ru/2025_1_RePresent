@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"log"
-	entity "retarget/internal/pay-service/entity"
+	"retarget/internal/pay-service/entity"
 
 	_ "github.com/lib/pq"
 
@@ -139,30 +138,20 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID 
 	return newBalance, nil
 }
 
-func (r *PaymentRepository) CreateTransaction(tx *entity.Transaction, requestID string) error {
-	query := `
-        INSERT INTO transaction
-            (transaction_id, user_id, amount, type, status, created_at)
-        VALUES 
-            ($1, $2, $3, $4, $5, $6)
-
+func (r *PaymentRepository) CreateTransaction(trx entity.Transaction) error {
+	const q = `
+    INSERT INTO transaction (
+        transaction_id, user_id, amount, type, status
+    ) VALUES ($1, $2, $3, $4, $5)
     `
-
-	_, err := r.db.Exec(query, tx.TransactionID, tx.UserID, tx.Amount, tx.Type, tx.Status, tx.CreatedAt)
+	_, err := r.db.Exec(q,
+		trx.TransactionID,
+		trx.UserID,
+		trx.Amount,
+		trx.Type,
+		trx.Status,
+	)
 	return err
-}
-
-func (r *PaymentRepository) TopUpAccount(userID int, amount int64, requestID string) error {
-	transactionID := uuid.New().String()
-
-	return r.CreateTransaction(&entity.Transaction{
-		TransactionID: transactionID,
-		UserID:        userID,
-		Amount:        amount,
-		Type:          "topup",
-		Status:        "completed",
-		CreatedAt:     time.Now(),
-	}, requestID)
 }
 
 func (r *PaymentRepository) GetLastTransaction(userID int, requestID string) (*entity.Transaction, error) {
@@ -229,6 +218,39 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount
 		return -1, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return user_banner_id, nil
+}
+
+func (r *PaymentRepository) GetPendingTransactions(userID int) ([]entity.Transaction, error) {
+	const q = `
+    	SELECT id, transaction_id, user_id, amount, type, status, created_at
+    	FROM transaction
+    	WHERE user_id = $1 AND status = 0
+    `
+	rows, err := r.db.Query(q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []entity.Transaction
+	for rows.Next() {
+		var tx entity.Transaction
+		if err := rows.Scan(&tx.ID, &tx.TransactionID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, tx)
+	}
+	return list, rows.Err()
+}
+
+func (r *PaymentRepository) UpdateTransactionStatus(transactionID string, status int) error {
+	const q = `
+    	UPDATE transaction
+    	SET status = $1
+    	WHERE transaction_id = $2
+    `
+	_, err := r.db.Exec(q, status, transactionID)
+	return err
 }
 
 func (r *PaymentRepository) CloseConnection() error {
