@@ -52,8 +52,14 @@ func (r *ProfileRepository) GetProfileByID(userID int, requestID string) (*entit
 	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", userID)
 	var profile entityProfile.Profile
 	startTime := time.Now()
-	err := r.db.QueryRow(query,
-		userID).Scan(&profile.ID, &profile.Username, &profile.Email, &profile.Description, &profile.Balance, &profile.Role)
+	err := r.db.QueryRow(query, userID).Scan(
+		&profile.ID,
+		&profile.Username,
+		&profile.Email,
+		&profile.Description,
+		&profile.Balance,
+		&profile.Role,
+	)
 	duration := time.Since(startTime)
 	if err != nil {
 		if err == sql.ErrNoRows {

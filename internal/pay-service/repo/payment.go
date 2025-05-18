@@ -31,17 +31,20 @@ type PaymentRepositoryInterface interface {
 }
 
 type PaymentRepository struct {
-	db     *sql.DB
-	logger *zap.SugaredLogger
+	db         *sql.DB
+	logger     *zap.SugaredLogger
+	clickhouse *sql.DB
 }
 
 func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string, logger *zap.SugaredLogger) *PaymentRepository {
 	paymentRepo := &PaymentRepository{}
 	db, err := sql.Open("postgres", fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=%s",
 		username, password, dbname, host, port, sslmode))
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	paymentRepo.logger = logger
 	paymentRepo.db = db
 	return paymentRepo
@@ -192,6 +195,40 @@ func (r *PaymentRepository) GetTransactionByID(transactionID string, requestID s
 		return nil, err
 	}
 	return &tx, nil
+}
+
+func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount int) (int, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return -1, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	_, err = tx.Exec(`
+        UPDATE auth_user 
+        SET balance = balance - $1 
+        WHERE id = $2`,
+		amount,
+		user_slot_id)
+	if err != nil {
+		tx.Rollback()
+		return -1, fmt.Errorf("failed to update first user balance: %w", err)
+	}
+
+	_, err = tx.Exec(`
+        UPDATE auth_user 
+        SET balance = balance + $1 
+        WHERE id = $2`,
+		amount,
+		user_banner_id)
+	if err != nil {
+		tx.Rollback()
+		return -1, fmt.Errorf("failed to update second user balance: %w", err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		return -1, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return user_banner_id, nil
 }
 
 func (r *PaymentRepository) CloseConnection() error {

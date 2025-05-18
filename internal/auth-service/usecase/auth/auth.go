@@ -7,6 +7,7 @@ import (
 	repoAuth "retarget/internal/auth-service/repo/auth"
 
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/inf.v0"
 )
 
 type AuthUsecaseInterface interface {
@@ -33,14 +34,11 @@ func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.Ses
 func (a *AuthUsecase) Login(email string, password string, role int, requestID string) (*entityAuth.User, error) {
 	user, err := a.authRepository.GetUserByEmail(email, requestID)
 	if err != nil {
-		return nil, err
-	}
-	if user.Role != role {
 		return nil, errors.New("Incorrect user data")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Incorrect user data")
 	}
 	return user, nil
 }
@@ -88,7 +86,7 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 		Email:       email,
 		Password:    hashedPassword,
 		Description: "",
-		Balance:     0,
+		Balance:     entityAuth.Decimal{Dec: inf.NewDec(0, 0)},
 		Role:        role,
 	}
 

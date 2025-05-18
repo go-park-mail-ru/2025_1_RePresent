@@ -23,7 +23,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	profileRepository := repoProfile.NewProfileRepository(cfg.Database.ConnectionString(), logger)
+	profileRepository := repoProfile.NewProfileRepository(cfg.Database.ConnectionString("auth"), logger)
 	defer func() {
 		if err := profileRepository.CloseConnection(); err != nil {
 			log.Println(err)

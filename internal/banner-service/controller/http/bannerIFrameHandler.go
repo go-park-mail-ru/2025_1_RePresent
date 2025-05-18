@@ -20,7 +20,7 @@ type IFrame struct {
 	Description string
 }
 
-func (h *BannerController) GetBannerIFrame(w http.ResponseWriter, r *http.Request) {
+func (h *BannerController) GetBannerIFrameByID(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))

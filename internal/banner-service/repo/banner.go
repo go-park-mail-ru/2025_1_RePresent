@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"retarget/internal/banner-service/entity"
 	"time"
@@ -64,6 +65,52 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 	}
 	r.logger.Debugw("SQL  query executed successfully", "request_id", requestID, "userID", id, "duration", duration, "error", err)
 	return banners, nil
+}
+
+func (r *BannerRepository) GetMaxPriceBanner() (*entity.Banner, error) {
+
+	r.logger.Debugw("Executing SQL query GetMaxPriceBanner")
+	query := `
+        SELECT b.id, b.title, b.content, b.description, b.link, b.owner_id
+		FROM banner b
+		JOIN auth_user u ON b.owner_id = u.id
+		WHERE b.status = 1 AND u.balance > 0
+ 		 AND u.max_price = (
+			SELECT MAX(u2.max_price)
+			FROM banner b2
+			JOIN auth_user u2 ON b2.owner_id = u2.id
+			WHERE b2.status = 1 AND u2.balance > 0
+  		)	
+		ORDER BY RANDOM()
+		LIMIT 1;
+    `
+
+	var banner entity.Banner
+	startTime := time.Now()
+	err := r.db.QueryRow(query).Scan(
+		&banner.ID,
+		&banner.Title,
+		&banner.Content,
+		&banner.Description,
+		&banner.Link,
+		&banner.OwnerID,
+	)
+
+	if err != nil {
+		r.logger.Debugw("Error executing query to get max price banner", "error", err)
+		return nil, err
+	}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("no active banners with valid owners found")
+		}
+		return nil, fmt.Errorf("failed to get random banner: %w", err)
+	}
+
+	duration := time.Since(startTime)
+	r.logger.Debugw("Successfully created new banner", "bannerID", banner.ID, "duration", duration)
+
+	return &banner, nil
 }
 
 func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID string) error {
@@ -139,7 +186,7 @@ func (r *BannerRepository) UpdateBanner(banner entity.Banner, requestID string) 
 func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Banner, error) {
 	startTime := time.Now()
 	query := `
-		SELECT owner_id, title, description, content, balance, link, status
+		SELECT owner_id, title, description, content, balance, link, status, max_price
 		FROM banner
 		WHERE id = $1 AND deleted = FALSE;
 		`
@@ -159,6 +206,7 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Bann
 		&banner.Balance,
 		&banner.Link,
 		&banner.Status,
+		&banner.MaxPrice,
 	)
 	if err != nil {
 		r.logger.Debugw("Failed to fetch banner",
@@ -197,7 +245,6 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) err
 		"ownerID", owner,
 	)
 
-	// Проверка существования баннера
 	var deleted bool
 	err := r.db.QueryRow(
 		"SELECT deleted FROM banner WHERE id = $1 AND owner_id = $2",

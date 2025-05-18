@@ -24,6 +24,7 @@ func SetupPaymentRoutes(authenticator *authenticate.Authenticator, PaymentUsecas
 	muxRouter.Handle("/api/v1/payment/balance", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetUserBalance))))
 	muxRouter.Handle("/api/v1/payment/accounts/topup", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.TopUpAccount))))
 	muxRouter.Handle("/api/v1/payment/transactions/{transactionid}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetTransactionByID))))
+	muxRouter.Handle("/api/v1/payment/transactions/clicks", logger.LogMiddleware(http.HandlerFunc(PaymentController.RegUserActivity)))
 	//muxRouter.Handle("/api/v1/payment/transactions/{transactionid}/confirm", http.HandlerFunc(skibidi))
 
 	return muxRouter

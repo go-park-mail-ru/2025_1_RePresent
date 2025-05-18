@@ -33,7 +33,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		}
 	}()
 
-	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString(), logger)
+	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString("auth"), logger)
 	defer func() {
 		if err := userRepository.CloseConnection(); err != nil {
 			log.Println(err)

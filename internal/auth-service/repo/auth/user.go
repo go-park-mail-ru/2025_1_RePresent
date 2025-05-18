@@ -24,7 +24,7 @@ type AuthRepositoryInterface interface {
 type AuthRepository struct {
 	db     *sql.DB
 	logger *zap.SugaredLogger
-} // TODO: Переделать коннект в эндпойнт
+}
 
 func NewAuthRepository(endPoint string, logger *zap.SugaredLogger) *AuthRepository {
 	userRepo := &AuthRepository{}
@@ -47,6 +47,7 @@ func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User
 	)
 	row := r.db.QueryRow(query, id)
 	user := &authEntity.User{}
+
 	err := row.Scan(
 		&user.ID,
 		&user.Username,
@@ -56,6 +57,7 @@ func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User
 		&user.Balance,
 		&user.Role,
 	)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			r.logger.Debugw("User not found",
@@ -123,7 +125,6 @@ func (r *AuthRepository) GetUserByEmail(email string, requestID string) (*authEn
 		)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
-
 	r.logger.Debugw("User retrieved successfully",
 		"request_id", requestID,
 		"userID", user.ID,

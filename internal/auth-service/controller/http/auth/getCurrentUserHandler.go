@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 	entity "retarget/pkg/entity"
+
+	"gopkg.in/inf.v0"
 )
 
 type UserResponse struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Balance  int    `json:"balance"`
-	Role     int    `json:"role"`
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Balance  inf.Dec `json:"balance"`
+	Role     int     `json:"role"`
 }
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +38,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	userResponse := &UserResponse{
 		Username: user.Username,
 		Email:    user.Email,
-		Balance:  user.Balance,
+		Balance:  *user.Balance.Dec,
 		Role:     user.Role,
 	}
 
