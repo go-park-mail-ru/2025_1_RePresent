@@ -38,7 +38,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
-	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository, cfg.YooShopID, cfg.YooSecretKey, httpClient)
+	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository, cfg.Yoo.ShopID, cfg.Yoo.SecretKey, httpClient)
 
 	go func() {
 		log.Println("Starting gRPC server...")
