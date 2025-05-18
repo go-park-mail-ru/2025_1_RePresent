@@ -4,22 +4,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
+
+	"github.com/rs/xid"
 )
 
-const letters = "abcdefghijklmnopqrstuvwxyz"
-
-func randStringFromCharset(length int, charset string) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(b)
-}
-
 func randUsername() string {
-	return randStringFromCharset(15, letters)
+	return xid.New().String()
 }
 
 func randPassword() string {
