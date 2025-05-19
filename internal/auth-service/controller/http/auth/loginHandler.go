@@ -35,8 +35,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.authUsecase.Login(req.Email, req.Password, req.Role, requestID)
-
+	user, err := c.authUsecase.Login(r.Context(), req.Email, req.Password, req.Role, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))

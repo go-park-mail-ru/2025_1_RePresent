@@ -1,8 +1,11 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	authEntity "retarget/internal/auth-service/entity/auth"
@@ -33,7 +36,11 @@ func NewAuthRepository(endPoint string, logger *zap.SugaredLogger) *AuthReposito
 		logger.Fatalf("Failed to connect to DB: %v", err)
 	}
 
-	asyncLogger := optiLog.NewAsyncLogger(logger, 1000)
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(10)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
+	asyncLogger := optiLog.NewAsyncLogger(logger, 1000, 100_000)
 
 	return &AuthRepository{
 		db:          db,
@@ -41,8 +48,71 @@ func NewAuthRepository(endPoint string, logger *zap.SugaredLogger) *AuthReposito
 	}
 }
 
+func withRetry(fn func() error) error {
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		err = fn()
+		if err == nil {
+			return nil
+		}
+
+		if !isTransientError(err) {
+			return err
+		}
+
+		if attempt < 2 {
+			delay := time.Millisecond * time.Duration(100*(1<<uint(attempt)))
+			time.Sleep(delay)
+		}
+	}
+	return err
+}
+
+func isTransientError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+
+	if strings.Contains(err.Error(), "connection refused") ||
+		strings.Contains(err.Error(), "network error") ||
+		strings.Contains(err.Error(), "timeout") ||
+		strings.Contains(err.Error(), "deadlock") ||
+		strings.Contains(err.Error(), "try again later") ||
+		strings.Contains(err.Error(), "EOF") ||
+		strings.Contains(err.Error(), "unexpected EOF") ||
+		strings.Contains(err.Error(), "server closed the connection unexpectedly") {
+		return true
+	}
+
+	return false
+}
+
 func (r *AuthRepository) getUserByColumn(columnName, value string, requestID string) (*authEntity.User, error) {
+	var user *authEntity.User
+	var err error
+
+	retryFn := func() error {
+		user, err = r.getUserByColumnOnce(columnName, value, requestID)
+		return err
+	}
+
+	err = withRetry(retryFn)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *AuthRepository) getUserByColumnOnce(columnName, value string, requestID string) (*authEntity.User, error) {
 	startTime := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	query := fmt.Sprintf("SELECT id, username, email, password, description, balance, role FROM auth_user WHERE %s = $1", columnName)
 
 	r.asyncLogger.Log(zapcore.DebugLevel, requestID, "Executing SQL query",
@@ -52,10 +122,10 @@ func (r *AuthRepository) getUserByColumn(columnName, value string, requestID str
 			"value":  value,
 		}))
 
-	row := r.db.QueryRow(query, value)
+	row := r.db.QueryRowContext(ctx, query, value)
 	user := &authEntity.User{}
 
-	err := row.Scan(
+	scanErr := row.Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
@@ -67,19 +137,19 @@ func (r *AuthRepository) getUserByColumn(columnName, value string, requestID str
 
 	duration := time.Since(startTime).Milliseconds()
 
-	if err != nil {
-		if err == sql.ErrNoRows {
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
 			r.asyncLogger.Log(zapcore.DebugLevel, requestID, "User not found",
 				optiLog.MakeLogFields(requestID, duration, map[string]interface{}{
 					columnName: value,
 				}))
-			return nil, err
+			return nil, scanErr
 		}
 		r.asyncLogger.Log(zapcore.WarnLevel, requestID, "Database query failed",
 			optiLog.MakeLogFields(requestID, duration, map[string]interface{}{
-				"error": err.Error(),
+				"error": scanErr.Error(),
 			}))
-		return nil, fmt.Errorf("database error: %w", err)
+		return nil, fmt.Errorf("database error: %w", scanErr)
 	}
 
 	r.asyncLogger.Log(zapcore.DebugLevel, requestID, "User retrieved successfully",
@@ -92,7 +162,26 @@ func (r *AuthRepository) getUserByColumn(columnName, value string, requestID str
 }
 
 func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User, error) {
+	var user *authEntity.User
+	var err error
+
+	retryFn := func() error {
+		user, err = r.getUserByIDOnce(id, requestID)
+		return err
+	}
+
+	err = withRetry(retryFn)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *AuthRepository) getUserByIDOnce(id int, requestID string) (*authEntity.User, error) {
 	startTime := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	query := "SELECT id, username, email, password, description, balance, role FROM auth_user WHERE id = $1"
 	r.asyncLogger.Log(zapcore.DebugLevel, requestID, "Executing SQL query",
@@ -101,10 +190,10 @@ func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User
 			"id":    id,
 		}))
 
-	row := r.db.QueryRow(query, id)
+	row := r.db.QueryRowContext(ctx, query, id)
 	user := &authEntity.User{}
 
-	err := row.Scan(
+	scanErr := row.Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
@@ -116,19 +205,19 @@ func (r *AuthRepository) GetUserByID(id int, requestID string) (*authEntity.User
 
 	duration := time.Since(startTime).Milliseconds()
 
-	if err != nil {
-		if err == sql.ErrNoRows {
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
 			r.asyncLogger.Log(zapcore.DebugLevel, requestID, "User not found",
 				optiLog.MakeLogFields(requestID, duration, map[string]interface{}{
 					"id": id,
 				}))
-			return nil, err
+			return nil, scanErr
 		}
 		r.asyncLogger.Log(zapcore.WarnLevel, requestID, "Database query failed",
 			optiLog.MakeLogFields(requestID, duration, map[string]interface{}{
-				"error": err.Error(),
+				"error": scanErr.Error(),
 			}))
-		return nil, fmt.Errorf("database error: %w", err)
+		return nil, fmt.Errorf("database error: %w", scanErr)
 	}
 
 	r.asyncLogger.Log(zapcore.DebugLevel, requestID, "User retrieved successfully",
@@ -166,6 +255,25 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User, requestID string) 
 			"role":     user.Role,
 		}))
 
+	var err error
+	retryFn := func() error {
+		err = r.createNewUserOnce(user, requestID)
+		return err
+	}
+
+	err = withRetry(retryFn)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *AuthRepository) createNewUserOnce(user *authEntity.User, requestID string) error {
+	startTime := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	query := "INSERT INTO auth_user (username, email, password, description, balance, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 
 	r.asyncLogger.Log(zapcore.DebugLevel, requestID, "Preparing SQL query",
@@ -174,7 +282,7 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User, requestID string) 
 		}))
 
 	var id int64
-	err := r.db.QueryRow(query,
+	err := r.db.QueryRowContext(ctx, query,
 		user.Username,
 		user.Email,
 		user.Password,
@@ -207,6 +315,9 @@ func (r *AuthRepository) CreateNewUser(user *authEntity.User, requestID string) 
 
 func (r *AuthRepository) CheckEmailOrUsernameExists(email, username string, requestID string) (*authEntity.User, error) {
 	startTime := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	query := `
         SELECT id, username, email, password, description, balance, role 
         FROM auth_user 
@@ -219,7 +330,7 @@ func (r *AuthRepository) CheckEmailOrUsernameExists(email, username string, requ
 			"username": username,
 		}))
 
-	row := r.db.QueryRow(query, email, username)
+	row := r.db.QueryRowContext(ctx, query, email, username)
 	user := &authEntity.User{}
 
 	err := row.Scan(

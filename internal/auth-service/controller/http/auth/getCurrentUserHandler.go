@@ -30,9 +30,11 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 	userID := userSession.UserID
 
-	user, err := c.authUsecase.GetUser(userID, requestID)
+	user, err := c.authUsecase.GetUser(r.Context(), userID, requestID)
 	if err != nil {
-		panic("UNIMPLIMENTED")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to get user"))
+		return
 	}
 
 	userResponse := &UserResponse{

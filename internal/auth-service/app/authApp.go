@@ -10,6 +10,7 @@ import (
 	repoSession "retarget/internal/auth-service/repo/auth"
 	usecaseAuth "retarget/internal/auth-service/usecase/auth"
 	authenticate "retarget/pkg/middleware/auth"
+	optiLog "retarget/pkg/utils/optiLog"
 	"time"
 
 	"go.uber.org/zap"
@@ -20,6 +21,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	asyncLogger := optiLog.NewAsyncLogger(logger, 1000, 100_000)
 
 	sessionRepository := repoSession.NewSessionRepository(
 		cfg.AuthRedis.EndPoint,
@@ -40,7 +42,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		}
 	}()
 
-	authUsecase := usecaseAuth.NewAuthUsecase(userRepository, sessionRepository)
+	authUsecase := usecaseAuth.NewAuthUsecase(userRepository, sessionRepository, asyncLogger)
 
 	mux := authAppHttp.SetupRoutes(authenticator, authUsecase)
 

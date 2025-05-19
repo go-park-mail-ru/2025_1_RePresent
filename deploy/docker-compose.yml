@@ -32,21 +32,25 @@ services:
     ports:
       - "${PSQL_PORT}:5432"
     command:
-      [
-        "postgres",
-        "-c",
-        "password_encryption=scram-sha-256",
-        "-c",
-        "max_connections=200",
-        "-c",
-        "log_statement=all", # или dll
-        "-c",
-        "ssl=off",
-        "-c",
-        "shared_buffers=256MB",
-        "-c",
-        "work_mem=16MB"
-      ]
+      - "postgres"
+      - "-c"
+      - "password_encryption=scram-sha-256"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=512MB"
+      - "-c"
+      - "work_mem=64MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "checkpoint_segments=16"
+      - "-c"
+      - "checkpoint_timeout=30min"
+      - "-c"
+      - "checkpoint_segments=16"
+      - "-c"
+      - "log_statement=dll" # для тестов all
     networks:
       - retarget_network
     volumes:

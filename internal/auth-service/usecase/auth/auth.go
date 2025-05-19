@@ -2,72 +2,143 @@ package auth
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
+	"time"
 
 	entityAuth "retarget/internal/auth-service/entity/auth"
 	repoAuth "retarget/internal/auth-service/repo/auth"
+	"retarget/pkg/utils/optiLog"
 
+	"go.uber.org/zap/zapcore"
 	"golang.org/x/crypto/argon2"
 	"gopkg.in/inf.v0"
 )
 
+// HashConfig определяет параметры Argon2id
 type HashConfig struct {
-	Memory      uint32
+	Memory      uint32 // in KB
 	Iterations  uint32
 	Parallelism uint8
 	SaltLength  uint32
 	KeyLength   uint32
 }
 
-var (
-	DefaultHashConfig = HashConfig{
-		Memory:      64 * 1024, // 64 MB
-		Iterations:  3,
-		Parallelism: 2,
-		SaltLength:  16,
-		KeyLength:   32,
+var DefaultHashConfig = HashConfig{
+	Memory:      16 * 1024, // 16 MB
+	Iterations:  3,
+	Parallelism: 2,
+	SaltLength:  16,
+	KeyLength:   32,
+}
+
+// SimpleRateLimiter - простой рейт-лимитер на основе времени последнего доступа
+type SimpleRateLimiter struct {
+	lastAccess map[string]time.Time
+	interval   time.Duration
+	mu         sync.RWMutex
+}
+
+func NewSimpleRateLimiter(interval time.Duration) *SimpleRateLimiter {
+	return &SimpleRateLimiter{
+		lastAccess: make(map[string]time.Time),
+		interval:   interval,
 	}
-)
+}
+
+func (r *SimpleRateLimiter) Allow(key string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	now := time.Now()
+	if last, ok := r.lastAccess[key]; ok && now.Sub(last) < r.interval {
+		return false
+	}
+	r.lastAccess[key] = now
+	return true
+}
 
 type AuthUsecaseInterface interface {
-	Login(email string, password string, role int, requestID string) (*entityAuth.User, error)
+	Login(ctx context.Context, email string, password string, role int, requestID string) (*entityAuth.User, error)
 	Logout(sessionId string) error
-	Register(username string, email string, password string, role int, requestID string) (*entityAuth.User, error)
-
-	GetUser(userId int, requestID string) (*entityAuth.User, error)
+	Register(ctx context.Context, username string, email string, password string, role int, requestID string) (*entityAuth.User, error)
+	GetUser(ctx context.Context, userID int, requestID string) (*entityAuth.User, error)
 	CheckCode(code int, userId int) error
 	CreateCode(userId int) (int, error)
-
-	AddSession(userId int, role int) (*entityAuth.Session, error)
+	AddSession(userID int, role int) (*entityAuth.Session, error)
 }
 
 type AuthUsecase struct {
 	authRepository    *repoAuth.AuthRepository
 	sessionRepository *repoAuth.SessionRepository
 	hashCfg           HashConfig
+	rateLimiter       *SimpleRateLimiter
+	asyncLogger       *optiLog.AsyncLogger
 }
 
-func NewAuthUsecase(userRepo *repoAuth.AuthRepository, sessionRepo *repoAuth.SessionRepository) *AuthUsecase {
+func NewAuthUsecase(
+	userRepo *repoAuth.AuthRepository,
+	sessionRepo *repoAuth.SessionRepository,
+	logger *optiLog.AsyncLogger,
+) *AuthUsecase {
 	return &AuthUsecase{
 		authRepository:    userRepo,
 		sessionRepository: sessionRepo,
 		hashCfg:           DefaultHashConfig,
+		rateLimiter:       NewSimpleRateLimiter(1 * time.Second),
+		asyncLogger:       logger,
 	}
 }
 
-func (a *AuthUsecase) Login(email string, password string, role int, requestID string) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByEmail(email, requestID)
+// -----------------------------
+// Методы авторизации
+// -----------------------------
+
+func (a *AuthUsecase) Login(ctx context.Context, email string, password string, role int, requestID string) (*entityAuth.User, error) {
+	startTime := time.Now()
+
+	if !a.rateLimiter.Allow(email) {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Too many login attempts",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"email": email,
+			}))
+		return nil, errors.New("слишком много попыток")
+	}
+
+	var user *entityAuth.User
+	err := withRetry(func() error {
+		var fetchErr error
+		user, fetchErr = a.authRepository.GetUserByEmail(email, requestID)
+		return fetchErr
+	})
 	if err != nil {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "User not found or DB error",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"email": email,
+				"error": err.Error(),
+			}))
 		return nil, errors.New("incorrect user data")
 	}
 
 	if err := compareHashAndPassword(string(user.Password), password, a.hashCfg); err != nil {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Password mismatch",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"userID": user.ID,
+				"email":  user.Email,
+			}))
 		return nil, errors.New("incorrect user data")
 	}
+
+	a.asyncLogger.Log(zapcore.DebugLevel, requestID, "Login successful",
+		optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+			"userID": user.ID,
+			"email":  user.Email,
+		}))
 
 	return user, nil
 }
@@ -80,15 +151,45 @@ func (a *AuthUsecase) Logout(sessionId string) error {
 	return nil
 }
 
-func (a *AuthUsecase) GetUser(userID int, requestID string) (*entityAuth.User, error) {
-	user, err := a.authRepository.GetUserByID(userID, requestID)
+func (a *AuthUsecase) GetUser(ctx context.Context, userID int, requestID string) (*entityAuth.User, error) {
+	startTime := time.Now()
+
+	var user *entityAuth.User
+	err := withRetry(func() error {
+		var fetchErr error
+		user, fetchErr = a.authRepository.GetUserByID(userID, requestID)
+		return fetchErr
+	})
+
 	if err != nil {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Failed to get user",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"userID": userID,
+				"error":  err.Error(),
+			}))
 		return nil, err
 	}
+
+	a.asyncLogger.Log(zapcore.DebugLevel, requestID, "User fetched successfully",
+		optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+			"userID": user.ID,
+			"role":   user.Role,
+		}))
+
 	return user, nil
 }
 
-func (a *AuthUsecase) Register(username string, email string, password string, role int, requestID string) (*entityAuth.User, error) {
+func (a *AuthUsecase) Register(ctx context.Context, username string, email string, password string, role int, requestID string) (*entityAuth.User, error) {
+	startTime := time.Now()
+
+	if len(password) < 8 {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Password too short",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"username": username,
+			}))
+		return nil, errors.New("пароль должен быть не короче 8 символов")
+	}
+
 	existingUser, err := a.authRepository.CheckEmailOrUsernameExists(email, username, requestID)
 	if err != nil {
 		return nil, err
@@ -96,15 +197,27 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 
 	if existingUser != nil {
 		if existingUser.Email == email {
+			a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Email already exists",
+				optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+					"email": email,
+				}))
 			return nil, errors.New("пользователь с таким email уже существует")
 		}
 		if existingUser.Username == username {
+			a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Username already exists",
+				optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+					"username": username,
+				}))
 			return nil, errors.New("пользователь с таким username уже существует")
 		}
 	}
 
 	hashedPassword, err := hashPassword(password, a.hashCfg)
 	if err != nil {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "Password hashing failed",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"error": err.Error(),
+			}))
 		return nil, err
 	}
 
@@ -118,12 +231,28 @@ func (a *AuthUsecase) Register(username string, email string, password string, r
 	}
 
 	if err := entityAuth.ValidateUser(user); err != nil {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "User validation failed",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"username": user.Username,
+				"error":    err.Error(),
+			}))
 		return nil, err
 	}
 
 	if err := a.authRepository.CreateNewUser(user, requestID); err != nil {
+		a.asyncLogger.Log(zapcore.WarnLevel, requestID, "User creation failed",
+			optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+				"username": user.Username,
+				"error":    err.Error(),
+			}))
 		return nil, err
 	}
+
+	a.asyncLogger.Log(zapcore.DebugLevel, requestID, "User registered successfully",
+		optiLog.MakeLogFields(requestID, time.Since(startTime).Milliseconds(), map[string]interface{}{
+			"userID": user.ID,
+			"email":  user.Email,
+		}))
 
 	return user, nil
 }
@@ -135,6 +264,10 @@ func (a *AuthUsecase) AddSession(userID int, role int) (*entityAuth.Session, err
 	}
 	return session, nil
 }
+
+// -----------------------------
+// Хэширование паролей
+// -----------------------------
 
 func hashPassword(password string, cfg HashConfig) ([]byte, error) {
 	salt := make([]byte, cfg.SaltLength)
@@ -183,4 +316,41 @@ func compareHashAndPassword(storedHash, password string, cfg HashConfig) error {
 	}
 
 	return nil
+}
+
+// -----------------------------
+// Вспомогательные функции
+// -----------------------------
+
+func withRetry(fn func() error) error {
+	for attempt := 0; attempt < 3; attempt++ {
+		err := fn()
+		if err == nil {
+			return nil
+		}
+		if isTransientError(err) {
+			if attempt < 2 {
+				delay := time.Millisecond * time.Duration(100*(1<<uint(attempt)))
+				time.Sleep(delay)
+			}
+			continue
+		}
+		break
+	}
+	return errors.New("operation failed after retries")
+}
+
+func isTransientError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if strings.Contains(err.Error(), "connection refused") ||
+		strings.Contains(err.Error(), "network error") ||
+		strings.Contains(err.Error(), "timeout") ||
+		strings.Contains(err.Error(), "EOF") ||
+		strings.Contains(err.Error(), "unexpected EOF") ||
+		strings.Contains(err.Error(), "server closed the connection unexpectedly") {
+		return true
+	}
+	return false
 }

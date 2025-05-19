@@ -40,7 +40,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 
 	// Login(данные пользователя), проверили данные, AddSession(user_id), поставили куки
 
-	user, err := c.authUsecase.Register(req.Username, req.Email, req.Password, req.Role, requestID)
+	user, err := c.authUsecase.Register(r.Context(), req.Username, req.Email, req.Password, req.Role, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
