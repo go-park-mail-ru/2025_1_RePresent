@@ -12,6 +12,9 @@ CREATE TABLE auth_user (
     role SMALLINT NOT NULL
 );
 
+CREATE UNIQUE INDEX auth_user_username_key ON auth_user(username);
+CREATE UNIQUE INDEX auth_user_email_key ON auth_user(email);
+
 CREATE
 OR REPLACE FUNCTION update_updated_at() RETURNS TRIGGER AS $ $ BEGIN NEW.updated_at = (now() AT TIME ZONE 'UTC');
 
