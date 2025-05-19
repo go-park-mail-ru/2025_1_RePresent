@@ -44,13 +44,9 @@ services:
       - "-c"
       - "maintenance_work_mem=256MB"
       - "-c"
-      - "checkpoint_segments=16"
-      - "-c"
       - "checkpoint_timeout=30min"
       - "-c"
-      - "checkpoint_segments=16"
-      - "-c"
-      - "log_statement=dll" # для тестов all
+      - "log_statement=dll" # для тестов all можно
     networks:
       - retarget_network
     volumes:
