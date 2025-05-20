@@ -35,3 +35,5 @@ deploy/minio-data
 deploy/auth-data
 deploy/venv
 deploy/index.html
+perf_test/login_targets.json
+perf_test/signup_targets.json
