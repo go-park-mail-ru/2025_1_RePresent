@@ -80,7 +80,6 @@ func main() {
 	fmt.Println("Файлы signup_targets.json и login_targets.json успешно сгенерированы.")
 }
 
-// writeJSONLine сериализует JSON и записывает его в одну строку
 func writeJSONLine(f *os.File, target map[string]interface{}) {
 	line, err := json.Marshal(target)
 	if err != nil {
