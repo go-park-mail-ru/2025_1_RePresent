@@ -102,7 +102,7 @@ func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string
 		INSERT INTO actions (
 			banner_id, 
 			slot_id, 
-			action
+			actions
 		) VALUES (?, ?, ?)
 	`
 
