@@ -142,7 +142,7 @@ func (uc *PaymentUsecase) GetTransactionByID(transactionID string, requestID str
 	return uc.PaymentRepository.GetTransactionByID(transactionID, requestID)
 }
 
-func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id, amount int) error {
+func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) error {
 	user_id, err := uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
 	if err != nil {
 		return err

@@ -129,6 +129,7 @@ func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) e
 	req := &protoPayment.PaymentRequest{
 		FromUserId: int32(bannerOwnerID),
 		ToUserId:   int32(ownerSlotID),
+		Amount:     string(banner.MaxPrice),
 	}
 	a.advRepository.WriteMetric(bannerID, slotLink, action)
 	a.PaymentClient.RegUserActivity(ctx, req)

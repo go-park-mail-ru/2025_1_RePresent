@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.2
-// source: tolina-huinya.proto
+// source: pkg/proto/payment/payment.proto
 
 package paymentpb
 
@@ -117,5 +117,5 @@ var PaymentService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "tolina-huinya.proto",
+	Metadata: "pkg/proto/payment/payment.proto",
 }

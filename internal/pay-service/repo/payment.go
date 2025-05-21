@@ -186,7 +186,7 @@ func (r *PaymentRepository) GetTransactionByID(transactionID string, requestID s
 	return &tx, nil
 }
 
-func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id, amount int) (int, error) {
+func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return -1, fmt.Errorf("failed to begin transaction: %w", err)
