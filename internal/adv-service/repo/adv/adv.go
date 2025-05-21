@@ -3,7 +3,6 @@ package adv
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -107,8 +106,16 @@ func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string
 		) VALUES (?, ?, ?)
 	`
 
-	if _, err := u.clickhouse.Exec(addQuery, bannerID, slotLink, action); err != nil {
-		return fmt.Errorf("Ошибка при добавлении в базу данных")
+	res, err := u.clickhouse.Exec(addQuery, bannerID, slotLink, action)
+	if err != nil {
+		log.Printf("ClickHouse insert error: %v", err)
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("Error getting rows affected: %v", err)
+	} else {
+		log.Printf("Rows affected: %d", rowsAffected)
 	}
 
 	return nil
