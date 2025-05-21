@@ -105,5 +105,5 @@ FROM alpine:latest AS adv-service
 WORKDIR /app
 COPY --from=adv-builder /bin/adv-service ./
 COPY --from=adv-builder /app/configs ./configs
-COPY --from=banner-builder /app/pkg/iframe-templates ./templates
+COPY --from=adv-builder /app/pkg/iframe-templates ./templates
 ENTRYPOINT ["./adv-service"]
