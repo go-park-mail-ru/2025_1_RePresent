@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	entity "retarget/pkg/entity"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -34,7 +35,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
-		Banner:      banner.OwnerID,
+		Banner:      strconv.Itoa(int(banner.Id)),
 		Slot:        secret_link,
 	}
 	if err := tmpl.Execute(w, data); err != nil {

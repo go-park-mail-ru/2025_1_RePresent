@@ -11,6 +11,7 @@ message Banner {
   string link = 4;
   string ownerID = 5;
   string max_price = 6;
+  int64 id = 7;
 }
 
 message Empty {}

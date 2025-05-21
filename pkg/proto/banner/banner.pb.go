@@ -29,6 +29,7 @@ type Banner struct {
 	Link          string                 `protobuf:"bytes,4,opt,name=link,proto3" json:"link,omitempty"`
 	OwnerID       string                 `protobuf:"bytes,5,opt,name=ownerID,proto3" json:"ownerID,omitempty"`
 	MaxPrice      string                 `protobuf:"bytes,6,opt,name=max_price,json=maxPrice,proto3" json:"max_price,omitempty"`
+	Id            int64                  `protobuf:"varint,7,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -103,6 +104,13 @@ func (x *Banner) GetMaxPrice() string {
 		return x.MaxPrice
 	}
 	return ""
+}
+
+func (x *Banner) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 type Empty struct {
@@ -189,14 +197,15 @@ var File_pkg_proto_banner_banner_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_banner_banner_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpkg/proto/banner/banner.proto\x12\bbannerpb\"\xa5\x01\n" +
+	"\x1dpkg/proto/banner/banner.proto\x12\bbannerpb\"\xb5\x01\n" +
 	"\x06Banner\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04link\x18\x04 \x01(\tR\x04link\x12\x18\n" +
 	"\aownerID\x18\x05 \x01(\tR\aownerID\x12\x1b\n" +
-	"\tmax_price\x18\x06 \x01(\tR\bmaxPrice\"\a\n" +
+	"\tmax_price\x18\x06 \x01(\tR\bmaxPrice\x12\x0e\n" +
+	"\x02id\x18\a \x01(\x03R\x02id\"\a\n" +
 	"\x05Empty\"\x1f\n" +
 	"\rBannerRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id2\xb2\x01\n" +
