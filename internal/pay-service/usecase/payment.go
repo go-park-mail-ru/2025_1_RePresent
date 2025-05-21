@@ -54,30 +54,31 @@ func NewPayUsecase(
 }
 
 func (u *PaymentUsecase) GetBalanceByUserId(userID int, requestID string) (float64, error) {
-	_, err := u.PaymentRepository.GetBalanceByUserId(userID, requestID)
+	balik, err := u.PaymentRepository.GetBalanceByUserId(userID, requestID)
 	if err != nil {
 		return 0, err
 	}
 
-	pending, err := u.PaymentRepository.GetPendingTransactions(userID)
-	if err != nil {
-		return 0, fmt.Errorf("error while loaing pending tx: %w", err)
-	}
+	// pending, err := u.PaymentRepository.GetPendingTransactions(userID)
+	// if err != nil {
+	// 	return 0, fmt.Errorf("error while loaing pending tx: %w", err)
+	// }
 
-	for _, tx := range pending {
-		statusStr, err := u.getYooPaymentStatus(tx.TransactionID)
-		if err != nil {
-			continue
-		}
-		statusInt := mapYooStatus(statusStr)
-		if statusInt == 1 && tx.Status != 1 {
-			if _, err := u.PaymentRepository.UpdateBalance(userID, tx.Amount, requestID); err == nil {
-				_ = u.PaymentRepository.UpdateTransactionStatus(tx.TransactionID, statusInt)
-			}
-		}
-	}
+	// for _, tx := range pending {
+	// 	statusStr, err := u.getYooPaymentStatus(tx.TransactionID)
+	// 	if err != nil {
+	// 		continue
+	// 	}
+	// 	statusInt := mapYooStatus(statusStr)
+	// 	if statusInt == 1 && tx.Status != 1 {
+	// 		if _, err := u.PaymentRepository.UpdateBalance(userID, tx.Amount, requestID); err == nil {
+	// 			_ = u.PaymentRepository.UpdateTransactionStatus(tx.TransactionID, statusInt)
+	// 		}
+	// 	}
+	// }
 
-	return u.PaymentRepository.GetBalanceByUserId(userID, requestID)
+	return balik, nil
+	// return u.PaymentRepository.GetBalanceByUserId(userID, requestID)
 }
 
 func mapYooStatus(s string) int {

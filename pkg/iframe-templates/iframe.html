@@ -133,11 +133,13 @@
   const ad = document.getElementById('ad-banner');
   let hasSent = false;
 
+  const isDebug = new URLSearchParams(window.location.search).get('debug') === 'true';
+
   function sendEvent(action) {
-    if (hasSent) return;
+    if (hasSent || isDebug) return;
     hasSent = true;
 
-    fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.banner}}&slot={{.slot}}&action=&{action}`, {
+    fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.Banner}}&slot={{.Slot}}&action=${action}`, {
       method: 'GET',
       mode: 'no-cors'
     });
