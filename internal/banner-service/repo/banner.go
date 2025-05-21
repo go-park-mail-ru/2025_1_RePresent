@@ -109,7 +109,7 @@ func (r *BannerRepository) GetMaxPriceBanner() (*entity.Banner, error) {
 	}
 
 	duration := time.Since(startTime)
-	r.logger.Debugw("Successfully created new banner", "bannerID", banner.ID, "duration", duration)
+	r.logger.Debugw("Success", "bannerID", banner.ID, "duration", duration)
 
 	return &banner, nil
 }

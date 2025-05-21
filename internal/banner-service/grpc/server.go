@@ -42,6 +42,7 @@ func (s *BannerServer) GetRandomBanner(
 		Description: banner.Description,
 		Link:        banner.Link,
 		OwnerID:     strconv.Itoa(banner.OwnerID),
+		Id:          int64(banner.ID),
 	}, nil
 }
 
