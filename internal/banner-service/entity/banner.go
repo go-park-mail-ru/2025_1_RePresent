@@ -2,6 +2,7 @@ package entity
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 
 	"gopkg.in/inf.v0"
@@ -46,6 +47,20 @@ func (d Decimal) MarshalJSON() ([]byte, error) {
 		return []byte(`"0"`), nil
 	}
 	return []byte(`"` + d.String() + `"`), nil
+}
+
+func (d *Decimal) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err == nil {
+		return d.parseFromString(s)
+	}
+
+	var f float64
+	if err := json.Unmarshal(b, &f); err == nil {
+		return d.parseFromString(fmt.Sprintf("%f", f))
+	}
+
+	return fmt.Errorf("invalid decimal json: %s", string(b))
 }
 
 type Banner struct {
