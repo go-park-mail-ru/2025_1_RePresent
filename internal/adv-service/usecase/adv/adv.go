@@ -112,7 +112,7 @@ func (a *AdvUsecase) generateLink(userID int, height, width int) adv.Link {
 
 func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) error {
 
-	ownerSlotID, err := a.advRepository.FindUserByLink(slotLink)
+	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
 	if err != nil {
 		return err
 	}
