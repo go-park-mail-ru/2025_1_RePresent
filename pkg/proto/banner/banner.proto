@@ -14,7 +14,12 @@ message Banner {
 
 message Empty {}
 
+message BannerRequest {
+  int64 id = 1;
+}
+
 service BannerService {
   rpc SendBanner(Banner) returns (Empty);
   rpc GetRandomBanner(Empty) returns (Banner);  // Новый метод без параметров
+  rpc GetBannerByID(BannerRequest) returns (Banner);
 }

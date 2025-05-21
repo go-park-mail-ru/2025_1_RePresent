@@ -18,6 +18,9 @@ type IFrame struct {
 	Link        string
 	Title       string
 	Description string
+	Action      string
+	Banner      int
+	Slot        string
 }
 
 func (h *BannerController) GetBannerIFrameByID(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +51,9 @@ func (h *BannerController) GetBannerIFrameByID(w http.ResponseWriter, r *http.Re
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
+		Action:      "",
+		Banner:      -1,
+		Slot:        "",
 	}
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Println("template execute error:", err)

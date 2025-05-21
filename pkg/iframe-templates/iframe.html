@@ -118,9 +118,6 @@
 <body>
   <a href="{{.Link}}" class="card-link" target="_blank">
     <div class="card">
-      <div class="card-header">
-        Реклама • 16+
-      </div>
       <div class="card-image">
         <img src="{{.ImageSrc}}" alt={{.Title}}>
       </div>
@@ -133,50 +130,27 @@
   </a>
 </body>
 <script>
-  "use strict";
+  const ad = document.getElementById('ad-banner');
+  let hasSent = false;
 
-  const METRICS_URL = "https://your-ad-service.com/api/metrics";
-  const BANNER_ID = "123";
-  let startTime = Date.now();
-  let hasClicked = false;
+  function sendEvent(action) {
+    if (hasSent) return;
+    hasSent = true;
 
-  function sendViewMetric() {
-    const duration = Math.round((Date.now() - startTime) / 1000);
-    const data = {
-      bannerId: BANNER_ID,
-      type: "view",
-      duration: duration,
-      timestamp: new Date().toISOString()
-    };
-
-    navigator.sendBeacon(METRICS_URL, JSON.stringify(data));
-  }
-
-  function handleClick() {
-    hasClicked = true;
-    const data = {
-      bannerId: BANNER_ID,
-      type: "click",
-      timestamp: new Date().toISOString()
-    };
-
-    fetch(METRICS_URL, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
-      keepalive: true
-    }).catch(e => console.error("Metrics error:", e));
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelector(".card-link").addEventListener("click", handleClick);
-
-    window.addEventListener("pagehide", sendViewMetric);
-    window.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        sendViewMetric();
-      }
+    fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.banner}}&slot={{.slot}}&action=&{action}`, {
+      method: 'GET',
+      mode: 'no-cors'
     });
+  }
+
+  // 1. Таймер на просмотр (5 секунд после показа)
+  const viewTimer = setTimeout(() => {
+    sendEvent('shown');
+  }, 5000);
+
+  // 2. Отправка по клику
+  ad.addEventListener('click', () => {
+    sendEvent('click');
   });
 </script>
 

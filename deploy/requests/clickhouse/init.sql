@@ -21,3 +21,14 @@ CREATE TABLE IF NOT EXISTS csat.activity (
     cash_off DECIMAL(12, 2)
 ) ENGINE = MergeTree()
 ORDER BY created_at;
+
+CREATE DATABASE IF NOT EXISTS adv;
+
+CREATE TABLE IF NOT EXISTS adv.actions (
+    id UUID DEFAULT generateUUIDv4(),
+    created_at TIMESTAMP DEFAULT toTimeZone(now(), 'Europe/Moscow'),
+    banner_id INT,
+    slot_id String,
+    actions String
+) ENGINE = MergeTree()
+ORDER BY created_at;

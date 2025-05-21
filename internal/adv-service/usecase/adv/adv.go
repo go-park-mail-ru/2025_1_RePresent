@@ -8,8 +8,9 @@ import (
 	"retarget/internal/adv-service/entity/adv"
 	repoAdv "retarget/internal/adv-service/repo/adv"
 	repoSlots "retarget/internal/adv-service/repo/slot"
-	pb "retarget/pkg/proto"
+	pb "retarget/pkg/proto/banner"
 	protoPayment "retarget/pkg/proto/payment"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -19,6 +20,7 @@ type AdvUsecaseInterface interface {
 	CheckLink(link string) error
 	PutLink(userID int, height, width int) (adv.Link, bool, error)
 	generateLink(userID int, height, width int) adv.Link
+	WriteMetric(bannerID int, slotLink string, metric string) error
 }
 
 type AdvUsecase struct {
@@ -106,4 +108,29 @@ func (a *AdvUsecase) generateLink(userID int, height, width int) adv.Link {
 		Height:   height,
 		Width:    width,
 	}
+}
+
+func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) error {
+
+	ownerSlotID, err := a.advRepository.FindUserByLink(slotLink)
+	if err != nil {
+		return fmt.Errorf("slot is not exist")
+	}
+	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
+	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
+	banner, err := a.bannerClient.GetBannerByID(ctx, bannerReq)
+	if err != nil {
+		return fmt.Errorf("get banner error")
+	}
+	bannerOwnerID, err := strconv.Atoi(banner.OwnerID)
+	if err != nil {
+		return fmt.Errorf("get banner error")
+	}
+	req := &protoPayment.PaymentRequest{
+		FromUserId: int32(bannerOwnerID),
+		ToUserId:   int32(ownerSlotID),
+	}
+	a.advRepository.WriteMetric(bannerID, slotLink, action)
+	a.PaymentClient.RegUserActivity(ctx, req)
+	return nil
 }

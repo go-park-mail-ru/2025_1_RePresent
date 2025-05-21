@@ -11,7 +11,7 @@ import (
 	usecaseAdv "retarget/internal/adv-service/usecase/adv"
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 	authenticate "retarget/pkg/middleware/auth"
-	pb "retarget/pkg/proto"
+	pb "retarget/pkg/proto/banner"
 	protoPayment "retarget/pkg/proto/payment"
 
 	"go.uber.org/zap"
@@ -23,7 +23,9 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	advRepository := repoAdv.NewAdvRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
+
+	dsn := "clickhouse://user:123456@ReTargetClickHouse:9000/csat?dial_timeout=10s"
+	advRepository := repoAdv.NewAdvRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password, dsn)
 
 	slotRepository := repoSlot.NewSlotRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
 	defer slotRepository.Close()

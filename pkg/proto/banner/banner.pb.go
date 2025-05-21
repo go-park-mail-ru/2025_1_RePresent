@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v6.30.2
-// source: pkg/proto/banner.proto
+// source: pkg/proto/banner/banner.proto
 
 package bannerpb
 
@@ -34,7 +34,7 @@ type Banner struct {
 
 func (x *Banner) Reset() {
 	*x = Banner{}
-	mi := &file_pkg_proto_banner_proto_msgTypes[0]
+	mi := &file_pkg_proto_banner_banner_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -46,7 +46,7 @@ func (x *Banner) String() string {
 func (*Banner) ProtoMessage() {}
 
 func (x *Banner) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_banner_proto_msgTypes[0]
+	mi := &file_pkg_proto_banner_banner_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +59,7 @@ func (x *Banner) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Banner.ProtoReflect.Descriptor instead.
 func (*Banner) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_banner_proto_rawDescGZIP(), []int{0}
+	return file_pkg_proto_banner_banner_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Banner) GetTitle() string {
@@ -105,7 +105,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_pkg_proto_banner_proto_msgTypes[1]
+	mi := &file_pkg_proto_banner_banner_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -117,7 +117,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_banner_proto_msgTypes[1]
+	mi := &file_pkg_proto_banner_banner_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -130,75 +130,125 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_banner_proto_rawDescGZIP(), []int{1}
+	return file_pkg_proto_banner_banner_proto_rawDescGZIP(), []int{1}
 }
 
-var File_pkg_proto_banner_proto protoreflect.FileDescriptor
+type BannerRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_pkg_proto_banner_proto_rawDesc = "" +
+func (x *BannerRequest) Reset() {
+	*x = BannerRequest{}
+	mi := &file_pkg_proto_banner_banner_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BannerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BannerRequest) ProtoMessage() {}
+
+func (x *BannerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_banner_banner_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BannerRequest.ProtoReflect.Descriptor instead.
+func (*BannerRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_banner_banner_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *BannerRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+var File_pkg_proto_banner_banner_proto protoreflect.FileDescriptor
+
+const file_pkg_proto_banner_banner_proto_rawDesc = "" +
 	"\n" +
-	"\x16pkg/proto/banner.proto\x12\bbannerpb\"\x88\x01\n" +
+	"\x1dpkg/proto/banner/banner.proto\x12\bbannerpb\"\x88\x01\n" +
 	"\x06Banner\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04link\x18\x04 \x01(\tR\x04link\x12\x18\n" +
 	"\aownerID\x18\x05 \x01(\tR\aownerID\"\a\n" +
-	"\x05Empty2v\n" +
+	"\x05Empty\"\x1f\n" +
+	"\rBannerRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id2\xb2\x01\n" +
 	"\rBannerService\x12/\n" +
 	"\n" +
 	"SendBanner\x12\x10.bannerpb.Banner\x1a\x0f.bannerpb.Empty\x124\n" +
-	"\x0fGetRandomBanner\x12\x0f.bannerpb.Empty\x1a\x10.bannerpb.BannerB$Z\"retarget/pkg/proto/banner;bannerpbb\x06proto3"
+	"\x0fGetRandomBanner\x12\x0f.bannerpb.Empty\x1a\x10.bannerpb.Banner\x12:\n" +
+	"\rGetBannerByID\x12\x17.bannerpb.BannerRequest\x1a\x10.bannerpb.BannerB$Z\"retarget/pkg/proto/banner;bannerpbb\x06proto3"
 
 var (
-	file_pkg_proto_banner_proto_rawDescOnce sync.Once
-	file_pkg_proto_banner_proto_rawDescData []byte
+	file_pkg_proto_banner_banner_proto_rawDescOnce sync.Once
+	file_pkg_proto_banner_banner_proto_rawDescData []byte
 )
 
-func file_pkg_proto_banner_proto_rawDescGZIP() []byte {
-	file_pkg_proto_banner_proto_rawDescOnce.Do(func() {
-		file_pkg_proto_banner_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_pkg_proto_banner_proto_rawDesc), len(file_pkg_proto_banner_proto_rawDesc)))
+func file_pkg_proto_banner_banner_proto_rawDescGZIP() []byte {
+	file_pkg_proto_banner_banner_proto_rawDescOnce.Do(func() {
+		file_pkg_proto_banner_banner_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_pkg_proto_banner_banner_proto_rawDesc), len(file_pkg_proto_banner_banner_proto_rawDesc)))
 	})
-	return file_pkg_proto_banner_proto_rawDescData
+	return file_pkg_proto_banner_banner_proto_rawDescData
 }
 
-var file_pkg_proto_banner_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_pkg_proto_banner_proto_goTypes = []any{
-	(*Banner)(nil), // 0: bannerpb.Banner
-	(*Empty)(nil),  // 1: bannerpb.Empty
+var file_pkg_proto_banner_banner_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_pkg_proto_banner_banner_proto_goTypes = []any{
+	(*Banner)(nil),        // 0: bannerpb.Banner
+	(*Empty)(nil),         // 1: bannerpb.Empty
+	(*BannerRequest)(nil), // 2: bannerpb.BannerRequest
 }
-var file_pkg_proto_banner_proto_depIdxs = []int32{
+var file_pkg_proto_banner_banner_proto_depIdxs = []int32{
 	0, // 0: bannerpb.BannerService.SendBanner:input_type -> bannerpb.Banner
 	1, // 1: bannerpb.BannerService.GetRandomBanner:input_type -> bannerpb.Empty
-	1, // 2: bannerpb.BannerService.SendBanner:output_type -> bannerpb.Empty
-	0, // 3: bannerpb.BannerService.GetRandomBanner:output_type -> bannerpb.Banner
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 2: bannerpb.BannerService.GetBannerByID:input_type -> bannerpb.BannerRequest
+	1, // 3: bannerpb.BannerService.SendBanner:output_type -> bannerpb.Empty
+	0, // 4: bannerpb.BannerService.GetRandomBanner:output_type -> bannerpb.Banner
+	0, // 5: bannerpb.BannerService.GetBannerByID:output_type -> bannerpb.Banner
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_pkg_proto_banner_proto_init() }
-func file_pkg_proto_banner_proto_init() {
-	if File_pkg_proto_banner_proto != nil {
+func init() { file_pkg_proto_banner_banner_proto_init() }
+func file_pkg_proto_banner_banner_proto_init() {
+	if File_pkg_proto_banner_banner_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_banner_proto_rawDesc), len(file_pkg_proto_banner_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_banner_banner_proto_rawDesc), len(file_pkg_proto_banner_banner_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_pkg_proto_banner_proto_goTypes,
-		DependencyIndexes: file_pkg_proto_banner_proto_depIdxs,
-		MessageInfos:      file_pkg_proto_banner_proto_msgTypes,
+		GoTypes:           file_pkg_proto_banner_banner_proto_goTypes,
+		DependencyIndexes: file_pkg_proto_banner_banner_proto_depIdxs,
+		MessageInfos:      file_pkg_proto_banner_banner_proto_msgTypes,
 	}.Build()
-	File_pkg_proto_banner_proto = out.File
-	file_pkg_proto_banner_proto_goTypes = nil
-	file_pkg_proto_banner_proto_depIdxs = nil
+	File_pkg_proto_banner_banner_proto = out.File
+	file_pkg_proto_banner_banner_proto_goTypes = nil
+	file_pkg_proto_banner_banner_proto_depIdxs = nil
 }

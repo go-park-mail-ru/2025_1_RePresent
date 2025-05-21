@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.2
-// source: pkg/proto/banner.proto
+// source: pkg/proto/banner/banner.proto
 
 package bannerpb
 
@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	BannerService_SendBanner_FullMethodName      = "/bannerpb.BannerService/SendBanner"
 	BannerService_GetRandomBanner_FullMethodName = "/bannerpb.BannerService/GetRandomBanner"
+	BannerService_GetBannerByID_FullMethodName   = "/bannerpb.BannerService/GetBannerByID"
 )
 
 // BannerServiceClient is the client API for BannerService service.
@@ -29,6 +30,7 @@ const (
 type BannerServiceClient interface {
 	SendBanner(ctx context.Context, in *Banner, opts ...grpc.CallOption) (*Empty, error)
 	GetRandomBanner(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Banner, error)
+	GetBannerByID(ctx context.Context, in *BannerRequest, opts ...grpc.CallOption) (*Banner, error)
 }
 
 type bannerServiceClient struct {
@@ -59,12 +61,23 @@ func (c *bannerServiceClient) GetRandomBanner(ctx context.Context, in *Empty, op
 	return out, nil
 }
 
+func (c *bannerServiceClient) GetBannerByID(ctx context.Context, in *BannerRequest, opts ...grpc.CallOption) (*Banner, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Banner)
+	err := c.cc.Invoke(ctx, BannerService_GetBannerByID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BannerServiceServer is the server API for BannerService service.
 // All implementations must embed UnimplementedBannerServiceServer
 // for forward compatibility.
 type BannerServiceServer interface {
 	SendBanner(context.Context, *Banner) (*Empty, error)
 	GetRandomBanner(context.Context, *Empty) (*Banner, error)
+	GetBannerByID(context.Context, *BannerRequest) (*Banner, error)
 	mustEmbedUnimplementedBannerServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedBannerServiceServer) SendBanner(context.Context, *Banner) (*E
 }
 func (UnimplementedBannerServiceServer) GetRandomBanner(context.Context, *Empty) (*Banner, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandomBanner not implemented")
+}
+func (UnimplementedBannerServiceServer) GetBannerByID(context.Context, *BannerRequest) (*Banner, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBannerByID not implemented")
 }
 func (UnimplementedBannerServiceServer) mustEmbedUnimplementedBannerServiceServer() {}
 func (UnimplementedBannerServiceServer) testEmbeddedByValue()                       {}
@@ -138,6 +154,24 @@ func _BannerService_GetRandomBanner_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BannerService_GetBannerByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BannerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BannerServiceServer).GetBannerByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BannerService_GetBannerByID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BannerServiceServer).GetBannerByID(ctx, req.(*BannerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BannerService_ServiceDesc is the grpc.ServiceDesc for BannerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -153,7 +187,11 @@ var BannerService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetRandomBanner",
 			Handler:    _BannerService_GetRandomBanner_Handler,
 		},
+		{
+			MethodName: "GetBannerByID",
+			Handler:    _BannerService_GetBannerByID_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pkg/proto/banner.proto",
+	Metadata: "pkg/proto/banner/banner.proto",
 }
