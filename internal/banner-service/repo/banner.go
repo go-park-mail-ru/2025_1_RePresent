@@ -75,14 +75,15 @@ func (r *BannerRepository) GetMaxPriceBanner() (*entity.Banner, error) {
 		FROM banner b
 		JOIN auth_user u ON b.owner_id = u.id
 		WHERE b.status = 1 AND u.balance > 0
- 		 AND u.max_price = (
-			SELECT MAX(u2.max_price)
+		AND b.max_price = (
+			SELECT MAX(b2.max_price)
 			FROM banner b2
 			JOIN auth_user u2 ON b2.owner_id = u2.id
 			WHERE b2.status = 1 AND u2.balance > 0
-  		)	
+		)
 		ORDER BY RANDOM()
 		LIMIT 1;
+
     `
 
 	var banner entity.Banner
