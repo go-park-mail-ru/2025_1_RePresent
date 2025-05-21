@@ -24,7 +24,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		log.Fatal(err.Error())
 	}
 
-	dsn := "clickhouse://user:123456@ReTargetClickHouse:9000/csat?dial_timeout=10s"
+	dsn := "clickhouse://user:123456@ReTargetClickHouse:9000/adv?dial_timeout=10s"
 	advRepository := repoAdv.NewAdvRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password, dsn)
 
 	slotRepository := repoSlot.NewSlotRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
