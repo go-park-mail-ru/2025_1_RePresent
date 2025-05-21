@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"path/filepath"
 	entity "retarget/pkg/entity"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -17,7 +16,7 @@ type IFrame struct {
 	Link        string
 	Title       string
 	Description string
-	Banner      string
+	Banner      int64
 	Slot        string
 }
 
@@ -35,7 +34,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
-		Banner:      strconv.Itoa(int(banner.Id)),
+		Banner:      banner.Id,
 		Slot:        secret_link,
 	}
 	if err := tmpl.Execute(w, data); err != nil {
