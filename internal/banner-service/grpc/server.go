@@ -58,6 +58,7 @@ func (s *BannerServer) GetBannerByID(ctx context.Context, req *bannerpb.BannerRe
 		Description: banner.Description,
 		Link:        banner.Link,
 		OwnerID:     strconv.Itoa(banner.OwnerID),
+		MaxPrice:    banner.MaxPrice.String(),
 	}, nil
 }
 
