@@ -114,7 +114,7 @@ func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) e
 
 	ownerSlotID, err := a.advRepository.FindUserByLink(slotLink)
 	if err != nil {
-		return fmt.Errorf("slot is not exist")
+		return err
 	}
 	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
 	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня

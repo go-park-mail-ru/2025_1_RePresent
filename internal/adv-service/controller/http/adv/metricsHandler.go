@@ -25,6 +25,7 @@ func (c *AdvController) MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if err = c.advUsecase.WriteMetric(bannerID, slot, action); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Got"))
