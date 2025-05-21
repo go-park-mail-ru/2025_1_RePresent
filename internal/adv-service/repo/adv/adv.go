@@ -100,7 +100,7 @@ func (u *AdvRepository) DeleteLink(link string) error {
 
 func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string) error {
 	const addQuery = `
-		INSERT INTO adv.actions (
+		INSERT INTO actions (
 			banner_id, 
 			slot_id, 
 			action, 
