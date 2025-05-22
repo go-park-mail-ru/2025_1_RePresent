@@ -40,7 +40,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	toStr := query.Get("to")
 	activity := query.Get("activity")
 	bannerIDstr := query.Get("banner")
-	slotIDstr := query.Get("slotIDstr")
+	slotIDstr := query.Get("slot")
 
 	if fromStr == "" || toStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
