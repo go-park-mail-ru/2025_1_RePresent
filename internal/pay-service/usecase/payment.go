@@ -150,7 +150,7 @@ func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id int, amou
 	}
 	balance_from, err := uc.CheckBalance(user_from_id)
 	if err == errTooLittleBalance {
-		uc.logger.Debugw("low balance detected", "user_id", user_from_id, "balance", balance_from)
+		uc.logger.Infow("balance checked", "user_id", user_from_id, "balance", balance_from, "limit", BalanceLimit)
 		go uc.requireSend(user_from_id, strconv.FormatFloat(balance_from, 'f', 2, 64))
 		return nil
 	}
