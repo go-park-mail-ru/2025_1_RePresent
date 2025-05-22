@@ -5,12 +5,17 @@ import (
 	"encoding/json"
 	"log"
 	"retarget/pkg/entity/notice"
+	"strconv"
 
 	"retarget/internal/mail-service/entity/mail"
 	usecaseMail "retarget/internal/mail-service/usecase/mail"
 
 	"github.com/lovoo/goka"
 	"github.com/lovoo/goka/codec"
+)
+
+const (
+	HREF = "https://re-target.ru/profile"
 )
 
 type Consumer struct {
@@ -32,22 +37,21 @@ func NewConsumer(brokers []string, group string, topic goka.Stream, mailUseCase 
 		log.Printf("\n[KAFKA] NEW MESSAGE\n"+
 			"User ID: %d\n"+
 			"Type: %d\n"+
+			"Amount: %d\n"+
 			"-------------------------",
 			event.UserID, event.Type)
 
-		email := "froloff1830@gmail.com"
-		username := "UserName"
-		balance := "100.00"
-		href := "https://re-target.ru/profile"
+		email, username, balance, err := mailUseCase.GetUserByID(event.UserID)
+
 		switch event.Type {
 		case notice.LowBalance:
-			if err := mailUseCase.SendLowBalanceMail(mail.LOW_BALANCE, email, username, balance, href); err != nil {
+			if err := mailUseCase.SendLowBalanceMail(mail.LOW_BALANCE, email, username, balance, HREF); err != nil {
 				log.Printf("Failed to send email: %v", err)
 			} else {
 				log.Printf("Email successfully sent to %s", email)
 			}
 		case notice.TopUpedBalance:
-			if err := mailUseCase.SendTopUpBalanceMail(mail.TOPUP_BALANCE, email, username, balance); err != nil {
+			if err := mailUseCase.SendTopUpBalanceMail(mail.TOPUP_BALANCE, email, username, strconv.FormatFloat(event.Amount, 'f', 2, 64)); err != nil {
 				log.Printf("Failed to send email: %v", err)
 			} else {
 				log.Printf("Email successfully sent to %s", email)

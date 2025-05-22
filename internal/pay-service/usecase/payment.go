@@ -134,7 +134,7 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID strin
 				"error", err)
 		}
 
-		err = uc.NoticeRepository.SendTopUpBalanceEvent(userID)
+		err = uc.NoticeRepository.SendTopUpBalanceEvent(userID, float64(amount))
 		uc.logger.Errorw("failed to send topUp message after top up",
 			"user_id", userID,
 			"error", err)

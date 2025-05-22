@@ -8,6 +8,7 @@ import (
 
 type MailUsecaseInterface interface {
 	SendCodeMail(operation int, to, code string) error
+	GetUserByID(user_id int) (string, string, string, error)
 }
 
 type MailUsecase struct {
@@ -109,4 +110,8 @@ func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 		return err
 	}
 	return nil
+}
+
+func (m *MailUsecase) GetUserByID(user_id int) (string, string, string, error) {
+	return "froloff1830@gmail.com", "Ilya Frolov Company", "100.00", nil
 }

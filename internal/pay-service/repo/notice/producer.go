@@ -59,7 +59,7 @@ func NewNoticeRepository(brokers []string, topic string, logger *zap.SugaredLogg
 	}
 }
 
-func (r *NoticeRepository) SendTopUpBalanceEvent(userID int) error {
+func (r *NoticeRepository) SendTopUpBalanceEvent(userID int, amount float64) error {
 	if userID <= 0 {
 		return fmt.Errorf("invalid user ID: %d", userID)
 	}
@@ -71,6 +71,7 @@ func (r *NoticeRepository) SendTopUpBalanceEvent(userID int) error {
 	event := notice.NoticeEvent{
 		UserID: userID,
 		Type:   noticeType.TopUpedBalance,
+		Amount: amount,
 	}
 
 	payload, err := json.Marshal(event)
