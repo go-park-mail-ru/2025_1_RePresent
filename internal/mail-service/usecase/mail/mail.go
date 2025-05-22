@@ -18,6 +18,64 @@ func NewMailUsecase(mailRepo *repoMail.MailRepository) *MailUsecase {
 	return &MailUsecase{mailRepository: mailRepo}
 }
 
+func (m *MailUsecase) SendLowBalanceMail(operation int, to, username, balance, href string) error {
+	var subject string
+	var body string
+	var err error
+
+	switch operation {
+	case entityMail.LOW_BALANCE:
+		subject = "Уведомление о низком балансе ReTarget"
+		body, err = entityMail.GetEmailLowBalanceBody(entityMail.LOW_BALANCE, username, balance, href)
+	default:
+		return errors.New("undefined operation")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	msg := "To: " + to + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		"Content-Type: text/html; charset=UTF-8\r\n" +
+		"\r\n" + body
+
+	err = m.mailRepository.Send(to, msg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MailUsecase) SendTopUpBalanceMail(operation int, to, username, amount string) error {
+	var subject string
+	var body string
+	var err error
+
+	switch operation {
+	case entityMail.TOPUP_BALANCE:
+		subject = "Пополнение баланса в ReTarget"
+		body, err = entityMail.GetEmailTopUpBody(entityMail.LOW_BALANCE, username, amount)
+	default:
+		return errors.New("undefined operation")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	msg := "To: " + to + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		"Content-Type: text/html; charset=UTF-8\r\n" +
+		"\r\n" + body
+
+	err = m.mailRepository.Send(to, msg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 	var subject string
 	var body string

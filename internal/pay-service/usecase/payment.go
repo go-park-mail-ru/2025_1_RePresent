@@ -133,6 +133,11 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID strin
 				"user_id", userID,
 				"error", err)
 		}
+
+		err = uc.NoticeRepository.SendTopUpBalanceEvent(userID)
+		uc.logger.Errorw("failed to send topUp message after top up",
+			"user_id", userID,
+			"error", err)
 	}()
 
 	return nil
@@ -199,7 +204,7 @@ func (uc *PaymentUsecase) requireSend(userID int, message string) {
 		case <-ctx.Done():
 			return backoff.Permanent(ctx.Err())
 		default:
-			return uc.NoticeRepository.SendLowBalanceNotification(userID, message)
+			return uc.NoticeRepository.SendLowBalanceNotification(userID)
 		}
 	}
 

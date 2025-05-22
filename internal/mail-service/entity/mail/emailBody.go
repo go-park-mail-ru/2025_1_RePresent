@@ -65,3 +65,50 @@ func GetEmailBody(operation int, code string) (string, error) {
 
 	return result, nil
 }
+
+func GetEmailLowBalanceBody(operation int, username, balance, href string) (string, error) {
+	tmpl, ok := emailTemplates[operation]
+	if !ok {
+		return "", nil
+	}
+
+	if tmpl == nil {
+		return "", nil
+	}
+
+	onInsert := map[string]interface{}{
+		"Username": username,
+		"Href":     href,
+		"Balance":  balance,
+	}
+
+	result, err := tmpl.Exec(onInsert)
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
+}
+
+func GetEmailTopUpBody(operation int, username, amount string) (string, error) {
+	tmpl, ok := emailTemplates[operation]
+	if !ok {
+		return "", nil
+	}
+
+	if tmpl == nil {
+		return "", nil
+	}
+
+	onInsert := map[string]interface{}{
+		"Username": username,
+		"Amount":   amount,
+	}
+
+	result, err := tmpl.Exec(onInsert)
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
+}
