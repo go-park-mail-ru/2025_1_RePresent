@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -27,6 +28,7 @@ var (
 
 type PaymentRepositoryInterface interface {
 	GetPaymentByUserId(id int) ([]*entity.Payment, error)
+	DeactivateBannersByUserID(ctx context.Context, userID int) error
 }
 
 type PaymentRepository struct {
@@ -251,6 +253,25 @@ func (r *PaymentRepository) UpdateTransactionStatus(transactionID string, status
     `
 	_, err := r.db.Exec(q, status, transactionID)
 	return err
+}
+
+func (r *PaymentRepository) DeactivateBannersByUserID(ctx context.Context, userID int) error {
+	const query = `
+        UPDATE banner
+        SET status = 0
+        WHERE owner_id = $1 AND status <> 0;`
+
+	result, err := r.db.ExecContext(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("failed to deactivate banners for user %d: %w", userID, err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	r.logger.Infow("banners deactivated",
+		"user_id", userID,
+		"rows_affected", rowsAffected)
+
+	return nil
 }
 
 func (r *PaymentRepository) CloseConnection() error {
