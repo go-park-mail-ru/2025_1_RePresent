@@ -144,15 +144,16 @@ func (uc *PaymentUsecase) GetTransactionByID(transactionID string, requestID str
 }
 
 func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) error {
-	user_id, err := uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
+	user_from_id, user_to_id, err := uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
 	if err != nil {
 		return err
 	}
-	balance, err := uc.CheckBalance(user_id)
-	uc.logger.Infow("balance detected", "user_id", user_id, "balance", balance)
+	balance_from, err := uc.CheckBalance(user_from_id)
+	balance_to, err := uc.CheckBalance(user_to_id)
+	uc.logger.Infow("balance detected", "user__from_id", user_from_id, "balance_from", balance_from, "user__to_id", user_to_id, "balance_to", balance_to)
 	if err == errTooLittleBalance {
-		uc.logger.Debugw("low balance detected", "user_id", user_id, "balance", balance)
-		go uc.requireSend(user_id, strconv.FormatFloat(balance, 'f', 2, 64))
+		uc.logger.Debugw("low balance detected", "user_id", user_from_id, "balance", balance_from)
+		go uc.requireSend(user_from_id, strconv.FormatFloat(balance_from, 'f', 2, 64))
 		return nil
 	}
 	if err != nil {

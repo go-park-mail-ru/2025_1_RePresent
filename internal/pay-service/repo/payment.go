@@ -186,10 +186,10 @@ func (r *PaymentRepository) GetTransactionByID(transactionID string, requestID s
 	return &tx, nil
 }
 
-func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) (int, error) {
+func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) (int, int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
-		return -1, fmt.Errorf("failed to begin transaction: %w", err)
+		return -1, -1, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
 	_, err = tx.Exec(`
@@ -200,7 +200,7 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, am
 		user_slot_id)
 	if err != nil {
 		tx.Rollback()
-		return -1, fmt.Errorf("failed to update first user balance: %w", err)
+		return -1, -1, fmt.Errorf("failed to update first user balance: %w", err)
 	}
 
 	_, err = tx.Exec(`
@@ -211,13 +211,13 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, am
 		user_banner_id)
 	if err != nil {
 		tx.Rollback()
-		return -1, fmt.Errorf("failed to update second user balance: %w", err)
+		return -1, -1, fmt.Errorf("failed to update second user balance: %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return -1, fmt.Errorf("failed to commit transaction: %w", err)
+		return -1, -1, fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return user_banner_id, nil
+	return user_banner_id, user_slot_id, nil
 }
 
 func (r *PaymentRepository) GetPendingTransactions(userID int) ([]entity.Transaction, error) {
