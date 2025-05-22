@@ -2,6 +2,7 @@ package adv
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	entity "retarget/pkg/entity"
 	response "retarget/pkg/entity"
@@ -86,7 +87,10 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Гена на", metrics))
+		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Гена на", metrics))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 		return
 	}
 
