@@ -123,7 +123,7 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID strin
 		// "status", banner.Status,
 		"link", banner.Link,
 	)
-	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;")
+	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;")
 	startTime := time.Now()
 
 	if err != nil {
@@ -135,7 +135,7 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID strin
 	defer stmt.Close()
 
 	var id int64
-	err = stmt.QueryRow(banner.OwnerID, banner.Title, banner.Description, banner.Content, banner.Status, 0, banner.Link).Scan(&id)
+	err = stmt.QueryRow(banner.OwnerID, banner.Title, banner.Description, banner.Content, banner.Status, 0, banner.Link, banner.MaxPrice).Scan(&id)
 	if err != nil {
 		r.logger.Debugw("Error executing query to create new banner", "request_id", requestID, "error", err)
 		return err
