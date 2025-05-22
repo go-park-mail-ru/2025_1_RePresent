@@ -20,8 +20,8 @@ type AttemptRepositoryInterface interface {
 }
 
 type AttemptRepository struct {
-	client      *redis.Client
-	ttl         time.Duration
+	Client      *redis.Client
+	Ttl         time.Duration
 	MaxAttempts int
 }
 
@@ -39,8 +39,8 @@ func NewAttemptRepository(endpoint, password string, db int, ttl time.Duration, 
 	}
 
 	return &AttemptRepository{
-		client:      client,
-		ttl:         ttl,
+		Client:      client,
+		Ttl:         ttl,
 		MaxAttempts: attempts,
 	}
 }
@@ -53,7 +53,7 @@ func (r *AttemptRepository) ResetAttemptsByUserID(userID int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := r.client.Del(ctx, r.getKey(userID)).Err(); err != nil {
+	if err := r.Client.Del(ctx, r.getKey(userID)).Err(); err != nil {
 		return fmt.Errorf("failed to reset attempts: %w", err)
 	}
 	return nil
@@ -65,13 +65,13 @@ func (r *AttemptRepository) IncrementAttemptsByUserID(userID int) error {
 
 	key := r.getKey(userID)
 
-	result := r.client.Incr(ctx, key)
+	result := r.Client.Incr(ctx, key)
 	if err := result.Err(); err != nil {
 		return fmt.Errorf("failed to increment attempts: %w", err)
 	}
 
 	if result.Val() == 1 {
-		if err := r.client.Expire(ctx, key, r.ttl).Err(); err != nil {
+		if err := r.Client.Expire(ctx, key, r.Ttl).Err(); err != nil {
 			return fmt.Errorf("failed to set TTL: %w", err)
 		}
 	}
@@ -98,7 +98,7 @@ func (r *AttemptRepository) DecrementAttemptsByUserID(userID int) error {
         return current
     `)
 
-	_, err := script.Run(ctx, r.client, []string{key}).Result()
+	_, err := script.Run(ctx, r.Client, []string{key}).Result()
 	if err != nil && err != redis.Nil {
 		return fmt.Errorf("failed to decrement attempts: %w", err)
 	}
@@ -112,7 +112,7 @@ func (r *AttemptRepository) GetAttemptsByUserID(userID int) (int, error) {
 
 	key := r.getKey(userID)
 
-	val, err := r.client.Get(ctx, key).Result()
+	val, err := r.Client.Get(ctx, key).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return 0, nil
@@ -129,8 +129,8 @@ func (r *AttemptRepository) GetAttemptsByUserID(userID int) (int, error) {
 }
 
 func (r *AttemptRepository) CloseConnection() error {
-	if r.client != nil {
-		return r.client.Close()
+	if r.Client != nil {
+		return r.Client.Close()
 	}
 	return nil
 }
