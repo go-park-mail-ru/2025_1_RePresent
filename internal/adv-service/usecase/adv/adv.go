@@ -11,6 +11,7 @@ import (
 	pb "retarget/pkg/proto/banner"
 	protoPayment "retarget/pkg/proto/payment"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -134,4 +135,19 @@ func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) e
 	a.advRepository.WriteMetric(bannerID, slotLink, action)
 	a.PaymentClient.RegUserActivity(ctx, req)
 	return nil
+}
+
+func (a *AdvUsecase) GetSlotMetric(slotLink, activity string, userID int, from, to time.Time) (map[string]int, error) {
+
+	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
+	if err != nil || userID != ownerSlotID {
+		return nil, fmt.Errorf("slot not found")
+	}
+
+	total, err := a.advRepository.GetSlotMetric(slotLink, activity, from, to)
+	if err != nil || userID != ownerSlotID {
+		return nil, fmt.Errorf("slot not found")
+	}
+
+	return total, nil
 }

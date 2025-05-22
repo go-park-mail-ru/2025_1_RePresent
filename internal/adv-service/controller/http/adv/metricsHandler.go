@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	entity "retarget/pkg/entity"
+	response "retarget/pkg/entity"
+	"time"
 
 	"strconv"
 )
@@ -29,4 +31,67 @@ func (c *AdvController) MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Got"))
+}
+
+func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+	query := r.URL.Query()
+	fromStr := query.Get("from")
+	toStr := query.Get("to")
+	activity := query.Get("activity")
+	bannerIDstr := query.Get("banner")
+	slotIDstr := query.Get("slotIDstr")
+
+	if fromStr == "" || toStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "missing 'from' or 'to' parameters"))
+		return
+	}
+
+	// Формат даты
+	layout := "2006-01-02"
+
+	// Парсинг
+	fromTime, err := time.Parse(layout, fromStr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
+		return
+	}
+	toTime, err := time.Parse(layout, toStr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
+		return
+	}
+
+	// if fromTime.After(toTime) {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, "'from' must be before or equal to 'to'"))
+	// 	return
+	// }
+
+	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+	}
+	userID := userSession.UserID
+
+	if bannerIDstr == "" && slotIDstr != "" {
+		metrics, err := c.advUsecase.GetSlotMetric(slotIDstr, activity, userID, fromTime, toTime)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(metrics); err != nil {
+			http.Error(w, "Error JSON encoding", http.StatusInternalServerError)
+			return
+		}
+
+	}
+
 }
