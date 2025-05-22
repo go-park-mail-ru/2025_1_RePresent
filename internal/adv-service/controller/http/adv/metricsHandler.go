@@ -86,7 +86,6 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Гена на", metrics))
 		return
 	}
