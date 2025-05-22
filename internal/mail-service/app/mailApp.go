@@ -15,12 +15,12 @@ import (
 )
 
 func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
-	log.Printf("Connecting to Kafka at: %v", "localhost:9092")
+	log.Printf("Connecting to Kafka at: %v", "kafka:9092")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	consumer := mailAppKafka.NewConsumer(
-		[]string{"localhost:9092"},
+		[]string{"kafka:9092"},
 		"on-email-sent-group",
 		"balance_notification_topic",
 	)
