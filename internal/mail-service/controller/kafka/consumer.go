@@ -22,15 +22,8 @@ func NewConsumer(brokers []string, group string, topic goka.Stream, mailUseCase 
 	cb := func(ctx goka.Context, msg interface{}) {
 		log.Printf("Raw message: %v", msg)
 
-		// Делаем type assertion на строку, так как используем codec.String
-		msgStr, ok := msg.(string)
-		if !ok {
-			log.Printf("Failed to cast message to string")
-			return
-		}
-
 		var event notice.NoticeEvent
-		err := json.Unmarshal([]byte(msgStr), &event)
+		err := json.Unmarshal([]byte(msg.(string)), &event)
 		if err != nil {
 			log.Printf("Failed to unmarshal message: %v", err)
 			return

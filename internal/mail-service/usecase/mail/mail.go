@@ -23,7 +23,7 @@ func NewMailUsecase(mailRepo *repoMail.MailRepository) *MailUsecase {
 }
 
 func emailIsExist(email string) error {
-	if email != " " {
+	if email == " " {
 		return recieverWasNotExist
 	}
 	return nil
