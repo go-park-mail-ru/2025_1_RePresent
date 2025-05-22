@@ -10,9 +10,11 @@ import (
 	mailAppKafka "retarget/internal/mail-service/controller/kafka"
 	repoMail "retarget/internal/mail-service/repo/mail"
 	usecaseMail "retarget/internal/mail-service/usecase/mail"
+
+	"go.uber.org/zap"
 )
 
-func Run(cfg *configs.Config) {
+func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	log.Printf("Connecting to Kafka at: %v", "localhost:9092")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
