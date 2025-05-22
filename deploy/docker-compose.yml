@@ -250,6 +250,21 @@ services:
     networks:
       - retarget_network
 
+  mail:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: mail-service
+    container_name: ReTargetApiMail
+    ports:
+      - "8036:8036"
+    depends_on:
+      - clickhouse
+      - scylla
+      - redis0
+    networks:
+      - retarget_network
+
 volumes:
   pg_data:
   clickhouse_data:

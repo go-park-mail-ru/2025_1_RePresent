@@ -19,8 +19,8 @@ func Run(cfg *configs.Config) {
 
 	consumer := mailAppKafka.NewConsumer(
 		[]string{"localhost:9092"},
-		"on-sent-group",
-		"notifications",
+		"on-email-sent-group",
+		"balance_notification_topic",
 	)
 	log.Println("Kafka consumer created successfully")
 	go func() {
@@ -39,5 +39,5 @@ func Run(cfg *configs.Config) {
 
 	mux := mailAppHttp.SetupRoutes(mailUsecase)
 
-	log.Fatal(http.ListenAndServe(":8025", mailMiddleware.CORS(mux)))
+	log.Fatal(http.ListenAndServe(":8036", mailMiddleware.CORS(mux)))
 }
