@@ -6,6 +6,10 @@ import (
 	repoMail "retarget/internal/mail-service/repo/mail"
 )
 
+var (
+	recieverWasNotExist = errors.New("reciever was not exist")
+)
+
 type MailUsecaseInterface interface {
 	SendCodeMail(operation int, to, code string) error
 }
@@ -18,10 +22,21 @@ func NewMailUsecase(mailRepo *repoMail.MailRepository) *MailUsecase {
 	return &MailUsecase{mailRepository: mailRepo}
 }
 
+func emailIsExist(email string) error {
+	if email != " " {
+		return recieverWasNotExist
+	}
+	return nil
+}
+
 func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 	var subject string
 	var body string
 	var err error
+
+	if err := emailIsExist(to); err != nil {
+		return err
+	}
 
 	switch operation {
 	case entityMail.REGISTER:
@@ -33,6 +48,12 @@ func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 	case entityMail.EDIT_PASSWORD:
 		subject = "Изменение пароля в ReTarget"
 		body, err = entityMail.GetEmailBody(entityMail.EDIT_PASSWORD, code)
+	case entityMail.TOPUP_BALANCE:
+		subject = "Пополнение баланса в ReTarget"
+		body, err = entityMail.GetEmailBody(entityMail.TOPUP_BALANCE, code)
+	case entityMail.LOW_BALANCE:
+		subject = "Уведомление о низком балансе ReTarget"
+		body, err = entityMail.GetEmailBody(entityMail.LOW_BALANCE, code)
 	default:
 		return errors.New("undefined operation")
 	}

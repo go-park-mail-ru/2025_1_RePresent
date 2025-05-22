@@ -2,33 +2,55 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"retarget/pkg/entity/notice"
+
+	"retarget/internal/mail-service/entity/mail"
+	usecaseMail "retarget/internal/mail-service/usecase/mail"
 
 	"github.com/lovoo/goka"
 	"github.com/lovoo/goka/codec"
 )
 
 type Consumer struct {
-	processor *goka.Processor
+	processor   *goka.Processor
+	mailUseCase *usecaseMail.MailUsecase
 }
 
-func NewConsumer(brokers []string, group string, topic goka.Stream) *Consumer {
+func NewConsumer(brokers []string, group string, topic goka.Stream, mailUseCase *usecaseMail.MailUsecase) *Consumer {
 	cb := func(ctx goka.Context, msg interface{}) {
-		if event, ok := msg.(*notice.NoticeEvent); ok {
-			log.Printf("\n[KAFKA] NEW MESSAGE\n"+
-				"Topic: %s\n"+
-				"Partition: %d\n"+
-				"Offset: %d\n"+
-				"Key: %s\n"+
-				"User ID: %d\n"+
-				"Type: %d\n"+
-				"Message: %s\n"+
-				"-------------------------",
-				ctx.Topic(), ctx.Partition(), ctx.Offset(), ctx.Key(),
-				event.UserID, event.Type, event.Message)
-		} else {
-			log.Printf("Received unknown message format: %v", msg)
+		log.Printf("Raw message: %v", msg)
+
+		// Делаем type assertion на строку, так как используем codec.String
+		msgStr, ok := msg.(string)
+		if !ok {
+			log.Printf("Failed to cast message to string")
+			return
+		}
+
+		var event notice.NoticeEvent
+		err := json.Unmarshal([]byte(msgStr), &event)
+		if err != nil {
+			log.Printf("Failed to unmarshal message: %v", err)
+			return
+		}
+
+		log.Printf("\n[KAFKA] NEW MESSAGE\n"+
+			"User ID: %d\n"+
+			"Type: %d\n"+
+			"Message: %s\n"+
+			"-------------------------",
+			event.UserID, event.Type, event.Message)
+
+		email := "froloff1830@gmail.com"
+
+		if event.Type == 0 {
+			if err := mailUseCase.SendCodeMail(mail.LOW_BALANCE, email, "Money here"); err != nil {
+				log.Printf("Failed to send email: %v", err)
+			} else {
+				log.Printf("Email successfully sent to %s", email)
+			}
 		}
 	}
 
@@ -46,7 +68,8 @@ func NewConsumer(brokers []string, group string, topic goka.Stream) *Consumer {
 	}
 
 	return &Consumer{
-		processor: processor,
+		processor:   processor,
+		mailUseCase: mailUseCase,
 	}
 }
 

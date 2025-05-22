@@ -15,21 +15,6 @@ import (
 )
 
 func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
-	log.Printf("Connecting to Kafka at: %v", "kafka:9092")
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	consumer := mailAppKafka.NewConsumer(
-		[]string{"kafka:9092"},
-		"on-email-sent-group",
-		"balance_notification_topic",
-	)
-	log.Println("Kafka consumer created successfully")
-	go func() {
-		log.Println("Starting Kafka consumer...")
-		consumer.Run(ctx)
-	}()
-
 	mailRepository := repoMail.NewMailRepository(cfg.Email.SmtpServer, cfg.Email.Port, cfg.Email.Username, cfg.Email.Password, cfg.Email.Sender)
 	defer func() {
 		if err := mailRepository.CloseConnection(); err != nil {
@@ -38,6 +23,21 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	}()
 
 	mailUsecase := usecaseMail.NewMailUsecase(mailRepository)
+
+	log.Printf("Connecting to Kafka at: %v", "kafka:9092")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	consumer := mailAppKafka.NewConsumer(
+		[]string{"kafka:9092"},
+		"on-email-sent-group",
+		"balance_notification_topic",
+		mailUsecase,
+	)
+	go func() {
+		log.Println("Starting Kafka consumer...")
+		consumer.Run(ctx)
+	}()
 
 	mux := mailAppHttp.SetupRoutes(mailUsecase)
 

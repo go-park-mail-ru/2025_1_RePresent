@@ -10,6 +10,8 @@ const (
 	REGISTER       = 1
 	RESET_PASSWORD = 2
 	EDIT_PASSWORD  = 3
+	TOPUP_BALANCE  = 4
+	LOW_BALANCE    = 5
 	TEMPLATES_DIR  = "./internal/mail-service/entity/mail/templates" // TODO: Вынести в конфиг это
 )
 
@@ -29,6 +31,8 @@ func init() {
 		REGISTER:       "registerEmail",
 		RESET_PASSWORD: "resetPasswordEmail",
 		EDIT_PASSWORD:  "editPasswordEmail",
+		TOPUP_BALANCE:  "topUpedBalanceEmail",
+		LOW_BALANCE:    "lowBalanceEmail",
 	}
 
 	for operation, name := range templates {
