@@ -121,4 +121,5 @@ FROM alpine:latest AS mail-service
 WORKDIR /app
 COPY --from=mail-builder /bin/mail-service ./
 COPY --from=mail-builder /app/configs ./configs
+COPY --from=mail-builder /app/internal/mail-service/entity/mail/templates ./internal/mail-service/entity/mail/templates
 ENTRYPOINT ["./mail-service"]
