@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"retarget/internal/pay-service/entity/notice"
+	"retarget/pkg/entity/notice"
 	noticeType "retarget/pkg/entity/notice"
 
 	"github.com/lovoo/goka"
@@ -59,7 +59,7 @@ func NewNoticeRepository(brokers []string, topic string, logger *zap.SugaredLogg
 	}
 }
 
-func (r *NoticeRepository) SendTopUpBalanceEvent(userID int, message string) error {
+func (r *NoticeRepository) SendTopUpBalanceEvent(userID int, amount float64) error {
 	if userID <= 0 {
 		return fmt.Errorf("invalid user ID: %d", userID)
 	}
@@ -69,9 +69,9 @@ func (r *NoticeRepository) SendTopUpBalanceEvent(userID int, message string) err
 	}
 
 	event := notice.NoticeEvent{
-		UserID:  userID,
-		Type:    noticeType.TopUpedBalance,
-		Message: message,
+		UserID: userID,
+		Type:   noticeType.TopUpedBalance,
+		Amount: amount,
 	}
 
 	payload, err := json.Marshal(event)
@@ -92,7 +92,7 @@ func (r *NoticeRepository) SendTopUpBalanceEvent(userID int, message string) err
 	return nil
 }
 
-func (r *NoticeRepository) SendLowBalanceNotification(userID int, message string) error {
+func (r *NoticeRepository) SendLowBalanceNotification(userID int) error {
 	if userID <= 0 {
 		return fmt.Errorf("invalid user ID: %d", userID)
 	}
@@ -102,9 +102,8 @@ func (r *NoticeRepository) SendLowBalanceNotification(userID int, message string
 	}
 
 	event := notice.NoticeEvent{
-		UserID:  userID,
-		Type:    noticeType.LowBalance,
-		Message: message,
+		UserID: userID,
+		Type:   noticeType.LowBalance,
 	}
 
 	payload, err := json.Marshal(event)

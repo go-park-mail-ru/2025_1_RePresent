@@ -21,7 +21,11 @@ import (
 
 var (
 	errTooLittleBalance = errors.New("balance of user is need to top up")
-	BalanceLimit        = 100.00
+)
+
+const (
+	BalanceLimit     = 100.00
+	MinActiveBalance = 10.00
 )
 
 type PaymentUsecase struct {
@@ -133,6 +137,11 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID strin
 				"user_id", userID,
 				"error", err)
 		}
+
+		err = uc.NoticeRepository.SendTopUpBalanceEvent(userID, float64(amount))
+		uc.logger.Errorw("failed to send topUp message after top up",
+			"user_id", userID,
+			"error", err)
 	}()
 
 	return nil
@@ -144,20 +153,43 @@ func (uc *PaymentUsecase) GetTransactionByID(transactionID string, requestID str
 }
 
 func (uc *PaymentUsecase) RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) error {
-	user_id, err := uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
+	_, user_from_id, err := uc.PaymentRepository.RegUserActivity(user_banner_id, user_slot_id, amount)
 	if err != nil {
 		return err
 	}
-	balance, err := uc.CheckBalance(user_id)
+	balance_from, err := uc.CheckBalance(user_from_id)
 	if err == errTooLittleBalance {
-		fmt.Println(balance)
-		go uc.requireSend(user_id, strconv.FormatFloat(balance, 'f', 2, 64))
+		if balance_from < MinActiveBalance {
+			go uc.offBannersByUserID(context.Background(), user_from_id)
+		}
+		uc.logger.Infow("balance checked", "user_id", user_from_id, "balance", balance_from, "limit", BalanceLimit)
+		go uc.requireSend(user_from_id, strconv.FormatFloat(balance_from, 'f', 2, 64))
 		return nil
 	}
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (uc *PaymentUsecase) offBannersByUserID(ctx context.Context, userID int) {
+	defer func() {
+		if r := recover(); r != nil {
+			uc.logger.Errorw("error/panic in offing Banners",
+				"recovered", r,
+				"user_id", userID)
+		}
+	}()
+
+	if err := uc.PaymentRepository.DeactivateBannersByUserID(ctx, userID); err != nil {
+		uc.logger.Errorw("failed to deactivate banners",
+			"error", err,
+			"user_id", userID)
+		return
+	}
+
+	uc.logger.Infow("banners deactivated successfully",
+		"user_id", userID)
 }
 
 func (uc *PaymentUsecase) requireSend(userID int, message string) {
@@ -199,7 +231,7 @@ func (uc *PaymentUsecase) requireSend(userID int, message string) {
 		case <-ctx.Done():
 			return backoff.Permanent(ctx.Err())
 		default:
-			return uc.NoticeRepository.SendLowBalanceNotification(userID, message)
+			return uc.NoticeRepository.SendLowBalanceNotification(userID)
 		}
 	}
 

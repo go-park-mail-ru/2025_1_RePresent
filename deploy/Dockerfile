@@ -59,6 +59,15 @@ COPY pkg ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/adv-service ./cmd/adv-service
 
+# ---- Mail Service ----
+FROM deps AS mail-builder
+COPY cmd/mail-service ./cmd/mail-service
+COPY internal/mail-service ./internal/mail-service
+COPY internal/auth-service ./internal/auth-service
+COPY pkg ./pkg
+COPY configs ./configs
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/mail-service ./cmd/mail-service
+
 # ===================================
 # Этап 3: Финальные образы
 # ===================================
@@ -107,3 +116,11 @@ COPY --from=adv-builder /bin/adv-service ./
 COPY --from=adv-builder /app/configs ./configs
 COPY --from=adv-builder /app/pkg/iframe-templates ./templates
 ENTRYPOINT ["./adv-service"]
+
+# ---- Mail Service ----
+FROM alpine:latest AS mail-service
+WORKDIR /app
+COPY --from=mail-builder /bin/mail-service ./
+COPY --from=mail-builder /app/configs ./configs
+COPY --from=mail-builder /app/internal/mail-service/entity/mail/templates ./internal/mail-service/entity/mail/templates
+ENTRYPOINT ["./mail-service"]

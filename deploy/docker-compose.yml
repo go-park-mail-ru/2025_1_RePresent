@@ -12,8 +12,8 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - retarget_network
-    volumes:
-      - ./redis_data:/data
+    # volumes: 
+    # - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping" ]
       interval: 5s
@@ -74,7 +74,7 @@ services:
     networks:
       - retarget_network
     volumes:
-      - ./minio_data:/data
+      - minio_data:/data
     command: server /data
 
   auth:
@@ -250,13 +250,28 @@ services:
     networks:
       - retarget_network
 
+  mail:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: mail-service
+    container_name: ReTargetApiMail
+    ports:
+      - "8036:8036"
+    depends_on:
+      - clickhouse
+      - scylla
+      - redis0
+    networks:
+      - retarget_network
+
 volumes:
   pg_data:
   clickhouse_data:
   grafana_data:
   scylla_data:
   minio_data:
-  redis_data:
+    # redis_data:
 
 
 networks:
