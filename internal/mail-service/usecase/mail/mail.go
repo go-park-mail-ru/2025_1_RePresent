@@ -55,7 +55,7 @@ func (m *MailUsecase) SendTopUpBalanceMail(operation int, to, username, amount s
 	switch operation {
 	case entityMail.TOPUP_BALANCE:
 		subject = "Пополнение баланса в ReTarget"
-		body, err = entityMail.GetEmailTopUpBody(entityMail.LOW_BALANCE, username, amount)
+		body, err = entityMail.GetEmailTopUpBody(entityMail.TOPUP_BALANCE, username, amount)
 	default:
 		return errors.New("undefined operation")
 	}
@@ -91,12 +91,6 @@ func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 	case entityMail.EDIT_PASSWORD:
 		subject = "Изменение пароля в ReTarget"
 		body, err = entityMail.GetEmailBody(entityMail.EDIT_PASSWORD, code)
-	case entityMail.TOPUP_BALANCE:
-		subject = "Пополнение баланса в ReTarget"
-		body, err = entityMail.GetEmailBody(entityMail.TOPUP_BALANCE, code)
-	case entityMail.LOW_BALANCE:
-		subject = "Уведомление о низком балансе ReTarget"
-		body, err = entityMail.GetEmailBody(entityMail.LOW_BALANCE, code)
 	default:
 		return errors.New("undefined operation")
 	}
