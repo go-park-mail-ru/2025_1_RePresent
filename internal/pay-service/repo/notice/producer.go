@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"retarget/internal/pay-service/entity/notice"
+	"retarget/pkg/entity/notice"
 	noticeType "retarget/pkg/entity/notice"
 
 	"github.com/lovoo/goka"
