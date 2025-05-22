@@ -12,7 +12,8 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - retarget_network
-    volumes: # - redis_data:/data
+    # volumes: 
+    # - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping" ]
       interval: 5s
