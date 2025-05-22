@@ -63,7 +63,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/adv-service ./cmd/adv-service
 FROM deps AS mail-builder
 COPY cmd/mail-service ./cmd/mail-service
 COPY internal/mail-service ./internal/mail-service
-COPY internal/auth-service-repo ./internal/auth-service/repo
+COPY internal/auth-service/repo ./internal/auth-service/repo
 COPY pkg ./pkg
 COPY configs ./configs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/mail-service ./cmd/mail-service
