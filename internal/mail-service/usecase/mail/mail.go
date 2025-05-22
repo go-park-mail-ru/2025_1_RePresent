@@ -2,6 +2,7 @@ package mail
 
 import (
 	"errors"
+	repoAuth "retarget/internal/auth-service/repo/auth"
 	entityMail "retarget/internal/mail-service/entity/mail"
 	repoMail "retarget/internal/mail-service/repo/mail"
 )
@@ -13,10 +14,11 @@ type MailUsecaseInterface interface {
 
 type MailUsecase struct {
 	mailRepository *repoMail.MailRepository
+	userRepository *repoAuth.AuthRepository
 }
 
-func NewMailUsecase(mailRepo *repoMail.MailRepository) *MailUsecase {
-	return &MailUsecase{mailRepository: mailRepo}
+func NewMailUsecase(mailRepo *repoMail.MailRepository, userRepo *repoAuth.AuthRepository) *MailUsecase {
+	return &MailUsecase{mailRepository: mailRepo, userRepository: userRepo}
 }
 
 func (m *MailUsecase) SendLowBalanceMail(operation int, to, username, balance, href string) error {
@@ -113,5 +115,9 @@ func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 }
 
 func (m *MailUsecase) GetUserByID(user_id int) (string, string, string, error) {
-	return "froloff1830@gmail.com", "Ilya Frolov Company", "100.00", nil
+	user, err := m.userRepository.GetUserByID(user_id, "UNIMPIMENTED request_id")
+	if err != nil {
+		return "froloff1830@gmail.com", "Error if parse Username", "Balance", err
+	}
+	return user.Email, user.Username, user.Balance.String(), nil
 }

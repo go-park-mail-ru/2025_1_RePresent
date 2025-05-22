@@ -42,7 +42,9 @@ func NewConsumer(brokers []string, group string, topic goka.Stream, mailUseCase 
 			event.UserID, event.Type)
 
 		email, username, balance, err := mailUseCase.GetUserByID(event.UserID)
-
+		if err != nil {
+			log.Printf("Failed to get user metadata: %v", err)
+		}
 		switch event.Type {
 		case notice.LowBalance:
 			if err := mailUseCase.SendLowBalanceMail(mail.LOW_BALANCE, email, username, balance, HREF); err != nil {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"retarget/configs"
+	repoAuth "retarget/internal/auth-service/repo/auth"
 	mailAppHttp "retarget/internal/mail-service/controller/http"
 	mailMiddleware "retarget/internal/mail-service/controller/http/middleware"
 	mailAppKafka "retarget/internal/mail-service/controller/kafka"
@@ -21,8 +22,14 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 			log.Println(err)
 		}
 	}()
+	userRepository := repoAuth.NewAuthRepository(cfg.Database.ConnectionString("d"), logger)
+	defer func() {
+		if err := userRepository.CloseConnection(); err != nil {
+			log.Println(err)
+		}
+	}()
 
-	mailUsecase := usecaseMail.NewMailUsecase(mailRepository)
+	mailUsecase := usecaseMail.NewMailUsecase(mailRepository, userRepository)
 
 	log.Printf("Connecting to Kafka at: %v", "kafka:9092")
 	ctx, cancel := context.WithCancel(context.Background())
