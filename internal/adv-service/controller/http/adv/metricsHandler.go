@@ -87,11 +87,8 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(metrics); err != nil {
-			http.Error(w, "Error JSON encoding", http.StatusInternalServerError)
-			return
-		}
-
+		json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Гена на", metrics))
+		return
 	}
 
 }
