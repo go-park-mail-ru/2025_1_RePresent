@@ -37,13 +37,21 @@ func NewConsumer(brokers []string, group string, topic goka.Stream, mailUseCase 
 			event.UserID, event.Type, event.Message)
 
 		email := "froloff1830@gmail.com"
-
-		if event.Type == 0 {
+		switch event.Type {
+		case notice.LowBalance:
 			if err := mailUseCase.SendCodeMail(mail.LOW_BALANCE, email, "Money here"); err != nil {
 				log.Printf("Failed to send email: %v", err)
 			} else {
 				log.Printf("Email successfully sent to %s", email)
 			}
+		case notice.TopUpedBalance:
+			if err := mailUseCase.SendCodeMail(mail.TOPUP_BALANCE, email, "More Money"); err != nil {
+				log.Printf("Failed to send email: %v", err)
+			} else {
+				log.Printf("Email successfully sent to %s", email)
+			}
+		default:
+			log.Printf("!!! UNDEFINED EVENT IN KAFKA !!!: %v", event.Type)
 		}
 	}
 

@@ -6,10 +6,6 @@ import (
 	repoMail "retarget/internal/mail-service/repo/mail"
 )
 
-var (
-	recieverWasNotExist = errors.New("reciever was not exist")
-)
-
 type MailUsecaseInterface interface {
 	SendCodeMail(operation int, to, code string) error
 }
@@ -22,21 +18,10 @@ func NewMailUsecase(mailRepo *repoMail.MailRepository) *MailUsecase {
 	return &MailUsecase{mailRepository: mailRepo}
 }
 
-func emailIsExist(email string) error {
-	if email == " " {
-		return recieverWasNotExist
-	}
-	return nil
-}
-
 func (m *MailUsecase) SendCodeMail(operation int, to, code string) error {
 	var subject string
 	var body string
 	var err error
-
-	if err := emailIsExist(to); err != nil {
-		return err
-	}
 
 	switch operation {
 	case entityMail.REGISTER:

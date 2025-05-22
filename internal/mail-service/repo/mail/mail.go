@@ -2,12 +2,25 @@ package mail
 
 import (
 	"crypto/tls"
+	"errors"
 	"log"
+	"net"
 	"net/smtp"
+	"strings"
+	"time"
+)
+
+var (
+	ErrInvalidEmail   = errors.New("invalid email address")
+	ErrNoMXRecords    = errors.New("no MX records found")
+	ErrSMTPConnect    = errors.New("failed to connect to SMTP server")
+	ErrEmailNotExists = errors.New("email address does not exist")
+	ErrSMTPCommand    = errors.New("SMTP command failed")
 )
 
 type MailRepositoryInterface interface {
 	Send(to, msg string) error
+	VerifyEmail(email string) (bool, error)
 
 	OpenConnection(smtpServer, smtpPort, username, password string) (*smtp.Client, error)
 	CloseConnection() error
@@ -29,6 +42,10 @@ func NewMailRepository(smtpServer, smtpPort, username, password, from_sender str
 }
 
 func (r *MailRepository) Send(to, msg string) error {
+	isExist, err := r.VerifyEmail(to)
+	if !isExist || err != nil {
+		return err
+	}
 	if err := r.smtpClient.Mail(r.from_sender); err != nil {
 		return err
 	}
@@ -49,6 +66,42 @@ func (r *MailRepository) Send(to, msg string) error {
 	}
 
 	return nil
+}
+
+func (r *MailRepository) VerifyEmail(email string) (bool, error) {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return false, ErrInvalidEmail
+	}
+	domain := parts[1]
+
+	mxRecords, err := net.LookupMX(domain)
+	if err != nil || len(mxRecords) == 0 {
+		return false, ErrNoMXRecords
+	}
+
+	host := mxRecords[0].Host
+
+	conn, err := net.DialTimeout("tcp", host+":25", 10*time.Second)
+	if err != nil {
+		return false, ErrSMTPConnect
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, host)
+	if err != nil {
+		return false, ErrSMTPCommand
+	}
+	defer client.Quit()
+
+	if err := client.Mail(r.from_sender); err != nil {
+		return false, err
+	}
+	if err := client.Rcpt(email); err != nil {
+		return false, ErrEmailNotExists
+	}
+
+	return true, nil
 }
 
 func (r *MailRepository) OpenConnection(smtpServer, smtpPort, username, password string) (*smtp.Client, error) {
