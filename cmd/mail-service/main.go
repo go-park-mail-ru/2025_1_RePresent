@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"retarget/configs"
-	authApp "retarget/internal/auth-service/app"
+	mailApp "retarget/internal/mail-service/app"
 	"syscall"
 
 	"go.uber.org/zap"
@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	go authApp.Run(cfg, sugar)
+	go mailApp.Run(cfg, sugar)
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
