@@ -123,7 +123,7 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID strin
 		// "status", banner.Status,
 		"link", banner.Link,
 	)
-	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;")
+	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link, max_price) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;")
 	startTime := time.Now()
 
 	if err != nil {
@@ -149,7 +149,7 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID strin
 
 func (r *BannerRepository) UpdateBanner(banner entity.Banner, requestID string) error {
 	startTime := time.Now()
-	query := "UPDATE banner SET title = $1, description = $2, content = $3, link = $4, status = $5 WHERE id = $6"
+	query := "UPDATE banner SET title = $1, description = $2, content = $3, link = $4, status = $5, max_price = $6 WHERE id = $7"
 	r.logger.Debugw("Starting banner update",
 		"request_id", requestID,
 		"bannerID", banner.ID,
@@ -166,7 +166,7 @@ func (r *BannerRepository) UpdateBanner(banner entity.Banner, requestID string) 
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(banner.Title, banner.Description, banner.Content, banner.Link, banner.Status, banner.ID)
+	_, err = stmt.Exec(banner.Title, banner.Description, banner.Content, banner.Link, banner.Status, banner.MaxPrice, banner.ID)
 	if err != nil {
 		r.logger.Debugw("Failed to execute banner update",
 			"request_id", requestID,
