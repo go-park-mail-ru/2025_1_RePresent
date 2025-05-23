@@ -5,120 +5,62 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Уведомление о низком балансе ReTarget</title>
+  <title>Пополнение баланса</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Oswald:wght@200..700&display=swap"
     rel="stylesheet">
-  <style type="text/css">
-    body {
-      margin: 0;
-      padding: 0;
-    }
-
-    table,
-    td {
-      border-collapse: collapse;
-    }
-
-    #bodyTable {
-      font-family: "Inter", sans-serif;
-      height: 100% !important;
-      margin: 0;
-      padding: 0;
-      width: 100% !important;
-    }
-
-    p {
-      margin-top: 15px;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-
-    h1 {
-      font-size: 22px;
-      font-weight: normal;
-    }
-
-    #logo a,
-    #btn a {
-      padding-top: 10px;
-      padding-bottom: 10px;
-      display: inline-block;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      vertical-align: middle;
-      background-color: #72E6BF;
-      text-decoration: none;
-    }
-
-    #logo {
-      height: 64px;
-      padding-left: 80px;
-      padding-right: 80px;
-    }
-
-    #logo a {
-      padding: 0 !important;
-      font-weight: bold;
-      font-size: 48px;
-      color: white;
-    }
-
-    #btn {
-      padding-top: 10px;
-      padding-bottom: 10px;
-      padding-left: 100px;
-      padding-right: 100px;
-    }
-
-    #btn a {
-      margin-top: 30px;
-      color: black;
-      border-radius: 12px;
-      border: 2px solid #4CB894;
-    }
-  </style>
 </head>
 
-<body>
-  <div id="bodyTable">
-    <table width="450" border="0" cellspacing="0" cellpadding="0" align="center" style="margin-top: 100px;">
+<body style="margin: 0;padding: 0;font-family: Inter, sans-serif;">
+  <div style="margin: 0;padding: 0;font-family: Inter, sans-serif;height: 100% !important;margin: 0;padding: 0;width:
+    100% !important;">
+    <table width="450" border="0" cellspacing="0" cellpadding="0" align="center"
+      style="margin-top: 100px;border-collapse: collapse;">
       <tr>
-        <td id="logo" align="center">
-          <a href="{{Href}}">ReTarget</a>
+        <td id="logo" align="center"
+          style="border-collapse: collapse;height: 64px;padding-left: 80px;padding-right: 80px;">
+          <a href="{{Href}}" target="_blank"
+            style="padding-top: 10px;padding-bottom: 10px;display: inline-block;width: 100%;height: 100%;text-align: center;vertical-align: middle;background-color: #72E6BF;text-decoration: none;padding: 0 !important;font-weight: bold;font-size: 48px;color: white;">ReTarget</a>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="border-collapse: collapse;text-align: center;">
+          <h1 style="margin-top: 40px;font-size: 22px;font-weight: normal;">Здравствуйте, владелец аккаунта {{Username}}
+          </h1>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-collapse: collapse;">
+          <p style="margin-top: 15px;margin-bottom: 15px;font-size: 16px;">Ваш баланс пополнен на <span
+              style="font-weight: bold;">{{Amount}} руб.</span></p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-collapse: collapse;">
+          <p style="margin-top: 15px;margin-bottom: 15px;font-size: 16px;">Деньги поступят на Ваш баланс в течение 1
+            минуты.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-collapse: collapse;">
+          <p style="margin-top: 15px;margin-bottom: 15px;font-size: 16px;">Вы можете узнать свой баланс на странице
+            профиля</p>
+        </td>
+      </tr>
+      <tr>
+        <td id="btn" align="center"
+          style="border-collapse: collapse;padding-top: 10px;padding-bottom: 10px;padding-left: 100px;padding-right: 100px;">
+          <a href="{{Href}}/profile" target="_blank"
+            style="padding-top: 10px;padding-bottom: 10px;display: inline-block;width: 100%;height: 100%;text-align: center;vertical-align: middle;background-color: #72E6BF;text-decoration: none;margin-top: 30px;color: black;border-radius: 12px;border: 2px solid #4CB894;">Перейти
+            в профиль</a>
         </td>
       </tr>
       <tr>
         <td align="center" style="text-align: center;">
-          <h1 style="margin-top: 40px;">Здравствуйте, владелец аккаунта {{Username}}</h1>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Ваш баланс пополнен на {{Amount}} руб.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Деньги поступят на Ваш баланс в течение 1 минуты.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Вы можете узнать свой баланс на странице профиля</p>
-        </td>
-      </tr>
-      <tr>
-        <td id="btn" align="center">
-          <a href="{{Href}}/profile">Перейти в профиль</a>
-        </td>
-      </tr>
-      <tr>
-        <td align="center" style="text-align: center;">
-          <p style="margin-top: 40px;">С уважением, команда <a href="{{Href}}" style="color: black;">ReTarget</a></p>
+          <p style="margin-top: 15px;margin-bottom: 15px;font-size: 16px;margin-top: 40px;">С уважением, команда <a
+              href="{{Href}}" target="_blank" style="color: black;">ReTarget</a></p>
         </td>
       </tr>
     </table>
