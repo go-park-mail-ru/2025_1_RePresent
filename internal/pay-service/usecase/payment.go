@@ -67,7 +67,6 @@ func (u *PaymentUsecase) GetBalanceByUserId(userID int, requestID string) (float
 	for _, tx := range pending {
 		statusStr, err := u.getYooPaymentStatus(tx.TransactionID)
 
-		fmt.Println(statusStr)
 		if err != nil {
 			continue
 		}
