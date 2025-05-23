@@ -2,11 +2,12 @@ package payment
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"retarget/internal/pay-service/repo"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
+
+	"github.com/gorilla/mux"
 
 	"github.com/google/uuid"
 )
@@ -18,7 +19,7 @@ type TransactionResponse struct {
 }
 
 type TopUpRequest struct {
-	Amount int64 `json:"amount"`
+	Amount float64 `json:"amount"`
 }
 
 func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Request) {

@@ -72,7 +72,7 @@ func (u *PaymentUsecase) GetBalanceByUserId(userID int, requestID string) (float
 		}
 		statusInt := mapYooStatus(statusStr)
 		if statusInt == 1 && tx.Status != 1 {
-			if _, err := u.PaymentRepository.UpdateBalance(userID, tx.Amount, requestID); err == nil {
+			if err := u.TopUpBalance(userID, tx.Amount, requestID); err == nil {
 				_ = u.PaymentRepository.UpdateTransactionStatus(tx.TransactionID, statusInt)
 			}
 		}
@@ -123,7 +123,7 @@ func (u *PaymentUsecase) getYooPaymentStatus(paymentID string) (string, error) {
 	return out.Status, nil
 }
 
-func (uc *PaymentUsecase) TopUpBalance(userID int, amount int64, requestID string) error {
+func (uc *PaymentUsecase) TopUpBalance(userID int, amount float64, requestID string) error {
 	if amount <= 0 {
 		return repo.ErrInvalidAmount
 	}
