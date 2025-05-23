@@ -2,6 +2,7 @@ package payment
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"net/http"
 	"retarget/internal/pay-service/repo"
 	"retarget/pkg/entity"
@@ -126,7 +127,22 @@ func (c *PaymentController) CreateTransaction(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	userID := r.Context().Value("user_id").(int)
+	cookie, err := r.Cookie("session_id")
+	if err != nil || cookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
+		return
+	}
+
+	// userID := r.Context().Value("user_id").(int)
+
+	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		return
+	}
+	userID := userSession.UserID
 
 	confirmationURL, err := c.PaymentUsecase.CreateYooMoneyPayment(
 		userID,
@@ -164,7 +180,10 @@ func handleTopUpError(w http.ResponseWriter, err error) {
 
 func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
-	transactionID := r.URL.Query().Get("transactionId")
+	// transactionID := r.URL.Query().Get("transactionId")
+
+	vars := mux.Vars(r)
+	transactionID := vars["transactionid"]
 
 	tx, err := h.PaymentUsecase.GetTransactionByID(transactionID, requestID)
 	if err != nil {

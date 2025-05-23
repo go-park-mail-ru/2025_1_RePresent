@@ -141,12 +141,19 @@ func (r *PaymentRepository) UpdateBalance(userID int, amount float64, requestID 
 }
 
 func (r *PaymentRepository) CreateTransaction(trx entity.Transaction) error {
+	const checkQuery = `SELECT 1 FROM transaction WHERE transaction_id = $1 LIMIT 1`
+	var exists int
+	err := r.db.QueryRow(checkQuery, trx.TransactionID).Scan(&exists)
+	if err != sql.ErrNoRows {
+		return nil
+	}
+
 	const q = `
     INSERT INTO transaction (
         transaction_id, user_id, amount, type, status
     ) VALUES ($1, $2, $3, $4, $5)
     `
-	_, err := r.db.Exec(q,
+	_, err = r.db.Exec(q,
 		trx.TransactionID,
 		trx.UserID,
 		trx.Amount,
@@ -226,7 +233,7 @@ func (r *PaymentRepository) GetPendingTransactions(userID int) ([]entity.Transac
 	const q = `
     	SELECT id, transaction_id, user_id, amount, type, status, created_at
     	FROM transaction
-    	WHERE user_id = $1 AND status = 0
+    	WHERE user_id = $1 AND status = '0'
     `
 	rows, err := r.db.Query(q, userID)
 	if err != nil {
