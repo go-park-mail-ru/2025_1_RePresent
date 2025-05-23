@@ -87,11 +87,26 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "Гена на", metrics))
+		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
 		if err != nil {
 			fmt.Println(err.Error())
 		}
 		return
 	}
 
+	if bannerIDstr != "" && slotIDstr == "" {
+		bannerID, err := strconv.Atoi(bannerIDstr)
+		metrics, err := c.advUsecase.GetBannerMetric(bannerID, activity, userID, fromTime, toTime)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		return
+	}
 }

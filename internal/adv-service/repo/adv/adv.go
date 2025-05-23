@@ -20,6 +20,7 @@ type AdvRepositoryInterface interface {
 	DeleteLink(link string) error
 	WriteMetric(bannerID int, slotLink string, action string) error
 	GetSlotMetric(slotID, action string, from, to time.Time) (map[string]int, error)
+	GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error)
 }
 
 type AdvRepository struct {
@@ -141,7 +142,44 @@ func (u *AdvRepository) GetSlotMetric(slotID, action string, from, to time.Time)
 	defer rows.Close()
 
 	result := make(map[string]int)
+	for rows.Next() {
+		var (
+			date  time.Time
+			count int
+		)
 
+		if err := rows.Scan(&date, &count); err != nil {
+			return nil, fmt.Errorf("error when reading from the database")
+		}
+
+		result[date.Format("2006-01-02")] = count
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error when reading from the database")
+	}
+
+	return result, nil
+}
+
+func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error) {
+	const query = `
+		SELECT toDate(created_at) as day, count(*) as total
+		FROM adv.actions
+		WHERE banner_id = ?
+		AND actions = ?
+		AND created_at BETWEEN ? AND ?
+		GROUP BY day
+		ORDER BY day
+	`
+
+	rows, err := u.clickhouse.Query(query, bannerID, action, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("error when reading from the database")
+	}
+	defer rows.Close()
+
+	result := make(map[string]int)
 	for rows.Next() {
 		var (
 			date  time.Time

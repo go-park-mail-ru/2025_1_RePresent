@@ -145,8 +145,29 @@ func (a *AdvUsecase) GetSlotMetric(slotLink, activity string, userID int, from, 
 	}
 
 	total, err := a.advRepository.GetSlotMetric(slotLink, activity, from, to)
-	if err != nil || userID != ownerSlotID {
+	if err != nil {
 		return nil, fmt.Errorf("slot not found")
+	}
+
+	return total, nil
+}
+
+func (a *AdvUsecase) GetBannerMetric(bannerID int, activity string, userID int, from, to time.Time) (map[string]int, error) {
+
+	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
+	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
+	banner, err := a.bannerClient.GetBannerByID(ctx, bannerReq)
+	if err != nil {
+		return nil, fmt.Errorf("banner not found")
+	}
+	ownerID, err := strconv.Atoi(banner.OwnerID)
+	if err != nil || ownerID != userID {
+		return nil, fmt.Errorf("banner not found")
+	}
+
+	total, err := a.advRepository.GetBannerMetric(bannerID, activity, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("banner not found")
 	}
 
 	return total, nil
