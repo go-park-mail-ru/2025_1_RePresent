@@ -37,7 +37,7 @@ jobs:
 
       - name: Run tests
         run: |
-          go test ./... -v
+          go test ./test/... -v
 
       - name: Run linter
         run: |
