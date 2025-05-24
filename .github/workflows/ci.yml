@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  CI:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,4 +41,11 @@ jobs:
 
       - name: Run linter
         run: |
-          golangci-lint run
+          golangci-lint run ./test/...
+  CD_Deploy:
+    runs-on: ubuntu-latest
+    needs: CI
+    steps:
+      - name: This will be deploy
+        run: |
+          echo "This will be deploy"
