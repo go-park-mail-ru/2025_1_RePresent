@@ -41,7 +41,7 @@ jobs:
 
       - name: Run linter
         run: |
-          golangci-lint run ./test/...
+          golangci-lint run ./test/
   CD_Deploy:
     runs-on: ubuntu-latest
     needs: CI
