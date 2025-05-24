@@ -57,7 +57,7 @@ func (m *MailUsecase) SendTopUpBalanceMail(operation int, to, username, amount s
 
 	switch operation {
 	case entityMail.TOPUP_BALANCE:
-		subject = "Пополнение баланса в ReTarget"
+		subject = "Пополнение баланса ReTarget"
 		body, err = entityMail.GetEmailTopUpBody(entityMail.TOPUP_BALANCE, username, amount)
 	default:
 		return errors.New("undefined operation")

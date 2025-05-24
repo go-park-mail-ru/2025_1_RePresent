@@ -12,6 +12,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -19,7 +20,10 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		if err := json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator")); err != nil {
+			http.Error(w, "Failed to write response", http.StatusInternalServerError)
+			return
+		}
 	}
 	userID := user.UserID
 
@@ -27,6 +31,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	err := json.NewDecoder(r.Body).Decode(&profileRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
 		return
 	}
@@ -34,15 +39,18 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	errorMessages, err := validator.ValidateStruct(profileRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
 		return
 	}
 	err = c.profileUsecase.PutProfile(userID, profileRequest.Username, profileRequest.Description, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Got and Saved"))
 }

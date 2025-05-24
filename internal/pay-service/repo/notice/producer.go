@@ -126,6 +126,8 @@ func (r *NoticeRepository) SendLowBalanceNotification(userID int) error {
 
 func (r *NoticeRepository) Close() {
 	if r.emitter != nil {
-		r.emitter.Finish()
+		if err := r.emitter.Finish(); err != nil {
+			r.logger.Errorw("Failed to finish emitter: %v", err)
+		}
 	}
 }

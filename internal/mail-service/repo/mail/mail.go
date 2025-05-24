@@ -92,7 +92,9 @@ func (r *MailRepository) VerifyEmail(email string) (bool, error) {
 	if err != nil {
 		return false, ErrSMTPCommand
 	}
-	defer client.Quit()
+	if err := client.Quit(); err != nil {
+		log.Printf("Error quitting client: %v", err)
+	}
 
 	if err := client.Mail(r.from_sender); err != nil {
 		return false, err

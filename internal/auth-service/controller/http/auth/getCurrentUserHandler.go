@@ -19,6 +19,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -26,6 +27,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
@@ -33,6 +35,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	user, err := c.authUsecase.GetUser(r.Context(), userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to get user"))
 		return
 	}
@@ -53,5 +56,6 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(response)
 }

@@ -16,6 +16,7 @@ func (c *SlotController) GetUserSlotsHandler(w http.ResponseWriter, r *http.Requ
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
@@ -24,6 +25,7 @@ func (c *SlotController) GetUserSlotsHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		response := entity.NewResponseWithBody(true, err.Error(), nil)
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -54,8 +56,8 @@ func (c *SlotController) GetUserSlotsHandler(w http.ResponseWriter, r *http.Requ
 			CreatedAt:  s.CreatedAt,
 		}
 	}
-
 	response := entity.NewResponseWithBody(false, "User slots retrieved successfully", responseSlots)
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(response)
 }

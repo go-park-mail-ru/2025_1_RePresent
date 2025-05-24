@@ -16,7 +16,13 @@ func LinkMiddleware(slotUsecase *usecaseSlot.SlotUsecase) func(http.Handler) htt
 			link := vars["link"]
 			if err := slotUsecase.CheckLink(link); err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+
+				encodeErr := json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+				if encodeErr != nil {
+					http.Error(w, "Failed to write response", http.StatusInternalServerError)
+					return
+				}
+
 				return
 			}
 			next.ServeHTTP(w, r)

@@ -14,6 +14,7 @@ type RegisterConfirmRequest struct {
 func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -22,6 +23,7 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -29,6 +31,7 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 	validate_errors, err := validator.ValidateStruct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
 		return
 	}
