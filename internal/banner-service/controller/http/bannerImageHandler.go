@@ -14,6 +14,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 
 	if r.ContentLength > (maxFileSize) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
 		return
 	}
@@ -21,6 +22,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	err := r.ParseMultipartForm(maxFileSize)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
 		return
 	}
@@ -28,6 +30,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found in request"))
 		return
 	}
@@ -37,6 +40,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	_, err = file.Read(buf)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image"))
 		return
 	}
@@ -50,6 +54,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	}
 	if _, ok := allowedTypes[fileType]; !ok {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files"))
 		return
 	}
@@ -57,6 +62,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		return
 	}
@@ -64,11 +70,13 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	link, err := c.ImageUsecase.UploadBannerImage(file)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload image"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, link))
 }
 
@@ -79,6 +87,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	object, err := c.ImageUsecase.DownloadBannerImage(imageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
 		return
 	}
@@ -92,6 +101,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Read(buf)
 	if err != nil && err != io.EOF {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
 		return
 	}
@@ -106,6 +116,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 		w.Header().Set("Content-Type", "image/gif")
 	default:
 		w.WriteHeader(http.StatusUnsupportedMediaType)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type"))
 		return
 	}
@@ -113,6 +124,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = object.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		return
 	}
@@ -121,6 +133,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	_, err = io.Copy(w, object)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
 		return
 	}

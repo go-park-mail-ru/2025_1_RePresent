@@ -37,9 +37,9 @@ func NewConsumer(brokers []string, group string, topic goka.Stream, mailUseCase 
 		log.Printf("\n[KAFKA] NEW MESSAGE\n"+
 			"User ID: %d\n"+
 			"Type: %d\n"+
-			"Amount: %d\n"+
+			"Amount: %f\n"+
 			"-------------------------",
-			event.UserID, event.Type)
+			event.UserID, event.Type, event.Amount)
 
 		email, username, balance, err := mailUseCase.GetUserByID(event.UserID)
 		if err != nil {

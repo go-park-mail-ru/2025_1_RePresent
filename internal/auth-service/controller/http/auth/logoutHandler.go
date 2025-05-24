@@ -10,6 +10,7 @@ import (
 func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -17,12 +18,14 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	_, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -42,10 +45,12 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = c.authUsecase.Logout(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Logout Successful"))
 }

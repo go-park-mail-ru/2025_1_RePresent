@@ -10,10 +10,11 @@ import (
 
 type BannerUsecase struct {
 	BannerRepository *repo.BannerRepository
+	rng              *rand.Rand
 }
 
 func NewBannerUsecase(bannerRepository *repo.BannerRepository) *BannerUsecase {
-	return &BannerUsecase{BannerRepository: bannerRepository}
+	return &BannerUsecase{BannerRepository: bannerRepository, rng: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }
 
 func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) ([]entity.Banner, error) {
@@ -45,19 +46,17 @@ func (b *BannerUsecase) GetBannerForIFrame(bannerID int, requestID string) (*ent
 }
 
 func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (*entity.Banner, error) {
-	rand.Seed(time.Now().UnixNano())
 	banners, err := b.BannerRepository.GetBannersByUserId(userID, requestID)
 	if err != nil {
 		return nil, err
 	}
 	if len(banners) > 0 {
-		return &banners[rand.Intn(len(banners))], err
+		return &banners[b.rng.Intn(len(banners))], nil
 	}
 	return &entity.DefaultBanner, nil
 }
 
 func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string) (*entity.Banner, error) {
-	rand.Seed(time.Now().UnixNano())
 	banner, err := b.BannerRepository.GetMaxPriceBanner()
 	if err != nil {
 		return nil, err
@@ -65,7 +64,7 @@ func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string) (*en
 	if banner == nil {
 		return &entity.DefaultBanner, nil
 	}
-	return banner, err
+	return banner, nil
 }
 
 func (b *BannerUsecase) CreateBanner(userID int, banner entity.Banner, requestID string) error {

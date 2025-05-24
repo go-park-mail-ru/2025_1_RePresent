@@ -16,6 +16,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
@@ -30,13 +31,13 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	slotRepository := repoSlot.NewSlotRepository(cfg.Scylla.Host, cfg.Scylla.Port, cfg.Scylla.SlotKeyspace, cfg.Scylla.Username, cfg.Scylla.Password)
 	defer slotRepository.Close()
 
-	conn, err := grpc.Dial("ReTargetApiBanner:50051", grpc.WithInsecure())
+	conn, err := grpc.NewClient("ReTargetApiBanner:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
-	connPayment, err := grpc.Dial("ReTargetApiPayment:8054", grpc.WithInsecure())
+	connPayment, err := grpc.NewClient("ReTargetApiPayment:8054", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

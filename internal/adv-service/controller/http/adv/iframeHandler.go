@@ -26,7 +26,11 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	banner, err := c.advUsecase.GetIframe(secret_link)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		if encodeErr := json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error())); encodeErr != nil {
+			http.Error(w, "Failed to write response", http.StatusInternalServerError)
+			return
+		}
+		return
 	}
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	data := IFrame{
@@ -40,6 +44,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Println("template execute error:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
 }

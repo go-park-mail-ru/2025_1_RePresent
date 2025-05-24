@@ -32,9 +32,8 @@ type PaymentRepositoryInterface interface {
 }
 
 type PaymentRepository struct {
-	db         *sql.DB
-	logger     *zap.SugaredLogger
-	clickhouse *sql.DB
+	db     *sql.DB
+	logger *zap.SugaredLogger
 }
 
 func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string, logger *zap.SugaredLogger) *PaymentRepository {
@@ -208,7 +207,10 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, am
 		amount,
 		user_slot_id)
 	if err != nil {
-		tx.Rollback()
+		if rbErr := tx.Rollback(); rbErr != nil {
+			r.logger.Errorw("Failed to rollback transaction: %v", rbErr)
+			err = fmt.Errorf("failed to rollback transaction: %v; original error: %w", rbErr, err)
+		}
 		return -1, -1, fmt.Errorf("failed to update first user balance: %w", err)
 	}
 
@@ -219,7 +221,9 @@ func (r *PaymentRepository) RegUserActivity(user_banner_id, user_slot_id int, am
 		amount,
 		user_banner_id)
 	if err != nil {
-		tx.Rollback()
+		if rbErr := tx.Rollback(); rbErr != nil {
+			err = fmt.Errorf("rollback failed: %v; original error: %w", rbErr, err)
+		}
 		return -1, -1, fmt.Errorf("failed to update second user balance: %w", err)
 	}
 	err = tx.Commit()

@@ -32,6 +32,7 @@ func (h *BannerController) GetBannerIFrameByID(w http.ResponseWriter, r *http.Re
 	bannerID, err := strconv.Atoi(bannerIDstr)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		return
 	}
@@ -39,11 +40,13 @@ func (h *BannerController) GetBannerIFrameByID(w http.ResponseWriter, r *http.Re
 	banner, err := h.BannerUsecase.GetBannerForIFrame(bannerID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
 	url, err := h.LinkBuilder.BannerImageURL(banner.Content)
 	if err != nil {
+		log.Println("Обработка ошибки")
 		// обработка ошибки
 	}
 	data := IFrame{
@@ -70,6 +73,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 	userID, err := strconv.Atoi(userIDstr)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		return
 	}
@@ -77,11 +81,13 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 	banner, err := h.BannerUsecase.GetRandomBannerForIFrame(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
 	url, err := h.LinkBuilder.BannerImageURL(banner.Content)
 	if err != nil {
+		log.Println("Обработка ошибки")
 		// обработка ошибки
 	}
 	data := IFrame{

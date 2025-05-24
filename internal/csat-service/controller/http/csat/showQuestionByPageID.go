@@ -22,6 +22,7 @@ func (c *CsatController) ShowQuestionByPageID(w http.ResponseWriter, r *http.Req
 	_, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		return
 	}
@@ -30,10 +31,12 @@ func (c *CsatController) ShowQuestionByPageID(w http.ResponseWriter, r *http.Req
 	question, err := c.csatUsecase.GetQuestionByPage(pageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(response.NewResponseWithBody(false, "Success send", question))
 }
 
@@ -42,6 +45,7 @@ func (c *CsatController) ShowQuestionIFrameByPageID(w http.ResponseWriter, r *ht
 	_, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		return
 	}
@@ -52,6 +56,7 @@ func (c *CsatController) ShowQuestionIFrameByPageID(w http.ResponseWriter, r *ht
 	question, err := c.csatUsecase.GetQuestionByPage(pageID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}

@@ -17,6 +17,7 @@ type RegisterCodeRequest struct {
 func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -25,6 +26,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 	err := json.NewDecoder(r.Body).Decode(&registerCodeRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
 		return
 	}
@@ -32,6 +34,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 	errorMessages, err := validator.ValidateStruct(registerCodeRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
 		return
 	}
@@ -40,15 +43,18 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "5") {
 			w.WriteHeader(http.StatusBadRequest)
+			//nolint:errcheck
 			json.NewEncoder(w).Encode(entity.NewResponse(true, "Такой почты не существует"))
 			return
 		}
 
 		w.WriteHeader(http.StatusServiceUnavailable)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Ошибка, повторите отправку позже"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Sent"))
 }

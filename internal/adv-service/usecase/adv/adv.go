@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"retarget/internal/adv-service/entity/adv"
 	repoAdv "retarget/internal/adv-service/repo/adv"
@@ -132,8 +133,13 @@ func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) e
 		ToUserId:   int32(ownerSlotID),
 		Amount:     string(banner.MaxPrice),
 	}
-	a.advRepository.WriteMetric(bannerID, slotLink, action)
-	a.PaymentClient.RegUserActivity(ctx, req)
+	if err := a.advRepository.WriteMetric(bannerID, slotLink, action); err != nil {
+		log.Printf("Failed to write metric: %v", err)
+	}
+	_, err = a.PaymentClient.RegUserActivity(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to register user activity: %w", err)
+	}
 	return nil
 }
 

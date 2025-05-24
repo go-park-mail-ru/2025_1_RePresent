@@ -3,7 +3,6 @@ package payment
 import (
 	"encoding/json"
 	"net/http"
-	"retarget/internal/pay-service/repo"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
 
@@ -27,6 +26,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
 		return
 	}
@@ -34,6 +34,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		return
 	}
@@ -42,6 +43,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	balance, err := h.PaymentUsecase.GetBalanceByUserId(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(
 			true,
 			"Error fetching balance: "+err.Error(),
@@ -58,6 +60,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 
 	if err := json.NewEncoder(w).Encode(responseData); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(
 			true,
 			"Error encoding response: "+err.Error(),
@@ -70,6 +73,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
 		return
 	}
@@ -77,6 +81,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
@@ -84,12 +89,14 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	var req TopUpRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Request Body"))
 		return
 	}
 
 	if req.Amount <= 0 {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Amount"))
 		return
 	}
@@ -97,6 +104,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	if err = h.PaymentUsecase.TopUpBalance(userID, req.Amount, requestID); err != nil {
 		// handleTopUpError(w, err)
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -111,6 +119,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(responseData)
 
 }
@@ -131,6 +140,7 @@ func (c *PaymentController) CreateTransaction(w http.ResponseWriter, r *http.Req
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
 		return
 	}
@@ -140,6 +150,7 @@ func (c *PaymentController) CreateTransaction(w http.ResponseWriter, r *http.Req
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		return
 	}
@@ -159,9 +170,11 @@ func (c *PaymentController) CreateTransaction(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(map[string]string{"confirmation_url": confirmationURL})
 }
 
+/* Хз мб это нужно
 func handleTopUpError(w http.ResponseWriter, err error) {
 	switch err {
 	case repo.ErrUserNotFound:
@@ -178,6 +191,7 @@ func handleTopUpError(w http.ResponseWriter, err error) {
 		))
 	}
 }
+*/
 
 func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
@@ -189,12 +203,14 @@ func (h *PaymentController) GetTransactionByID(w http.ResponseWriter, r *http.Re
 	tx, err := h.PaymentUsecase.GetTransactionByID(transactionID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(tx)
 }
 

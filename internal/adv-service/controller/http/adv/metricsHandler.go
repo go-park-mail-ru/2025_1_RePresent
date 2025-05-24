@@ -21,16 +21,19 @@ func (c *AdvController) MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	bannerID, err := strconv.Atoi(bannerIDstr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Format"))
 		return
 	}
 
 	if err = c.advUsecase.WriteMetric(bannerID, slot, action); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Got"))
 }
 
@@ -45,6 +48,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 
 	if fromStr == "" || toStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "missing 'from' or 'to' parameters"))
 		return
 	}
@@ -56,12 +60,14 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	fromTime, err := time.Parse(layout, fromStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
 		return
 	}
 	toTime, err := time.Parse(layout, toStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
 		return
 	}
@@ -75,6 +81,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
@@ -83,6 +90,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		metrics, err := c.advUsecase.GetSlotMetric(slotIDstr, activity, userID, fromTime, toTime)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			//nolint:errcheck
 			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 			return
 		}
@@ -96,9 +104,14 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 
 	if bannerIDstr != "" && slotIDstr == "" {
 		bannerID, err := strconv.Atoi(bannerIDstr)
+		if err != nil {
+			http.Error(w, "Invalid banner ID", http.StatusBadRequest)
+			return
+		}
 		metrics, err := c.advUsecase.GetBannerMetric(bannerID, activity, userID, fromTime, toTime)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			//nolint:errcheck
 			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 			return
 		}

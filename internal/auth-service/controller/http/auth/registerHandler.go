@@ -19,6 +19,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -27,6 +28,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -34,6 +36,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	validate_errors, err := validator.ValidateStruct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
 		return
 	}
@@ -43,6 +46,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	user, err := c.authUsecase.Register(r.Context(), req.Username, req.Email, req.Password, req.Role, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -50,6 +54,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	session, err := c.authUsecase.AddSession(user.ID, user.Role)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -66,5 +71,6 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	http.SetCookie(w, cookie)
 
 	w.WriteHeader(http.StatusCreated)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "registration succesful"))
 }

@@ -297,14 +297,21 @@ func compareHashAndPassword(storedHash, password string, cfg HashConfig) error {
 	}
 
 	var version int
-	fmt.Sscanf(parts[2], "v=%d", &version)
+	n, err := fmt.Sscanf(parts[2], "v=%d", &version)
+	if n != 1 || err != nil {
+		return fmt.Errorf("failed to parse version: %w", err)
+	}
 	if version != argon2.Version {
 		return errors.New("incompatible version")
 	}
 
 	var memory, iterations uint32
 	var parallelism uint8
-	fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &iterations, &parallelism)
+
+	n, err = fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &iterations, &parallelism)
+	if n != 3 || err != nil {
+		return fmt.Errorf("failed to parse m/t/p values: %w", err)
+	}
 
 	salt, _ := base64.RawStdEncoding.DecodeString(parts[4])
 	expectedHash, _ := base64.RawStdEncoding.DecodeString(parts[5])
