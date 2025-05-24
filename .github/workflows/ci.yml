@@ -1,0 +1,44 @@
+name: Run Tests & Linter
+
+on:
+  push:
+    branches:
+      - main
+      - RE-59-add-sql-logs
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check current branch
+        run: |
+          echo "CI started in branch: $GITHUB_REF_NAME"
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.24"
+
+      - name: Run go mod tidy (install dependencies)
+        run: |
+          go mod tidy
+      - name: Create .env files
+        run: |
+          echo "Create env..."
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh  | sh -s -- -b $(go env GOPATH)/bin v1.57.0
+
+      - name: Run tests
+        run: |
+          go test ./... -v
+
+      - name: Run linter
+        run: |
+          golangci-lint run
