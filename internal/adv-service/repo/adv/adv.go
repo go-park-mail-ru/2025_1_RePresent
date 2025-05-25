@@ -141,7 +141,8 @@ func (u *AdvRepository) GetSlotMetric(slotID, action string, from, to time.Time)
 		ORDER BY day
 	`
 
-	rows, err := u.clickhouse.Query(query, slotID, action, from, to)
+	toPlusOne := to.AddDate(0, 0, 1)
+	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading from the database")
 	}
@@ -180,12 +181,13 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 				countIf(actions = 'shown') AS shown
 			FROM adv.actions
 			WHERE slot_id = ?
-			AND created_at >= ? AND created_at < addDays(?, 1)
+			AND created_at >= ? AND created_at < ?
 			GROUP BY day
 		)
 		ORDER BY day
 	`
-	rows, err := u.clickhouse.Query(query, slotID, from, to)
+	toPlusOne := to.AddDate(0, 0, 1)
+	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading CTR from the database")
 	}
@@ -220,11 +222,14 @@ func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time
 		FROM adv.actions
 		WHERE slot_id = ?
 		AND created_at >= ?
-		AND created_at < addDays(?, 1)
+		AND created_at < ?
 		GROUP BY day
 		ORDER BY day
 	`
-	rows, err := u.clickhouse.Query(query, slotID, from, to)
+
+	toPlusOne := to.AddDate(0, 0, 1)
+
+	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading expenses from the database")
 	}
@@ -259,12 +264,13 @@ func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Tim
 		FROM adv.actions
 		WHERE banner_id = ?
 			AND created_at >= ?
-			AND created_at < addDays(?, 1)
+			AND created_at < ?
 		GROUP BY day
 		ORDER BY day
 
 	`
-	rows, err := u.clickhouse.Query(query, slotID, from, to)
+	toPlusOne := to.AddDate(0, 0, 1)
+	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading expenses from the database")
 	}
@@ -297,12 +303,13 @@ func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to ti
 		FROM adv.actions
 		WHERE banner_id = ?
 		AND actions = ?
-		AND created_at >= ? AND created_at < addDays(?, 1)
+		AND created_at >= ? AND created_at < ?
 		GROUP BY day
 		ORDER BY day
 	`
 
-	rows, err := u.clickhouse.Query(query, bannerID, action, from, to)
+	toPlusOne := to.AddDate(0, 0, 1)
+	rows, err := u.clickhouse.Query(query, bannerID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading from the database")
 	}
@@ -341,12 +348,13 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 				countIf(actions = 'shown') AS shown
 			FROM adv.actions
 			WHERE banner_id = ?
-			AND created_at >= ? AND created_at < addDays(?, 1)
+			AND created_at >= ? AND created_at < ?
 			GROUP BY day
 		)
 		ORDER BY day
 	`
-	rows, err := u.clickhouse.Query(query, bannerID, from, to)
+	toPlusOne := to.AddDate(0, 0, 1)
+	rows, err := u.clickhouse.Query(query, bannerID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading CTR from the database")
 	}
@@ -381,11 +389,12 @@ func (u *AdvRepository) GetBannerExpenses(bannerID int, action string, from, to 
 		FROM adv.actions
 		WHERE banner_id = ?
 		AND created_at >= ?
-		AND created_at < addDays(?, 1)
+		AND created_at < ?
 		GROUP BY day
 		ORDER BY day
 	`
-	rows, err := u.clickhouse.Query(query, bannerID, from, to)
+	toPlusOne := to.AddDate(0, 0, 1)
+	rows, err := u.clickhouse.Query(query, bannerID, from, toPlusOne)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading expenses from the database")
 	}
