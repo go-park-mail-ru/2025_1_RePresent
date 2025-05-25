@@ -17,7 +17,7 @@ type CreateUpdateBannerRequest struct {
 	Content     string           `json:"content" validate:"required,len=32"`
 	Link        string           `json:"link" validate:"required,max=100"`
 	Status      int              `json:"status"`
-	MaxPrice    response.Decimal `json:"max_price" validate:"gt_decimal_0.1"`
+	MaxPrice    response.Decimal `json:"max_price" validate:"gt_decimal_01"`
 }
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {

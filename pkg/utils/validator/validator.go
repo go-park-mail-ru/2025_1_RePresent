@@ -12,7 +12,7 @@ var validate *validator.Validate
 
 func init() {
 	validate = validator.New()
-	validate.RegisterValidation("gt_decimal_0.1", func(fl validator.FieldLevel) bool {
+	validate.RegisterValidation("gt_decimal_01", func(fl validator.FieldLevel) bool {
 		decimal, ok := fl.Field().Interface().(entity.Decimal)
 		if !ok || decimal.Dec == nil {
 			return false
