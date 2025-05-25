@@ -183,7 +183,7 @@ func (a *AdvUsecase) GetSlotCTR(slotLink, activity string, userID int, from, to 
 	}
 	total, err := a.advRepository.GetSlotCTR(slotLink, activity, from, to)
 	if err != nil {
-		return nil, fmt.Errorf("slot not found")
+		return nil, fmt.Errorf(err.Error())
 	}
 
 	return total, nil
@@ -196,7 +196,7 @@ func (a *AdvUsecase) GetSlotAVGPrice(slotLink, activity string, userID int, from
 	}
 	total, err := a.advRepository.GetSlotAVGPrice(slotLink, activity, from, to)
 	if err != nil {
-		return nil, fmt.Errorf("slot not found")
+		return nil, fmt.Errorf(err.Error())
 	}
 
 	return total, nil
