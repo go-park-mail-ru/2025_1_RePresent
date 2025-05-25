@@ -83,7 +83,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	}
 	userID := userSession.UserID
 
-	if bannerIDstr == "" && slotIDstr != "" {
+	if bannerIDstr != "" && slotIDstr == "" {
 		bannerID, err := strconv.Atoi(bannerIDstr)
 		if err != nil {
 			http.Error(w, "Invalid banner ID", http.StatusBadRequest)
@@ -99,13 +99,18 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		} else {
 			err = fmt.Errorf("unknown get parameters")
 		}
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-	}
-	if bannerIDstr != "" && slotIDstr == "" {
+		return
+	} else if bannerIDstr == "" && slotIDstr != "" {
 		var metrics interface{}
 		var err error
 		err = nil
@@ -120,12 +125,20 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		} else {
 			err = fmt.Errorf("unknown get parameters")
 		}
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
 		if err != nil {
 			fmt.Println(err.Error())
 		}
+		return
 	}
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
 
 	// var metrics map[string]int
 	// if bannerIDstr == "" && slotIDstr != "" {
@@ -140,10 +153,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	// 	metrics, err = c.advUsecase.GetBannerMetric(bannerID, activity, userID, fromTime, toTime)
 	// }
 	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	//nolint:errcheck
-	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
-	// 	return
+
 	// }
 	// w.WriteHeader(http.StatusOK)
 	// err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
