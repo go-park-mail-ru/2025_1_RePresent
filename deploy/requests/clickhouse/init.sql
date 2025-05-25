@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS adv.actions (
     created_at TIMESTAMP DEFAULT toTimeZone(now(), 'Europe/Moscow'),
     banner_id INT,
     slot_id String,
-    actions String
+    actions String,
+    price Decimal(12, 2)
 ) ENGINE = MergeTree()
 ORDER BY created_at;

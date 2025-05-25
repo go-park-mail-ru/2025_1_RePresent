@@ -24,6 +24,9 @@ type AdvUsecaseInterface interface {
 	PutLink(userID int, height, width int) (adv.Link, bool, error)
 	generateLink(userID int, height, width int) adv.Link
 	WriteMetric(bannerID int, slotLink string, metric string) error
+	GetBannerMetric(bannerID int, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error)
+	GetSlotMetric(slotLink, activity string, userID int, from, to time.Time) (map[string]int, error)
+	GetSlotCTR(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error)
 }
 
 type AdvUsecase struct {
@@ -173,6 +176,45 @@ func (a *AdvUsecase) GetSlotMetric(slotLink, activity string, userID int, from, 
 	return total, nil
 }
 
+func (a *AdvUsecase) GetSlotCTR(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
+	if err != nil || userID != ownerSlotID {
+		return nil, fmt.Errorf("slot not found")
+	}
+	total, err := a.advRepository.GetSlotCTR(slotLink, activity, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("slot not found")
+	}
+
+	return total, nil
+}
+
+func (a *AdvUsecase) GetSlotAVGPrice(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
+	if err != nil || userID != ownerSlotID {
+		return nil, fmt.Errorf("slot not found")
+	}
+	total, err := a.advRepository.GetSlotAVGPrice(slotLink, activity, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("slot not found")
+	}
+
+	return total, nil
+}
+
+func (a *AdvUsecase) GetSlotRevenue(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
+	if err != nil || userID != ownerSlotID {
+		return nil, fmt.Errorf("slot not found")
+	}
+	total, err := a.advRepository.GetSlotAVGPrice(slotLink, activity, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("slot not found")
+	}
+
+	return total, nil
+}
+
 func (a *AdvUsecase) GetBannerMetric(bannerID int, activity string, userID int, from, to time.Time) (map[string]int, error) {
 
 	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
@@ -187,6 +229,48 @@ func (a *AdvUsecase) GetBannerMetric(bannerID int, activity string, userID int, 
 	}
 
 	total, err := a.advRepository.GetBannerMetric(bannerID, activity, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("banner not found")
+	}
+
+	return total, nil
+}
+
+func (a *AdvUsecase) GetBannerCTR(bannerID int, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+
+	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
+	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
+	banner, err := a.bannerClient.GetBannerByID(ctx, bannerReq)
+	if err != nil {
+		return nil, fmt.Errorf("banner not found")
+	}
+	ownerID, err := strconv.Atoi(banner.OwnerID)
+	if err != nil || ownerID != userID {
+		return nil, fmt.Errorf("banner not found")
+	}
+
+	total, err := a.advRepository.GetBannerCTR(bannerID, activity, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("banner not found")
+	}
+
+	return total, nil
+}
+
+func (a *AdvUsecase) GetBannerExpenses(bannerID int, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+
+	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
+	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
+	banner, err := a.bannerClient.GetBannerByID(ctx, bannerReq)
+	if err != nil {
+		return nil, fmt.Errorf("banner not found")
+	}
+	ownerID, err := strconv.Atoi(banner.OwnerID)
+	if err != nil || ownerID != userID {
+		return nil, fmt.Errorf("banner not found")
+	}
+
+	total, err := a.advRepository.GetBannerExpenses(bannerID, activity, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("banner not found")
 	}

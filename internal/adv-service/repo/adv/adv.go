@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"retarget/internal/adv-service/entity/adv"
+	"retarget/pkg/entity"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/gocql/gocql"
@@ -20,7 +21,12 @@ type AdvRepositoryInterface interface {
 	DeleteLink(link string) error
 	WriteMetric(bannerID int, slotLink string, action string) error
 	GetSlotMetric(slotID, action string, from, to time.Time) (map[string]int, error)
+	GetSlotCTR(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
 	GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error)
+	GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error)
 }
 
 type AdvRepository struct {
@@ -162,6 +168,129 @@ func (u *AdvRepository) GetSlotMetric(slotID, action string, from, to time.Time)
 	return result, nil
 }
 
+func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+	const query = `
+		SELECT
+			day,
+			round(clicks / shown, 4) AS ctr
+		FROM (
+			SELECT
+				toDate(created_at) AS day,
+				countIf(actions = 'click') AS clicks,
+				countIf(actions = 'shown') AS shown
+			FROM adv.actions
+			WHERE slot_id = ?
+			AND created_at >= ? AND created_at < addDays(?, 1)
+			GROUP BY day
+		)
+		ORDER BY day
+	`
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("error when reading CTR from the database")
+	}
+	defer rows.Close()
+
+	result := make(map[string]entity.Decimal)
+	for rows.Next() {
+		var (
+			date time.Time
+			ctr  entity.Decimal
+		)
+
+		if err := rows.Scan(&date, &ctr); err != nil {
+			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+
+		result[date.Format("2006-01-02")] = ctr
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after reading CTR rows")
+	}
+
+	return result, nil
+}
+
+func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+	const query = `
+		SELECT
+			toDate(created_at) AS day,
+			sum(price) AS total_price
+		FROM adv.actions
+		WHERE slot_id = ?
+		AND created_at >= ?
+		AND created_at < addDays(?, 1)
+		GROUP BY day
+		ORDER BY day
+	`
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("error when reading expenses from the database")
+	}
+	defer rows.Close()
+
+	result := make(map[string]entity.Decimal)
+	for rows.Next() {
+		var (
+			date     time.Time
+			expenses entity.Decimal
+		)
+
+		if err := rows.Scan(&date, &expenses); err != nil {
+			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+
+		result[date.Format("2006-01-02")] = expenses
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after reading CTR rows")
+	}
+
+	return result, nil
+}
+
+func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+	const query = `
+		SELECT
+			toDate(created_at) AS day,
+			avg(price) AS avg_price
+		FROM adv.actions
+		WHERE banner_id = ?
+			AND created_at >= ?
+			AND created_at < addDays(?, 1)
+		GROUP BY day
+		ORDER BY day
+
+	`
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("error when reading expenses from the database")
+	}
+	defer rows.Close()
+
+	result := make(map[string]entity.Decimal)
+	for rows.Next() {
+		var (
+			date     time.Time
+			expenses entity.Decimal
+		)
+
+		if err := rows.Scan(&date, &expenses); err != nil {
+			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+
+		result[date.Format("2006-01-02")] = expenses
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after reading CTR rows")
+	}
+
+	return result, nil
+}
+
 func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error) {
 	const query = `
 		SELECT toDate(created_at) as day, count(*) as total
@@ -195,6 +324,89 @@ func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to ti
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error when reading from the database")
+	}
+
+	return result, nil
+}
+
+func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+	const query = `
+		SELECT
+			day,
+			round(clicks / shown, 4) AS ctr
+		FROM (
+			SELECT
+				toDate(created_at) AS day,
+				countIf(actions = 'click') AS clicks,
+				countIf(actions = 'shown') AS shown
+			FROM adv.actions
+			WHERE banner_id = ?
+			AND created_at >= ? AND created_at < addDays(?, 1)
+			GROUP BY day
+		)
+		ORDER BY day
+	`
+	rows, err := u.clickhouse.Query(query, bannerID, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("error when reading CTR from the database")
+	}
+	defer rows.Close()
+
+	result := make(map[string]entity.Decimal)
+	for rows.Next() {
+		var (
+			date time.Time
+			ctr  entity.Decimal
+		)
+
+		if err := rows.Scan(&date, &ctr); err != nil {
+			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+
+		result[date.Format("2006-01-02")] = ctr
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after reading CTR rows")
+	}
+
+	return result, nil
+}
+
+func (u *AdvRepository) GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+	const query = `
+		SELECT
+			toDate(created_at) AS day,
+			sum(price) AS total_price
+		FROM adv.actions
+		WHERE banner_id = ?
+		AND created_at >= ?
+		AND created_at < addDays(?, 1)
+		GROUP BY day
+		ORDER BY day
+	`
+	rows, err := u.clickhouse.Query(query, bannerID, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("error when reading expenses from the database")
+	}
+	defer rows.Close()
+
+	result := make(map[string]entity.Decimal)
+	for rows.Next() {
+		var (
+			date     time.Time
+			expenses entity.Decimal
+		)
+
+		if err := rows.Scan(&date, &expenses); err != nil {
+			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+
+		result[date.Format("2006-01-02")] = expenses
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after reading CTR rows")
 	}
 
 	return result, nil

@@ -41,7 +41,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	query := r.URL.Query()
 	fromStr := query.Get("from")
 	toStr := query.Get("to")
-	activity := query.Get("activity")
+	activity := query.Get("activity") // shown, click, ctr, уникальные для слотов: avg-action-price, revenue; баннера: expenses
 	bannerIDstr := query.Get("banner")
 	slotIDstr := query.Get("slot")
 
@@ -69,11 +69,11 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// if fromTime.After(toTime) {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, "'from' must be before or equal to 'to'"))
-	// 	return
-	// }
+	if fromTime.After(toTime) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "'from' must be before or equal to 'to'"))
+		return
+	}
 
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
@@ -84,39 +84,70 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	userID := userSession.UserID
 
 	if bannerIDstr == "" && slotIDstr != "" {
-		metrics, err := c.advUsecase.GetSlotMetric(slotIDstr, activity, userID, fromTime, toTime)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			//nolint:errcheck
-			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		return
-	}
-
-	if bannerIDstr != "" && slotIDstr == "" {
 		bannerID, err := strconv.Atoi(bannerIDstr)
 		if err != nil {
 			http.Error(w, "Invalid banner ID", http.StatusBadRequest)
 			return
 		}
-		metrics, err := c.advUsecase.GetBannerMetric(bannerID, activity, userID, fromTime, toTime)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			//nolint:errcheck
-			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
-			return
+		var metrics interface{}
+		if activity == "click" || activity == "shown" {
+			metrics, err = c.advUsecase.GetBannerMetric(bannerID, activity, userID, fromTime, toTime)
+		} else if activity == "ctr" {
+			metrics, err = c.advUsecase.GetBannerCTR(bannerID, activity, userID, fromTime, toTime)
+		} else if activity == "expenses" {
+			metrics, err = c.advUsecase.GetBannerExpenses(bannerID, activity, userID, fromTime, toTime)
+		} else {
+			err = fmt.Errorf("unknown get parameters")
 		}
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		return
 	}
+	if bannerIDstr != "" && slotIDstr == "" {
+		var metrics interface{}
+		var err error
+		err = nil
+		if activity == "click" || activity == "shown" {
+			metrics, err = c.advUsecase.GetSlotMetric(slotIDstr, activity, userID, fromTime, toTime)
+		} else if activity == "ctr" {
+			metrics, err = c.advUsecase.GetSlotCTR(slotIDstr, activity, userID, fromTime, toTime)
+		} else if activity == "revenue" {
+			metrics, err = c.advUsecase.GetSlotRevenue(slotIDstr, activity, userID, fromTime, toTime)
+		} else if activity == "avg-action-price" {
+			metrics, err = c.advUsecase.GetSlotAVGPrice(slotIDstr, activity, userID, fromTime, toTime)
+		} else {
+			err = fmt.Errorf("unknown get parameters")
+		}
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+
+	// var metrics map[string]int
+	// if bannerIDstr == "" && slotIDstr != "" {
+	// 	metrics, err = c.advUsecase.GetSlotMetric(slotIDstr, activity, userID, fromTime, toTime)
+	// }
+	// if bannerIDstr != "" && slotIDstr == "" {
+	// 	bannerID, convErr := strconv.Atoi(bannerIDstr)
+	// 	if convErr != nil {
+	// 		http.Error(w, "Invalid banner ID", http.StatusBadRequest)
+	// 		return
+	// 	}
+	// 	metrics, err = c.advUsecase.GetBannerMetric(bannerID, activity, userID, fromTime, toTime)
+	// }
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	//nolint:errcheck
+	// 	json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+	// 	return
+	// }
+	// w.WriteHeader(http.StatusOK)
+	// err = json.NewEncoder(w).Encode(entity.NewResponseWithBody(false, "metrics received", metrics))
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
 }
