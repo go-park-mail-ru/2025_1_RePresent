@@ -140,7 +140,7 @@ func (u *AdvRepository) GetSlotMetric(slotID, action string, from, to time.Time)
 		GROUP BY day
 		ORDER BY day
 	`
-	rows, err := u.clickhouse.Query(query, slotID, from, to)
+	rows, err := u.clickhouse.Query(query, slotID, action, from, to)
 	if err != nil {
 		return nil, err //fmt.Errorf("error when reading from the database")
 	}
@@ -256,7 +256,7 @@ func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Tim
 			toDate(created_at) AS day,
 			avg(price) AS avg_price
 		FROM adv.actions
-		WHERE banner_id = ?
+		WHERE slot_id = ?
 			AND created_at >= ?
 			AND created_at < ?
 		GROUP BY day
@@ -299,7 +299,7 @@ func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to ti
 		GROUP BY day
 		ORDER BY day
 	`
-	rows, err := u.clickhouse.Query(query, bannerID, from, to)
+	rows, err := u.clickhouse.Query(query, bannerID, action, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading from the database")
 	}
