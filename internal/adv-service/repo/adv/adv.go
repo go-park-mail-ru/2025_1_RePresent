@@ -168,7 +168,7 @@ func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to ti
 		FROM adv.actions
 		WHERE banner_id = ?
 		AND actions = ?
-		AND created_at BETWEEN ? AND ?
+		AND created_at >= ? AND created_at < addDays(?, 1)
 		GROUP BY day
 		ORDER BY day
 	`

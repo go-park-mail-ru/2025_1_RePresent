@@ -131,15 +131,24 @@
 </body>
 <script>
   const ad = document.getElementById('ad-banner');
-  let hasSent = false;
+
+  let hasSentShown = false;
+  let hasSentClick = false;
 
   const isDebug = new URLSearchParams(window.location.search).get('debug') === 'true';
 
   function sendEvent(action) {
-    if (hasSent || isDebug) return;
-    hasSent = true;
+    if (isDebug) return;
 
-    fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.Banner}}&slot={{.Slot}}&action=${action}`, {
+    if (action === 'shown' && !hasSentShown) {
+      hasSentShown = true;
+    } else if (action === 'click' && !hasSentClick) {
+      hasSentClick = true;
+    } else {
+      return;
+    }
+
+    fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.Banner}}&slot={{.Slot}}&action=${action}&`, {
       method: 'GET',
       mode: 'no-cors'
     });
@@ -155,5 +164,6 @@
     sendEvent('click');
   });
 </script>
+
 
 </html>

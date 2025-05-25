@@ -8,19 +8,19 @@ import (
 	"gopkg.in/inf.v0"
 )
 
-type Dec struct {
+type Decimal struct {
 	*inf.Dec
 }
 
-func NewDec(s string) (*Dec, error) {
+func NewDec(s string) (*Decimal, error) {
 	d := new(inf.Dec)
 	if _, ok := d.SetString(s); !ok {
 		return nil, fmt.Errorf("invalid decimal format: %s", s)
 	}
-	return &Dec{Dec: d}, nil
+	return &Decimal{Dec: d}, nil
 }
 
-func (d *Dec) Scan(value interface{}) error {
+func (d *Decimal) Scan(value interface{}) error {
 	if value == nil {
 		d.Dec = inf.NewDec(0, 0)
 		return nil
@@ -51,14 +51,14 @@ func parseDecimal(s string) (*inf.Dec, error) {
 	return d, nil
 }
 
-func (d Dec) Value() (driver.Value, error) {
+func (d Decimal) Value() (driver.Value, error) {
 	if d.Dec == nil {
 		return "0", nil
 	}
 	return d.String(), nil
 }
 
-func (d *Dec) UnmarshalJSON(data []byte) error {
+func (d *Decimal) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(string(data), `"`)
 	if s == "null" || s == "" {
 		d.Dec = inf.NewDec(0, 0)
@@ -70,7 +70,7 @@ func (d *Dec) UnmarshalJSON(data []byte) error {
 	return err
 }
 
-func (d Dec) MarshalJSON() ([]byte, error) {
+func (d Decimal) MarshalJSON() ([]byte, error) {
 	if d.Dec == nil {
 		return []byte(`"0"`), nil
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	entity "retarget/pkg/entity"
-	response "retarget/pkg/entity"
 	"time"
 
 	"strconv"
@@ -53,10 +52,8 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Формат даты
 	layout := "2006-01-02"
 
-	// Парсинг
 	fromTime, err := time.Parse(layout, fromStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -78,11 +75,11 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	// 	return
 	// }
 
-	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
+	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
