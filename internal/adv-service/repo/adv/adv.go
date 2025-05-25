@@ -254,7 +254,7 @@ func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Tim
 	const query = `
 		SELECT
 			toDate(created_at) AS day,
-			avg(price) AS avg_price
+			CAST(avg(price) AS Decimal(12, 2)) AS avg_price
 		FROM adv.actions
 		WHERE slot_id = ?
 			AND created_at >= ?
