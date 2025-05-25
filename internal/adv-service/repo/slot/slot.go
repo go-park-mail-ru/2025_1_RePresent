@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
-	"gopkg.in/inf.v0"
 )
 
 var (
@@ -195,7 +194,6 @@ func (r *SlotRepository) GetUserByLink(ctx context.Context, link string) (int, t
 
 func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (slot.Slot, error) {
 	var s slot.Slot
-	var minPriceDecimal string
 
 	err := r.session.Query(
 		`SELECT link, slot_name, format_code, min_price, is_active, created_at 
@@ -205,7 +203,7 @@ func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (sl
 		&s.Link,
 		&s.SlotName,
 		&s.FormatCode,
-		&minPriceDecimal,
+		&s.MinPrice,
 		&s.IsActive,
 		&s.CreatedAt,
 	)
@@ -215,11 +213,6 @@ func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (sl
 			return slot.Slot{}, ErrSlotNotFound
 		}
 		return slot.Slot{}, err
-	}
-
-	s.MinPrice = *inf.NewDec(0, 0)
-	if _, ok := s.MinPrice.SetString(minPriceDecimal); !ok {
-		return slot.Slot{}, errors.New("failed to parse min_price")
 	}
 
 	return s, nil

@@ -64,7 +64,7 @@ func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
 		Description: entity.DefaultBanner.Description,
 		Link:        entity.DefaultBanner.Link,
 		OwnerID:     ownerID,
-		MaxPrice:    entity.DefaultBanner.MaxPrice.String(),
+		MaxPrice:    "0",
 		Id:          int64(entity.DefaultBanner.ID),
 	}
 	if err != nil {

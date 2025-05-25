@@ -17,7 +17,7 @@ var DefaultBanner = Banner{
 	ID:          -1,
 	OwnerID:     -1,
 	Title:       "Здесь ничего нет",
-	Content:     "0d93f25e17810c6fc8666718f37a5203", //хардкоднуто
+	Content:     "0a8a2d2cecbddf2d2ae18cb36483277c", //хардкоднуто
 	Description: "Но тут могла быть ваша реклама",
 	Status:      0,
 	Balance:     0,
