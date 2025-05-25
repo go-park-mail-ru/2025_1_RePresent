@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
-
 	"retarget/internal/banner-service/usecase" // Импорт usecase
-	bannerpb "retarget/pkg/proto/banner"       // Импорт сгенерированного gRPC-кода
+	entity "retarget/pkg/entity"
+	bannerpb "retarget/pkg/proto/banner" // Импорт сгенерированного gRPC-кода
+	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -29,9 +29,10 @@ func NewBannerServer(bannerUC usecase.BannerUsecase) *BannerServer {
 
 func (s *BannerServer) GetRandomBanner(
 	ctx context.Context,
-	req *bannerpb.Empty,
+	req *bannerpb.BannerWithMinPrice,
 ) (*bannerpb.Banner, error) {
-	banner, err := s.bannerUC.GetRandomBannerForADV(0, "")
+	dec, _ := entity.NewDec(req.MinPrice)
+	banner, err := s.bannerUC.GetRandomBannerForADV(0, "", dec)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get banner: %v", err)
 	}

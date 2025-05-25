@@ -3,9 +3,9 @@ package repo
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"retarget/internal/banner-service/entity"
+	decimal "retarget/pkg/entity"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -67,28 +67,29 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 	return banners, nil
 }
 
-func (r *BannerRepository) GetMaxPriceBanner() (*entity.Banner, error) {
+func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *entity.Banner {
+	r.logger.Debugw("Executing SQL query GetMaxPriceBanner", "floor", floor.String())
 
-	r.logger.Debugw("Executing SQL query GetMaxPriceBanner")
 	query := `
         SELECT b.id, b.title, b.content, b.description, b.link, b.owner_id
-		FROM banner b
-		JOIN auth_user u ON b.owner_id = u.id
-		WHERE b.status = 1 AND u.balance > 0
-		AND b.max_price = (
-			SELECT MAX(b2.max_price)
-			FROM banner b2
-			JOIN auth_user u2 ON b2.owner_id = u2.id
-			WHERE b2.status = 1 AND u2.balance > 0
-		)
-		ORDER BY RANDOM()
-		LIMIT 1;
-
+        FROM banner b
+        JOIN auth_user u ON b.owner_id = u.id
+        WHERE b.status = 1
+          AND u.balance > 0
+          AND b.max_price = (
+              SELECT MAX(b2.max_price)
+              FROM banner b2
+              JOIN auth_user u2 ON b2.owner_id = u2.id
+              WHERE b2.status = 1 AND u2.balance > 0 AND b2.max_price > $1
+          )
+        ORDER BY RANDOM()
+        LIMIT 1;
     `
 
 	var banner entity.Banner
 	startTime := time.Now()
-	err := r.db.QueryRow(query).Scan(
+
+	err := r.db.QueryRow(query, floor).Scan(
 		&banner.ID,
 		&banner.Title,
 		&banner.Content,
@@ -97,21 +98,13 @@ func (r *BannerRepository) GetMaxPriceBanner() (*entity.Banner, error) {
 		&banner.OwnerID,
 	)
 
+	r.logger.Debugw("SQL query completed", "duration", time.Since(startTime))
+
 	if err != nil {
-		r.logger.Debugw("Error executing query to get max price banner", "error", err)
-		return nil, err
-	}
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("no active banners with valid owners found")
-		}
-		return nil, fmt.Errorf("failed to get random banner: %w", err)
+		return &entity.DefaultBanner
 	}
 
-	duration := time.Since(startTime)
-	r.logger.Debugw("Success", "bannerID", banner.ID, "duration", duration)
-
-	return &banner, nil
+	return &banner
 }
 
 func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID string) error {

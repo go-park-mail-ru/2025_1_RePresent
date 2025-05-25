@@ -19,7 +19,6 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BannerService_SendBanner_FullMethodName      = "/bannerpb.BannerService/SendBanner"
 	BannerService_GetRandomBanner_FullMethodName = "/bannerpb.BannerService/GetRandomBanner"
 	BannerService_GetBannerByID_FullMethodName   = "/bannerpb.BannerService/GetBannerByID"
 )
@@ -28,8 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BannerServiceClient interface {
-	SendBanner(ctx context.Context, in *Banner, opts ...grpc.CallOption) (*Empty, error)
-	GetRandomBanner(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Banner, error)
+	GetRandomBanner(ctx context.Context, in *BannerWithMinPrice, opts ...grpc.CallOption) (*Banner, error)
 	GetBannerByID(ctx context.Context, in *BannerRequest, opts ...grpc.CallOption) (*Banner, error)
 }
 
@@ -41,17 +39,7 @@ func NewBannerServiceClient(cc grpc.ClientConnInterface) BannerServiceClient {
 	return &bannerServiceClient{cc}
 }
 
-func (c *bannerServiceClient) SendBanner(ctx context.Context, in *Banner, opts ...grpc.CallOption) (*Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, BannerService_SendBanner_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *bannerServiceClient) GetRandomBanner(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Banner, error) {
+func (c *bannerServiceClient) GetRandomBanner(ctx context.Context, in *BannerWithMinPrice, opts ...grpc.CallOption) (*Banner, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Banner)
 	err := c.cc.Invoke(ctx, BannerService_GetRandomBanner_FullMethodName, in, out, cOpts...)
@@ -75,8 +63,7 @@ func (c *bannerServiceClient) GetBannerByID(ctx context.Context, in *BannerReque
 // All implementations must embed UnimplementedBannerServiceServer
 // for forward compatibility.
 type BannerServiceServer interface {
-	SendBanner(context.Context, *Banner) (*Empty, error)
-	GetRandomBanner(context.Context, *Empty) (*Banner, error)
+	GetRandomBanner(context.Context, *BannerWithMinPrice) (*Banner, error)
 	GetBannerByID(context.Context, *BannerRequest) (*Banner, error)
 	mustEmbedUnimplementedBannerServiceServer()
 }
@@ -88,10 +75,7 @@ type BannerServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBannerServiceServer struct{}
 
-func (UnimplementedBannerServiceServer) SendBanner(context.Context, *Banner) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendBanner not implemented")
-}
-func (UnimplementedBannerServiceServer) GetRandomBanner(context.Context, *Empty) (*Banner, error) {
+func (UnimplementedBannerServiceServer) GetRandomBanner(context.Context, *BannerWithMinPrice) (*Banner, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandomBanner not implemented")
 }
 func (UnimplementedBannerServiceServer) GetBannerByID(context.Context, *BannerRequest) (*Banner, error) {
@@ -118,26 +102,8 @@ func RegisterBannerServiceServer(s grpc.ServiceRegistrar, srv BannerServiceServe
 	s.RegisterService(&BannerService_ServiceDesc, srv)
 }
 
-func _BannerService_SendBanner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Banner)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BannerServiceServer).SendBanner(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BannerService_SendBanner_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BannerServiceServer).SendBanner(ctx, req.(*Banner))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _BannerService_GetRandomBanner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(BannerWithMinPrice)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -149,7 +115,7 @@ func _BannerService_GetRandomBanner_Handler(srv interface{}, ctx context.Context
 		FullMethod: BannerService_GetRandomBanner_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BannerServiceServer).GetRandomBanner(ctx, req.(*Empty))
+		return srv.(BannerServiceServer).GetRandomBanner(ctx, req.(*BannerWithMinPrice))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -179,10 +145,6 @@ var BannerService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "bannerpb.BannerService",
 	HandlerType: (*BannerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SendBanner",
-			Handler:    _BannerService_SendBanner_Handler,
-		},
 		{
 			MethodName: "GetRandomBanner",
 			Handler:    _BannerService_GetRandomBanner_Handler,

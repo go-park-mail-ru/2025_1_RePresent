@@ -39,11 +39,11 @@ func (d *Decimal) Scan(value interface{}) error {
 	s = strings.TrimLeft(s, "+")
 
 	var err error
-	d.Dec, err = parseDecimal(s)
+	d.Dec, err = ParseDecimal(s)
 	return err
 }
 
-func parseDecimal(s string) (*inf.Dec, error) {
+func ParseDecimal(s string) (*inf.Dec, error) {
 	d := new(inf.Dec)
 	if _, ok := d.SetString(s); !ok {
 		return nil, fmt.Errorf("invalid decimal format: %s", s)
@@ -66,7 +66,7 @@ func (d *Decimal) UnmarshalJSON(data []byte) error {
 	}
 
 	var err error
-	d.Dec, err = parseDecimal(s)
+	d.Dec, err = ParseDecimal(s)
 	return err
 }
 

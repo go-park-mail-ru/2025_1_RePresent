@@ -9,6 +9,7 @@ import (
 	"retarget/internal/adv-service/entity/adv"
 	repoAdv "retarget/internal/adv-service/repo/adv"
 	repoSlots "retarget/internal/adv-service/repo/slot"
+	entity "retarget/pkg/entity"
 	pb "retarget/pkg/proto/banner"
 	protoPayment "retarget/pkg/proto/payment"
 	"strconv"
@@ -55,11 +56,25 @@ func (a *AdvUsecase) GetLinks(userID int) ([]adv.Link, error) {
 }
 
 func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
-	emptyReq := &pb.Empty{}
-	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
-	banner, err := a.bannerClient.GetRandomBanner(ctx, emptyReq)
+	slot, err := a.SlotsRepository.GetSlotInfoByLink(context.Background(), key)
+	ownerID := strconv.Itoa(entity.DefaultBanner.OwnerID)
+	defaultBanner := &pb.Banner{
+		Title:       entity.DefaultBanner.Title,
+		Content:     entity.DefaultBanner.Content,
+		Description: entity.DefaultBanner.Description,
+		Link:        entity.DefaultBanner.Link,
+		OwnerID:     ownerID,
+		MaxPrice:    entity.DefaultBanner.MaxPrice.String(),
+		Id:          int64(entity.DefaultBanner.ID),
+	}
 	if err != nil {
-		return nil, err
+		return defaultBanner, nil
+	}
+	req := &pb.BannerWithMinPrice{MinPrice: slot.MinPrice.String()}
+	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
+	banner, err := a.bannerClient.GetRandomBanner(ctx, req)
+	if err != nil {
+		return defaultBanner, nil
 	}
 	return banner, nil
 }

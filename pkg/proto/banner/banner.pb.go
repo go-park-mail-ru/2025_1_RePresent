@@ -113,26 +113,27 @@ func (x *Banner) GetId() int64 {
 	return 0
 }
 
-type Empty struct {
+type BannerWithMinPrice struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	MinPrice      string                 `protobuf:"bytes,1,opt,name=min_price,json=minPrice,proto3" json:"min_price,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Empty) Reset() {
-	*x = Empty{}
+func (x *BannerWithMinPrice) Reset() {
+	*x = BannerWithMinPrice{}
 	mi := &file_pkg_proto_banner_banner_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Empty) String() string {
+func (x *BannerWithMinPrice) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Empty) ProtoMessage() {}
+func (*BannerWithMinPrice) ProtoMessage() {}
 
-func (x *Empty) ProtoReflect() protoreflect.Message {
+func (x *BannerWithMinPrice) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_proto_banner_banner_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -144,9 +145,16 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
-func (*Empty) Descriptor() ([]byte, []int) {
+// Deprecated: Use BannerWithMinPrice.ProtoReflect.Descriptor instead.
+func (*BannerWithMinPrice) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_banner_banner_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *BannerWithMinPrice) GetMinPrice() string {
+	if x != nil {
+		return x.MinPrice
+	}
+	return ""
 }
 
 type BannerRequest struct {
@@ -205,14 +213,13 @@ const file_pkg_proto_banner_banner_proto_rawDesc = "" +
 	"\x04link\x18\x04 \x01(\tR\x04link\x12\x18\n" +
 	"\aownerID\x18\x05 \x01(\tR\aownerID\x12\x1b\n" +
 	"\tmax_price\x18\x06 \x01(\tR\bmaxPrice\x12\x0e\n" +
-	"\x02id\x18\a \x01(\x03R\x02id\"\a\n" +
-	"\x05Empty\"\x1f\n" +
+	"\x02id\x18\a \x01(\x03R\x02id\"1\n" +
+	"\x12BannerWithMinPrice\x12\x1b\n" +
+	"\tmin_price\x18\x01 \x01(\tR\bminPrice\"\x1f\n" +
 	"\rBannerRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id2\xb2\x01\n" +
-	"\rBannerService\x12/\n" +
-	"\n" +
-	"SendBanner\x12\x10.bannerpb.Banner\x1a\x0f.bannerpb.Empty\x124\n" +
-	"\x0fGetRandomBanner\x12\x0f.bannerpb.Empty\x1a\x10.bannerpb.Banner\x12:\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id2\x8e\x01\n" +
+	"\rBannerService\x12A\n" +
+	"\x0fGetRandomBanner\x12\x1c.bannerpb.BannerWithMinPrice\x1a\x10.bannerpb.Banner\x12:\n" +
 	"\rGetBannerByID\x12\x17.bannerpb.BannerRequest\x1a\x10.bannerpb.BannerB$Z\"retarget/pkg/proto/banner;bannerpbb\x06proto3"
 
 var (
@@ -229,19 +236,17 @@ func file_pkg_proto_banner_banner_proto_rawDescGZIP() []byte {
 
 var file_pkg_proto_banner_banner_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pkg_proto_banner_banner_proto_goTypes = []any{
-	(*Banner)(nil),        // 0: bannerpb.Banner
-	(*Empty)(nil),         // 1: bannerpb.Empty
-	(*BannerRequest)(nil), // 2: bannerpb.BannerRequest
+	(*Banner)(nil),             // 0: bannerpb.Banner
+	(*BannerWithMinPrice)(nil), // 1: bannerpb.BannerWithMinPrice
+	(*BannerRequest)(nil),      // 2: bannerpb.BannerRequest
 }
 var file_pkg_proto_banner_banner_proto_depIdxs = []int32{
-	0, // 0: bannerpb.BannerService.SendBanner:input_type -> bannerpb.Banner
-	1, // 1: bannerpb.BannerService.GetRandomBanner:input_type -> bannerpb.Empty
-	2, // 2: bannerpb.BannerService.GetBannerByID:input_type -> bannerpb.BannerRequest
-	1, // 3: bannerpb.BannerService.SendBanner:output_type -> bannerpb.Empty
-	0, // 4: bannerpb.BannerService.GetRandomBanner:output_type -> bannerpb.Banner
-	0, // 5: bannerpb.BannerService.GetBannerByID:output_type -> bannerpb.Banner
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 0: bannerpb.BannerService.GetRandomBanner:input_type -> bannerpb.BannerWithMinPrice
+	2, // 1: bannerpb.BannerService.GetBannerByID:input_type -> bannerpb.BannerRequest
+	0, // 2: bannerpb.BannerService.GetRandomBanner:output_type -> bannerpb.Banner
+	0, // 3: bannerpb.BannerService.GetBannerByID:output_type -> bannerpb.Banner
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

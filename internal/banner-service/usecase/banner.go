@@ -6,6 +6,8 @@ import (
 	"retarget/internal/banner-service/entity"
 	"retarget/internal/banner-service/repo"
 	"time"
+
+	decimal "retarget/pkg/entity"
 )
 
 type BannerUsecase struct {
@@ -56,11 +58,8 @@ func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (
 	return &entity.DefaultBanner, nil
 }
 
-func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string) (*entity.Banner, error) {
-	banner, err := b.BannerRepository.GetMaxPriceBanner()
-	if err != nil {
-		return nil, err
-	}
+func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string, floor *decimal.Decimal) (*entity.Banner, error) {
+	banner := b.BannerRepository.GetMaxPriceBanner(floor)
 	if banner == nil {
 		return &entity.DefaultBanner, nil
 	}
