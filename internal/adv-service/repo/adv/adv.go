@@ -140,11 +140,9 @@ func (u *AdvRepository) GetSlotMetric(slotID, action string, from, to time.Time)
 		GROUP BY day
 		ORDER BY day
 	`
-
-	toPlusOne := to.AddDate(0, 0, 1)
-	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
 	if err != nil {
-		return nil, fmt.Errorf("error when reading from the database")
+		return nil, err //fmt.Errorf("error when reading from the database")
 	}
 	defer rows.Close()
 
@@ -186,8 +184,7 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 		)
 		ORDER BY day
 	`
-	toPlusOne := to.AddDate(0, 0, 1)
-	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading CTR from the database")
 	}
@@ -226,10 +223,7 @@ func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time
 		GROUP BY day
 		ORDER BY day
 	`
-
-	toPlusOne := to.AddDate(0, 0, 1)
-
-	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading expenses from the database")
 	}
@@ -267,10 +261,8 @@ func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Tim
 			AND created_at < ?
 		GROUP BY day
 		ORDER BY day
-
 	`
-	toPlusOne := to.AddDate(0, 0, 1)
-	rows, err := u.clickhouse.Query(query, slotID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, slotID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading expenses from the database")
 	}
@@ -307,9 +299,7 @@ func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to ti
 		GROUP BY day
 		ORDER BY day
 	`
-
-	toPlusOne := to.AddDate(0, 0, 1)
-	rows, err := u.clickhouse.Query(query, bannerID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, bannerID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading from the database")
 	}
@@ -353,8 +343,7 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 		)
 		ORDER BY day
 	`
-	toPlusOne := to.AddDate(0, 0, 1)
-	rows, err := u.clickhouse.Query(query, bannerID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, bannerID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading CTR from the database")
 	}
@@ -393,8 +382,7 @@ func (u *AdvRepository) GetBannerExpenses(bannerID int, action string, from, to 
 		GROUP BY day
 		ORDER BY day
 	`
-	toPlusOne := to.AddDate(0, 0, 1)
-	rows, err := u.clickhouse.Query(query, bannerID, from, toPlusOne)
+	rows, err := u.clickhouse.Query(query, bannerID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("error when reading expenses from the database")
 	}
