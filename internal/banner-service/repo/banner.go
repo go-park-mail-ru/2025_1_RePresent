@@ -37,7 +37,7 @@ func NewBannerRepository(endPoint string, logger *zap.SugaredLogger) *BannerRepo
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entity.Banner, error) {
-	query := "SELECT id, owner_id, title, description, content, status, link FROM banner WHERE owner_id = $1 AND deleted = FALSE;"
+	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND deleted = FALSE;"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", id)
 	startTime := time.Now()
 	rows, err := r.db.Query(query, id)
@@ -51,7 +51,7 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 
 	for rows.Next() {
 		banner := entity.Banner{}
-		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Link)
+		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Link, &banner.MaxPrice)
 		if err != nil {
 			r.logger.Debugw("SQL Error", "request_id", requestID, "userID", id, "duration", duration, "error", err)
 			return nil, err
