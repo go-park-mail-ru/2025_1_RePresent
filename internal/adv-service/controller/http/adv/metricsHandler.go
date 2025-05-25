@@ -120,14 +120,14 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 			metrics, err = c.advUsecase.GetSlotCTR(slotIDstr, activity, userID, fromTime, toTime)
 		} else if activity == "revenue" {
 			metrics, err = c.advUsecase.GetSlotRevenue(slotIDstr, activity, userID, fromTime, toTime)
-		} else if activity == "avg-action-price" {
+		} else if activity == "avg-show-price" {
 			metrics, err = c.advUsecase.GetSlotAVGPrice(slotIDstr, activity, userID, fromTime, toTime)
 		} else {
 			err = fmt.Errorf("unknown get parameters")
 		}
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
