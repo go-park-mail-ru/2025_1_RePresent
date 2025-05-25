@@ -20,6 +20,11 @@ func NewDec(s string) (*Decimal, error) {
 	return &Decimal{Dec: d}, nil
 }
 
+func NewDecWithoutErr(s string) *Decimal {
+	d := new(inf.Dec)
+	return &Decimal{Dec: d}
+}
+
 func (d *Decimal) Scan(value interface{}) error {
 	if value == nil {
 		d.Dec = inf.NewDec(0, 0)

@@ -27,4 +27,5 @@ var DefaultBanner = Banner{
 	Balance:     0,
 	Link:        "http://re-target.ru",
 	Deleted:     false,
+	MaxPrice:    *entity.NewDecWithoutErr("0.1"),
 }

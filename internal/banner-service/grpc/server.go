@@ -44,6 +44,7 @@ func (s *BannerServer) GetRandomBanner(
 		Link:        banner.Link,
 		OwnerID:     strconv.Itoa(banner.OwnerID),
 		Id:          int64(banner.ID),
+		MaxPrice:    banner.MaxPrice.String(),
 	}, nil
 }
 
@@ -60,6 +61,7 @@ func (s *BannerServer) GetBannerByID(ctx context.Context, req *bannerpb.BannerRe
 		Description: banner.Description,
 		Link:        banner.Link,
 		OwnerID:     strconv.Itoa(banner.OwnerID),
+		Id:          int64(banner.ID),
 		MaxPrice:    banner.MaxPrice.String(),
 	}, nil
 }
