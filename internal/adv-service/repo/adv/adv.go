@@ -21,7 +21,7 @@ type AdvRepositoryInterface interface {
 	DeleteLink(link string) error
 	WriteMetric(bannerID int, slotLink string, action string) error
 	GetSlotMetric(slotID, action string, from, to time.Time) (map[string]int, error)
-	GetSlotCTR(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetSlotCTR(slotID, action string, from, to time.Time) (map[string]float64, error)
 	GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
 	GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
 	GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error)
@@ -167,7 +167,7 @@ func (u *AdvRepository) GetSlotMetric(slotID, action string, from, to time.Time)
 	return result, nil
 }
 
-func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.Time) (map[string]float64, error) {
 	const query = `
 		SELECT
 			day,
@@ -190,11 +190,11 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 	}
 	defer rows.Close()
 
-	result := make(map[string]entity.Decimal)
+	result := make(map[string]float64)
 	for rows.Next() {
 		var (
 			date time.Time
-			ctr  entity.Decimal
+			ctr  float64
 		)
 
 		if err := rows.Scan(&date, &ctr); err != nil {

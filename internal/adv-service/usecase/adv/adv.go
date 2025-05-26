@@ -176,7 +176,7 @@ func (a *AdvUsecase) GetSlotMetric(slotLink, activity string, userID int, from, 
 	return total, nil
 }
 
-func (a *AdvUsecase) GetSlotCTR(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+func (a *AdvUsecase) GetSlotCTR(slotLink, activity string, userID int, from, to time.Time) (map[string]float64, error) {
 	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
 	if err != nil || userID != ownerSlotID {
 		return nil, fmt.Errorf("slot not found")
