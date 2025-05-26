@@ -207,7 +207,7 @@ func (a *AdvUsecase) GetSlotRevenue(slotLink, activity string, userID int, from,
 	if err != nil || userID != ownerSlotID {
 		return nil, fmt.Errorf("slot not found")
 	}
-	total, err := a.advRepository.GetSlotAVGPrice(slotLink, activity, from, to)
+	total, err := a.advRepository.GetSlotRevenue(slotLink, activity, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("slot not found")
 	}
