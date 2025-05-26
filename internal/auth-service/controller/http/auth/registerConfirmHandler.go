@@ -3,13 +3,10 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
 )
-
-type RegisterConfirmRequest struct {
-	Email string `json:"email" validate:"email,required"`
-}
 
 func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -19,7 +16,7 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	var req RegisterRequest
+	var req model.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)

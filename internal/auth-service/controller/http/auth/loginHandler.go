@@ -3,15 +3,10 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
 )
-
-type LoginRequest struct {
-	Email    string `json:"email" validate:"email,required"`
-	Password string `json:"password" validate:"required,min=8"`
-	Role     int    `json:"role" validate:"required,gte=1,lte=2"`
-}
 
 func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
@@ -22,7 +17,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req LoginRequest
+	var req model.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)

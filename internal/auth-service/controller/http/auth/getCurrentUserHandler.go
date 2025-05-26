@@ -3,17 +3,9 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
-
-	"gopkg.in/inf.v0"
 )
-
-type UserResponse struct {
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
-	Balance  inf.Dec `json:"balance"`
-	Role     int     `json:"role"`
-}
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
@@ -40,7 +32,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	userResponse := &UserResponse{
+	userResponse := &model.UserResponse{
 		Username: user.Username,
 		Email:    user.Email,
 		Balance:  *user.Balance.Dec,
@@ -48,8 +40,8 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	response := struct {
-		Service entity.Response `json:"service"`
-		Body    UserResponse    `json:"body"`
+		Service entity.Response    `json:"service"`
+		Body    model.UserResponse `json:"body"`
 	}{
 		Service: entity.NewResponse(false, "Sent"),
 		Body:    *userResponse,
