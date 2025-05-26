@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"retarget/internal/adv-service/entity/adv"
-	"retarget/pkg/entity"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/gocql/gocql"
@@ -22,11 +21,11 @@ type AdvRepositoryInterface interface {
 	WriteMetric(bannerID int, slotLink string, action string) error
 	GetSlotMetric(slotID, action string, from, to time.Time) (map[string]int, error)
 	GetSlotCTR(slotID, action string, from, to time.Time) (map[string]float64, error)
-	GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
-	GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]float64, error)
+	GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]float64, error)
 	GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error)
 	GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]float64, error)
-	GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]float64, error)
 }
 
 type AdvRepository struct {
@@ -211,7 +210,7 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 	return result, nil
 }
 
-func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]float64, error) {
 	const query = `
 		SELECT
 			toDate(created_at) AS day,
@@ -229,11 +228,11 @@ func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time
 	}
 	defer rows.Close()
 
-	result := make(map[string]entity.Decimal)
+	result := make(map[string]float64)
 	for rows.Next() {
 		var (
 			date     time.Time
-			expenses entity.Decimal
+			expenses float64
 		)
 
 		if err := rows.Scan(&date, &expenses); err != nil {
@@ -250,7 +249,7 @@ func (u *AdvRepository) GetSlotRevenue(slotID, action string, from, to time.Time
 	return result, nil
 }
 
-func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]float64, error) {
 	const query = `
 		SELECT
 			toDate(created_at) AS day,
@@ -268,11 +267,11 @@ func (u *AdvRepository) GetSlotAVGPrice(slotID, action string, from, to time.Tim
 	}
 	defer rows.Close()
 
-	result := make(map[string]entity.Decimal)
+	result := make(map[string]float64)
 	for rows.Next() {
 		var (
 			date     time.Time
-			expenses entity.Decimal
+			expenses float64
 		)
 
 		if err := rows.Scan(&date, &expenses); err != nil {
@@ -370,7 +369,7 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 	return result, nil
 }
 
-func (u *AdvRepository) GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+func (u *AdvRepository) GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]float64, error) {
 	const query = `
 		SELECT
 			toDate(created_at) AS day,
@@ -388,11 +387,11 @@ func (u *AdvRepository) GetBannerExpenses(bannerID int, action string, from, to 
 	}
 	defer rows.Close()
 
-	result := make(map[string]entity.Decimal)
+	result := make(map[string]float64)
 	for rows.Next() {
 		var (
 			date     time.Time
-			expenses entity.Decimal
+			expenses float64
 		)
 
 		if err := rows.Scan(&date, &expenses); err != nil {

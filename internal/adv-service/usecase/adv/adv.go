@@ -189,7 +189,7 @@ func (a *AdvUsecase) GetSlotCTR(slotLink, activity string, userID int, from, to 
 	return total, nil
 }
 
-func (a *AdvUsecase) GetSlotAVGPrice(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+func (a *AdvUsecase) GetSlotAVGPrice(slotLink, activity string, userID int, from, to time.Time) (map[string]float64, error) {
 	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
 	if err != nil || userID != ownerSlotID {
 		return nil, fmt.Errorf("slot not found")
@@ -202,7 +202,7 @@ func (a *AdvUsecase) GetSlotAVGPrice(slotLink, activity string, userID int, from
 	return total, nil
 }
 
-func (a *AdvUsecase) GetSlotRevenue(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+func (a *AdvUsecase) GetSlotRevenue(slotLink, activity string, userID int, from, to time.Time) (map[string]float64, error) {
 	ownerSlotID, _, err := a.SlotsRepository.GetUserByLink(context.Background(), slotLink)
 	if err != nil || userID != ownerSlotID {
 		return nil, fmt.Errorf("slot not found")
@@ -257,7 +257,7 @@ func (a *AdvUsecase) GetBannerCTR(bannerID int, activity string, userID int, fro
 	return total, nil
 }
 
-func (a *AdvUsecase) GetBannerExpenses(bannerID int, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+func (a *AdvUsecase) GetBannerExpenses(bannerID int, activity string, userID int, from, to time.Time) (map[string]float64, error) {
 
 	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
 	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
