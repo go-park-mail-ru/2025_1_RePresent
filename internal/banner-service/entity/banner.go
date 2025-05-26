@@ -25,7 +25,7 @@ var DefaultBanner = Banner{
 	Description: "Но тут могла быть ваша реклама",
 	Status:      0,
 	Balance:     0,
-	Link:        "http://re-target.ru",
+	Link:        "http://test.re-target.ru",
 	Deleted:     false,
 	MaxPrice:    *entity.NewDecWithoutErr("0.0"),
 }
