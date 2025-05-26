@@ -151,7 +151,7 @@ func (a *AdvUsecase) WriteMetric(bannerID int, slotLink string, action string) e
 		ToUserId:   int32(ownerSlotID),
 		Amount:     string(banner.MaxPrice),
 	}
-	if err := a.advRepository.WriteMetric(bannerID, slotLink, action, *entity.NewDecWithoutErr(banner.MaxPrice)); err != nil {
+	if err := a.advRepository.WriteMetric(bannerID, slotLink, action, banner.MaxPrice); err != nil {
 		log.Printf("Failed to write metric: %v", err)
 	}
 	_, err = a.PaymentClient.RegUserActivity(ctx, req)

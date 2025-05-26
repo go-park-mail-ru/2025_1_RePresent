@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"retarget/internal/adv-service/entity/adv"
-	"retarget/pkg/entity"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/gocql/gocql"
@@ -19,7 +18,7 @@ type AdvRepositoryInterface interface {
 	CreateLink(link adv.Link) error
 	FindLinksByUser(userID int) ([]adv.Link, error)
 	DeleteLink(link string) error
-	WriteMetric(bannerID int, slotLink string, action string, price entity.Decimal) error
+	WriteMetric(bannerID int, slotLink string, action string, price string) error
 	GetSlotMetric(slotID, action string, from, to time.Time) (map[string]int, error)
 	GetSlotCTR(slotID, action string, from, to time.Time) (map[string]float64, error)
 	GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]float64, error)
@@ -106,7 +105,7 @@ func (u *AdvRepository) DeleteLink(link string) error {
 	return nil
 }
 
-func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string, price entity.Decimal) error {
+func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string, price string) error {
 	const addQuery = `
 		INSERT INTO actions (
 			banner_id, 
@@ -116,7 +115,7 @@ func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string
 		) VALUES (?, ?, ?, ?)
 	`
 
-	res, err := u.clickhouse.Exec(addQuery, bannerID, slotLink, action, price.Dec.String())
+	res, err := u.clickhouse.Exec(addQuery, bannerID, slotLink, action, price)
 	if err != nil {
 		log.Printf("ClickHouse insert error: %v", err)
 		return err
