@@ -42,7 +42,7 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	buf := make([]byte, 512)
 	_, err = object.Read(buf)
 	if err != nil && err != io.EOF {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusNotFound)
 		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read avatar: "+err.Error()))
 		return
