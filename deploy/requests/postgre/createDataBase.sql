@@ -52,27 +52,16 @@ DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'update_updated_at') THEN
         CREATE OR REPLACE FUNCTION update_updated_at()
-        RETURNS TRIGGER AS $$
+        RETURNS TRIGGER AS $function$
         BEGIN
             NEW.updated_at = (now() AT TIME ZONE 'UTC');
             RETURN NEW;
         END;
-        $$ LANGUAGE plpgsql;
+        $function$ LANGUAGE plpgsql;
     END IF;
 END $$;
 
-DO $$
-DECLARE
-    trigger_exists BOOLEAN;
-BEGIN
-    SELECT INTO trigger_exists COUNT(*) > 0
-    FROM pg_trigger
-    WHERE tgname = 'update_user_updated_at';
-
-    IF NOT trigger_exists THEN
-        CREATE TRIGGER update_user_updated_at
-        BEFORE UPDATE ON auth_user
-        FOR EACH ROW
-        EXECUTE FUNCTION update_updated_at();
-    END IF;
-END $$;
+CREATE TRIGGER update_user_updated_at
+BEFORE UPDATE ON auth_user
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
