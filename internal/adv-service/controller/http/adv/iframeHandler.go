@@ -6,19 +6,11 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	model "retarget/internal/adv-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 
 	"github.com/gorilla/mux"
 )
-
-type IFrame struct {
-	ImageSrc    string
-	Link        string
-	Title       string
-	Description string
-	Banner      int64
-	Slot        string
-}
 
 func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -33,7 +25,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
-	data := IFrame{
+	data := model.IFrame{
 		ImageSrc:    "http://re-target.ru/api/v1/banner/image/" + banner.Content,
 		Link:        banner.Link,
 		Title:       banner.Title,

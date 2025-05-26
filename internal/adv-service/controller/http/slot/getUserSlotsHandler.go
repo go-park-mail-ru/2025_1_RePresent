@@ -4,12 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
 
-	"gopkg.in/inf.v0"
+	model "retarget/internal/adv-service/easyjsonModels"
 )
 
 func (c *SlotController) GetUserSlotsHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,24 +29,10 @@ func (c *SlotController) GetUserSlotsHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	responseSlots := make([]struct {
-		Link       string    `json:"link"`
-		SlotName   string    `json:"slot_name"`
-		FormatCode int       `json:"format_code"`
-		MinPrice   inf.Dec   `json:"min_price"`
-		IsActive   bool      `json:"is_active"`
-		CreatedAt  time.Time `json:"created_at"`
-	}, len(slots))
+	responseSlots := make([]model.GetSlotResponse, len(slots))
 
 	for i, s := range slots {
-		responseSlots[i] = struct {
-			Link       string    `json:"link"`
-			SlotName   string    `json:"slot_name"`
-			FormatCode int       `json:"format_code"`
-			MinPrice   inf.Dec   `json:"min_price"`
-			IsActive   bool      `json:"is_active"`
-			CreatedAt  time.Time `json:"created_at"`
-		}{
+		responseSlots[i] = model.GetSlotResponse{
 			Link:       s.Link,
 			SlotName:   s.SlotName,
 			FormatCode: s.FormatCode,

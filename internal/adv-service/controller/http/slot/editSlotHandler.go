@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"retarget/internal/adv-service/dto"
+	model "retarget/internal/adv-service/easyjsonModels"
 	"retarget/internal/adv-service/usecase/slot"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
@@ -41,13 +42,7 @@ func (c *SlotController) EditSlotHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	responseSlot := struct {
-		Link       string `json:"link"`
-		SlotName   string `json:"slot_name"`
-		FormatCode int    `json:"format_code"`
-		MinPrice   string `json:"min_price"`
-		IsActive   bool   `json:"is_active"`
-	}{
+	responseSlot := model.EditSlotResponse{
 		Link:       updatedSlot.Link,
 		SlotName:   updatedSlot.SlotName,
 		FormatCode: updatedSlot.FormatCode,

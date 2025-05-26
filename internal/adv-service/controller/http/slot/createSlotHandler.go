@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"retarget/internal/adv-service/dto"
+	model "retarget/internal/adv-service/easyjsonModels"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
 )
@@ -39,14 +39,7 @@ func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	responseSlot := struct {
-		Link       string    `json:"link"`
-		SlotName   string    `json:"slot_name"`
-		FormatCode int       `json:"format_code"`
-		MinPrice   string    `json:"min_price"`
-		IsActive   bool      `json:"is_active"`
-		CreatedAt  time.Time `json:"created_at"`
-	}{
+	responseSlot := model.CreateSlotResponse{
 		Link:       createdSlot.Link,
 		SlotName:   createdSlot.SlotName,
 		FormatCode: createdSlot.FormatCode,
