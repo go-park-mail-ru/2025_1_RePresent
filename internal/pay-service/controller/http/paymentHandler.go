@@ -3,6 +3,7 @@ package payment
 import (
 	"encoding/json"
 	"net/http"
+	model "retarget/internal/pay-service/easyjsonModels"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
 
@@ -10,16 +11,6 @@ import (
 
 	"github.com/google/uuid"
 )
-
-type TransactionResponse struct {
-	TransactionID string `json:"transactionId"`
-	Status        string `json:"status"`
-	NextAction    string `json:"nextAction"`
-}
-
-type TopUpRequest struct {
-	Amount float64 `json:"amount"`
-}
 
 func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
@@ -86,7 +77,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	}
 	userID := userSession.UserID
 
-	var req TopUpRequest
+	var req model.TopUpRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
@@ -111,7 +102,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 
 	transactionID := uuid.New().String()
 
-	responseData := TransactionResponse{
+	responseData := model.TransactionResponse{
 		TransactionID: transactionID,
 		Status:        "completed",
 		NextAction:    "redirect_to_payment_gateway",

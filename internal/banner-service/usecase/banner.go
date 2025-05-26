@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"math/rand"
+	model "retarget/internal/banner-service/easyjsonModels"
 	"retarget/internal/banner-service/entity"
 	"retarget/internal/banner-service/repo"
 	"time"
@@ -19,7 +20,7 @@ func NewBannerUsecase(bannerRepository *repo.BannerRepository) *BannerUsecase {
 	return &BannerUsecase{BannerRepository: bannerRepository, rng: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }
 
-func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) ([]entity.Banner, error) {
+func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) ([]model.Banner, error) {
 	banners, err := b.BannerRepository.GetBannersByUserId(userID, requestID)
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) ([]enti
 	return banners, nil
 }
 
-func (b *BannerUsecase) GetBannerByID(userID, bannerID int, requestID string) (*entity.Banner, error) {
+func (b *BannerUsecase) GetBannerByID(userID, bannerID int, requestID string) (*model.Banner, error) {
 	banner, err := b.BannerRepository.GetBannerByID(bannerID, requestID)
 	if err != nil {
 		return nil, err
@@ -39,7 +40,7 @@ func (b *BannerUsecase) GetBannerByID(userID, bannerID int, requestID string) (*
 	return banner, err
 }
 
-func (b *BannerUsecase) GetBannerForIFrame(bannerID int, requestID string) (*entity.Banner, error) {
+func (b *BannerUsecase) GetBannerForIFrame(bannerID int, requestID string) (*model.Banner, error) {
 	banner, err := b.BannerRepository.GetBannerByID(bannerID, requestID)
 	if err != nil {
 		return nil, err
@@ -47,7 +48,7 @@ func (b *BannerUsecase) GetBannerForIFrame(bannerID int, requestID string) (*ent
 	return banner, err
 }
 
-func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (*entity.Banner, error) {
+func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (*model.Banner, error) {
 	banners, err := b.BannerRepository.GetBannersByUserId(userID, requestID)
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func (b *BannerUsecase) GetRandomBannerForIFrame(userID int, requestID string) (
 	return &entity.DefaultBanner, nil
 }
 
-func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string, floor *decimal.Decimal) (*entity.Banner, error) {
+func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string, floor *decimal.Decimal) (*model.Banner, error) {
 	banner := b.BannerRepository.GetMaxPriceBanner(floor)
 	if banner == nil {
 		return &entity.DefaultBanner, nil
@@ -66,12 +67,12 @@ func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string, floo
 	return banner, nil
 }
 
-func (b *BannerUsecase) CreateBanner(userID int, banner entity.Banner, requestID string) error {
+func (b *BannerUsecase) CreateBanner(userID int, banner model.Banner, requestID string) error {
 	err := b.BannerRepository.CreateNewBanner(banner, requestID)
 	return err
 }
 
-func (b *BannerUsecase) UpdateBanner(userID int, banner entity.Banner, requestID string) error {
+func (b *BannerUsecase) UpdateBanner(userID int, banner model.Banner, requestID string) error {
 	oldBanner, err := b.BannerRepository.GetBannerByID(banner.ID, requestID)
 	if err != nil {
 		return err

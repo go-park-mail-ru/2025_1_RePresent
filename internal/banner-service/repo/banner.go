@@ -4,19 +4,21 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	model "retarget/internal/banner-service/easyjsonModels"
 	"retarget/internal/banner-service/entity"
-	decimal "retarget/pkg/entity"
-	"time"
 
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
+
+	decimal "retarget/pkg/entity"
+	"time"
 )
 
 type BannerRepositoryInterface interface {
-	GetBannerByUserId(id int) ([]*entity.Banner, error)
-	CreateNewBanner(banner entity.Banner)
-	UpdateBanner(banner entity.Banner)
-	GetBannerByID(id int) (*entity.Banner, error)
+	GetBannerByUserId(id int) ([]*model.Banner, error)
+	CreateNewBanner(banner model.Banner)
+	UpdateBanner(banner model.Banner)
+	GetBannerByID(id int) (*model.Banner, error)
 	DeleteBannerByID(owner, id int) error
 }
 
@@ -36,7 +38,7 @@ func NewBannerRepository(endPoint string, logger *zap.SugaredLogger) *BannerRepo
 	return bannerRepo
 }
 
-func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entity.Banner, error) {
+func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]model.Banner, error) {
 	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND deleted = FALSE;"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", id)
 	startTime := time.Now()
@@ -47,10 +49,10 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 		return nil, err
 	}
 	defer rows.Close()
-	banners := []entity.Banner{}
+	banners := []model.Banner{}
 
 	for rows.Next() {
-		banner := entity.Banner{}
+		banner := model.Banner{}
 		err := rows.Scan(&banner.ID, &banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Link, &banner.MaxPrice)
 		if err != nil {
 			r.logger.Debugw("SQL Error", "request_id", requestID, "userID", id, "duration", duration, "error", err)
@@ -67,7 +69,7 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]entit
 	return banners, nil
 }
 
-func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *entity.Banner {
+func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *model.Banner {
 	r.logger.Debugw("Executing SQL query GetMaxPriceBanner", "floor", floor.String())
 
 	query := `
@@ -86,7 +88,7 @@ func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *entity.Ban
         LIMIT 1;
     `
 
-	var banner entity.Banner
+	var banner model.Banner
 	startTime := time.Now()
 
 	err := r.db.QueryRow(query, floor).Scan(
@@ -107,7 +109,7 @@ func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *entity.Ban
 	return &banner
 }
 
-func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID string) error {
+func (r *BannerRepository) CreateNewBanner(banner model.Banner, requestID string) error {
 	r.logger.Debugw("Executing SQL query СreateNewBanner",
 		"request_id", requestID,
 		"ownerID", banner.OwnerID,
@@ -140,7 +142,7 @@ func (r *BannerRepository) CreateNewBanner(banner entity.Banner, requestID strin
 
 }
 
-func (r *BannerRepository) UpdateBanner(banner entity.Banner, requestID string) error {
+func (r *BannerRepository) UpdateBanner(banner model.Banner, requestID string) error {
 	startTime := time.Now()
 	query := "UPDATE banner SET title = $1, description = $2, content = $3, link = $4, status = $5, max_price = $6 WHERE id = $7"
 	r.logger.Debugw("Starting banner update",
@@ -177,7 +179,7 @@ func (r *BannerRepository) UpdateBanner(banner entity.Banner, requestID string) 
 	return nil
 }
 
-func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Banner, error) {
+func (r *BannerRepository) GetBannerByID(id int, requestID string) (*model.Banner, error) {
 	startTime := time.Now()
 	query := `
 		SELECT owner_id, title, description, content, balance, link, status, max_price
@@ -191,7 +193,7 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Bann
 
 	row := r.db.QueryRow(query, id)
 
-	banner := &entity.Banner{}
+	banner := &model.Banner{}
 	err := row.Scan(
 		&banner.OwnerID,
 		&banner.Title,
@@ -220,9 +222,9 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*entity.Bann
 	return banner, nil
 }
 
-// func (r *BannerRepository) GetRandomBanner(id int) (*entity.Banner, error) {
+// func (r *BannerRepository) GetRandomBanner(id int) (*model.Banner, error) {
 //      row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1 AND deleted = FALSE;", id)
-//      banner := &entity.Banner{}
+//      banner := &model.Banner{}
 //      err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Balance, &banner.Link)
 //      if err != nil {
 //              return nil, err

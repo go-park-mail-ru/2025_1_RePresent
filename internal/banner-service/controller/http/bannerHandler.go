@@ -3,22 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	entity "retarget/internal/banner-service/entity"
+	model "retarget/internal/banner-service/easyjsonModels"
 	response "retarget/pkg/entity"
 	validator "retarget/pkg/utils/validator"
 	"strconv"
 
 	"github.com/gorilla/mux"
 )
-
-type CreateUpdateBannerRequest struct {
-	Title       string           `json:"title" validate:"required,min=3,max=30"`
-	Description string           `json:"description" validate:"max=100"`
-	Content     string           `json:"content" validate:"required,len=32"`
-	Link        string           `json:"link" validate:"required,max=100"`
-	Status      int              `json:"status"`
-	MaxPrice    response.Decimal `json:"max_price" validate:"gt_decimal_01"`
-}
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
@@ -88,7 +79,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 
 func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
-	var req CreateUpdateBannerRequest
+	var req model.CreateUpdateBannerRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -113,7 +104,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	}
 	userID := userSession.UserID
 
-	banner := entity.Banner{
+	banner := model.Banner{
 		OwnerID:     userID,
 		Title:       req.Title,
 		Description: req.Description,
@@ -138,7 +129,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 
 func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
-	var req CreateUpdateBannerRequest
+	var req model.CreateUpdateBannerRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -172,7 +163,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	banner := entity.Banner{
+	banner := model.Banner{
 		ID:          bannerID,
 		Title:       req.Title,
 		Description: req.Description,

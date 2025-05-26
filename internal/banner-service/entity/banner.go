@@ -1,23 +1,11 @@
 package entity
 
 import (
+	model "retarget/internal/banner-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 )
 
-type Banner struct {
-	ID          int            `json:"id"`
-	OwnerID     int            `json:"owner"`
-	Title       string         `json:"title"`
-	Content     string         `json:"content"`
-	Description string         `json:"description"`
-	Status      int            `json:"status"`
-	Balance     int            `json:"balance"`
-	Link        string         `json:"link"`
-	Deleted     bool           `json:"deleted"`
-	MaxPrice    entity.Decimal `json:"max_price"`
-}
-
-var DefaultBanner = Banner{
+var DefaultBanner = model.Banner{
 	ID:          -1,
 	OwnerID:     -1,
 	Title:       "Здесь ничего нет",
