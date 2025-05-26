@@ -25,7 +25,7 @@ type AdvRepositoryInterface interface {
 	GetSlotRevenue(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
 	GetSlotAVGPrice(slotID, action string, from, to time.Time) (map[string]entity.Decimal, error)
 	GetBannerMetric(bannerID int, action string, from, to time.Time) (map[string]int, error)
-	GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error)
+	GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]float64, error)
 	GetBannerExpenses(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error)
 }
 
@@ -326,7 +326,7 @@ func (u *AdvRepository) GetBannerMetric(bannerID int, action string, from, to ti
 	return result, nil
 }
 
-func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]entity.Decimal, error) {
+func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.Time) (map[string]float64, error) {
 	const query = `
 		SELECT
 			day,
@@ -349,11 +349,11 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 	}
 	defer rows.Close()
 
-	result := make(map[string]entity.Decimal)
+	result := make(map[string]float64)
 	for rows.Next() {
 		var (
 			date time.Time
-			ctr  entity.Decimal
+			ctr  float64
 		)
 
 		if err := rows.Scan(&date, &ctr); err != nil {

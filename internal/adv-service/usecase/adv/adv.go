@@ -236,7 +236,7 @@ func (a *AdvUsecase) GetBannerMetric(bannerID int, activity string, userID int, 
 	return total, nil
 }
 
-func (a *AdvUsecase) GetBannerCTR(bannerID int, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error) {
+func (a *AdvUsecase) GetBannerCTR(bannerID int, activity string, userID int, from, to time.Time) (map[string]float64, error) {
 
 	bannerReq := &pb.BannerRequest{Id: int64(bannerID)}
 	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
