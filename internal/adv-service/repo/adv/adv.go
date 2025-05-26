@@ -116,7 +116,7 @@ func (u *AdvRepository) WriteMetric(bannerID int, slotLink string, action string
 		) VALUES (?, ?, ?, ?)
 	`
 
-	res, err := u.clickhouse.Exec(addQuery, bannerID, slotLink, action, price.Dec)
+	res, err := u.clickhouse.Exec(addQuery, bannerID, slotLink, action, price.Dec.String())
 	if err != nil {
 		log.Printf("ClickHouse insert error: %v", err)
 		return err
