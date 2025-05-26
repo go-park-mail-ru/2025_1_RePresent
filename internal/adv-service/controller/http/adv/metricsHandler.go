@@ -71,6 +71,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 
 	if fromTime.After(toTime) {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "'from' must be before or equal to 'to'"))
 		return
 	}
@@ -101,6 +102,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		}
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			//nolint:errcheck
 			json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
 			return
 		}
@@ -127,6 +129,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		}
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			//nolint:errcheck
 			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 			return
 		}
@@ -138,6 +141,7 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	w.WriteHeader(http.StatusBadRequest)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
 
 	// var metrics map[string]int
