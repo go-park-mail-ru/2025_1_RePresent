@@ -54,23 +54,14 @@ jobs:
         run: |
           echo "CD started in branch: $GITHUB_REF_NAME"
 
-      - name: Copy scripts
+      - name: Deploy from script
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
           username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}
-          source: ".github/scripts/deploy.sh"
-          target: "/home/ubuntu/deploy.sh"
-
-      - name: Deploy...
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: "ubuntu"
-          key: ${{ secrets.SSH_KEY }}
+          source: ".github/scripts/*"
+          target: "/home/ubuntu/scripts/"
           script: |
-            chmod +x /home/ubuntu/deploy.sh
-            /home/ubuntu/deploy.sh
+            /home/ubuntu/scripts/deploy.sh
