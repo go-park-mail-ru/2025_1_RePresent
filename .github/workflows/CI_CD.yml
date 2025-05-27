@@ -39,4 +39,5 @@ jobs:
           username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}
           script: |
+            chmod +x /home/ubuntu/scripts/.github/scripts/deploy.sh
             /home/ubuntu/scripts/.github/scripts/deploy.sh
