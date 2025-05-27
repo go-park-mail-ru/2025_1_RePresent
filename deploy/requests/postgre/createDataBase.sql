@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
     email TEXT NOT NULL UNIQUE CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     password BYTEA NOT NULL,
     description TEXT,
-    balance DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    balance INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
     updated_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
     role SMALLINT NOT NULL -- role: 1=advertiser, 2=platform
