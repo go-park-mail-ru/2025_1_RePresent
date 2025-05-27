@@ -30,6 +30,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: ".github/scripts/"
           target: "/home/ubuntu/scripts"
+          command_timeout: 1m
 
       - name: Deploy from script
         uses: appleboy/ssh-action@master
@@ -38,6 +39,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}
+          command_timeout: 20m
           script: |
             chmod +x /home/ubuntu/scripts/.github/scripts/deploy.sh
             /home/ubuntu/scripts/.github/scripts/deploy.sh
