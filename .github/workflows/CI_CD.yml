@@ -59,11 +59,11 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
+          username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Current user: $(whoami)"
             echo "Working dir: $(pwd)"
-            echo "OK" > /home/$USER/success.txt
+            echo "OK" > /home/ubuntu/success.txt
             echo "File created"
             ls
