@@ -24,7 +24,7 @@ jobs:
       - name: Copy scripts
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: 193.33.153.154
           port: ${{ secrets.SSH_PORT }}
           username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}
@@ -35,7 +35,7 @@ jobs:
       - name: Deploy from script
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: 193.33.153.154
           port: ${{ secrets.SSH_PORT }}
           username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}

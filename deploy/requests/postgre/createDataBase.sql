@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
     balance DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
     updated_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
-    role SMALLINT NOT NULL
+    role SMALLINT NOT NULL -- role: 1=advertiser, 2=platform
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS auth_user_username_key ON auth_user (username);
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS banner (
     balance DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     content TEXT NOT NULL,
     link TEXT NOT NULL,
+    max_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     status SMALLINT
 );
