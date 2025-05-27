@@ -9,6 +9,7 @@ ls
 cd backend_2025_1_RePresent/
 sudo git pull
 
+cd deploy/
 docker compose down
 docker container prune -f
 docker image prune -a -f
