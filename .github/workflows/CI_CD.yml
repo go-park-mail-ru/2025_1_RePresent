@@ -47,6 +47,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: CI
     steps:
-      - name: This will be deploy
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check current branch
         run: |
-          echo "This will be deploy"
+          echo "CD started in branch: $GITHUB_REF_NAME"
+
+      - name: Connect via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "Current user: $(whoami)"
+            echo "Working dir: $(pwd)"
+            echo "OK" > /home/$USER/success.txt
+            echo "File created"
+            ls
