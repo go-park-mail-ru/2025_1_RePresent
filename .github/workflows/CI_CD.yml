@@ -54,7 +54,17 @@ jobs:
         run: |
           echo "CD started in branch: $GITHUB_REF_NAME"
 
-      - name: Connect via SSH
+      - name: Copy scripts
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: "ubuntu"
+          key: ${{ secrets.SSH_KEY }}
+          source: ".github/scripts/deploy.sh"
+          target: "/home/ubuntu/deploy.sh"
+
+      - name: Deploy...
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -62,8 +72,5 @@ jobs:
           username: "ubuntu"
           key: ${{ secrets.SSH_KEY }}
           script: |
-            echo "Current user: $(whoami)"
-            echo "Working dir: $(pwd)"
-            echo "OK" > /home/ubuntu/success.txt
-            echo "File created"
-            ls
+            chmod +x /home/ubuntu/deploy.sh
+            /home/ubuntu/deploy.sh
