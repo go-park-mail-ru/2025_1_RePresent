@@ -19,7 +19,7 @@ func NewLinkBuilder(router *mux.Router) LinkBuilder {
 func (b *linkBuilder) BannerImageURL(imageID string) (string, error) {
 	url, err := b.router.Get("download_image").URL("image_id", imageID)
 	url.Scheme = "https"
-	url.Host = "test.re-target.ru" // TODO: ОБЯЗАТЕЛЬНО УБРАТЬ
+	url.Host = "re-target.ru" // TODO: Посмотреть в чём реальная проблема и должно ли это тут быть
 	if err != nil {
 		return "", err
 	}

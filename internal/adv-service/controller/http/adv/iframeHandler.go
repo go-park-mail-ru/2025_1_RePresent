@@ -26,7 +26,7 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
 	data := model.IFrame{
-		ImageSrc:    "https://test.re-target.ru/api/v1/banner/image/" + banner.Content,
+		ImageSrc:    "https://re-target.ru/api/v1/banner/image/" + banner.Content,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
