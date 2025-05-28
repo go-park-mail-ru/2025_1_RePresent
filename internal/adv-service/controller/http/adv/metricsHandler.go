@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"strconv"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *AdvController) MetricsHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +50,10 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	if fromStr == "" || toStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "missing 'from' or 'to' parameters"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "missing 'from' or 'to' parameters"))
+		resp := entity.NewResponse(true, "missing 'from' or 'to' parameters")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -58,21 +63,30 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
+		resp := entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	toTime, err := time.Parse(layout, toStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD"))
+		resp := entity.NewResponse(true, "invalid 'to' format, use YYYY-MM-DD")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	if fromTime.After(toTime) {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "'from' must be before or equal to 'to'"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "'from' must be before or equal to 'to'"))
+		resp := entity.NewResponse(true, "'from' must be before or equal to 'to'")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -80,7 +94,10 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
 
@@ -103,7 +120,10 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			//nolint:errcheck
-			json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+			// json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+			resp := entity.NewResponse(true, "Bad GET parameters")
+			//nolint:errcheck
+			easyjson.MarshalToWriter(&resp, w)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -130,7 +150,10 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			//nolint:errcheck
-			json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+			// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+			resp := entity.NewResponse(true, err.Error())
+			//nolint:errcheck
+			easyjson.MarshalToWriter(&resp, w)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -142,7 +165,10 @@ func (c *AdvController) MyMetricsHandler(w http.ResponseWriter, r *http.Request)
 	}
 	w.WriteHeader(http.StatusBadRequest)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+	// json.NewEncoder(w).Encode(entity.NewResponse(true, "Bad GET parameters"))
+	resp := entity.NewResponse(true, "Bad GET parameters")
+	//nolint:errcheck
+	easyjson.MarshalToWriter(&resp, w)
 
 	// var metrics map[string]int
 	// if bannerIDstr == "" && slotIDstr != "" {

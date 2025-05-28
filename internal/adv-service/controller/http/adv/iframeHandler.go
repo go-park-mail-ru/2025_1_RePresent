@@ -14,6 +14,8 @@ import (
 
 func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	query := r.URL.Query()
+	debug := query.Get("debug")
 	secret_link := vars["link"]
 	banner, err := c.advUsecase.GetIframe(secret_link)
 	if err != nil {
@@ -25,12 +27,17 @@ func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
+	bannerID := banner.Id
+	if debug != "" {
+		secret_link = ""
+		bannerID = -1
+	}
 	data := model.IFrame{
 		ImageSrc:    "https://re-target.ru/api/v1/banner/image/" + banner.Content,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
-		Banner:      banner.Id,
+		Banner:      bannerID,
 		Slot:        secret_link,
 	}
 	if err := tmpl.Execute(w, data); err != nil {
