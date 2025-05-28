@@ -3,6 +3,7 @@
 package model
 
 import (
+	"retarget/pkg/entity"
 	"time"
 
 	"gopkg.in/inf.v0"
@@ -41,4 +42,14 @@ type EditSlotResponse struct {
 	FormatCode int    `json:"format_code"`
 	MinPrice   string `json:"min_price"`
 	IsActive   bool   `json:"is_active"`
+}
+
+type ResponseWithSlot struct {
+	Service entity.ServiceResponse `json:"service"`
+	Body    CreateSlotResponse     `json:"body,omitempty"`
+}
+
+type ResponseWithSlots struct {
+	Service entity.ServiceResponse `json:"service"`
+	Body    []GetSlotResponse      `json:"body,omitempty"`
 }

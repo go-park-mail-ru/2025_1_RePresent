@@ -9,6 +9,8 @@ import (
 	model "retarget/internal/adv-service/easyjsonModels"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +49,16 @@ func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Reques
 		IsActive:   createdSlot.IsActive,
 		CreatedAt:  createdSlot.CreatedAt,
 	}
-
-	response := entity.NewResponseWithBody(false, "Slot created successfully", responseSlot)
+	s := "Slot created successfully"
+	serv := entity.ServiceResponse{
+		Success: &s,
+	}
+	response := model.ResponseWithSlot{
+		Service: serv,
+		Body:    responseSlot,
+	}
 	w.WriteHeader(http.StatusCreated)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(response)
+	// json.NewEncoder(w).Encode(response)
+	easyjson.MarshalToWriter(&response, w)
 }

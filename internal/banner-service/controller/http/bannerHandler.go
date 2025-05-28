@@ -38,7 +38,8 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(banners); err != nil {
+	_, err = easyjson.MarshalToWriter(&banners, w)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error encoding banners: "+err.Error()))

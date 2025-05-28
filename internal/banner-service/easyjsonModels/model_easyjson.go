@@ -120,7 +120,73 @@ func (v *CreateUpdateBannerRequest) UnmarshalJSON(data []byte) error {
 func (v *CreateUpdateBannerRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels(l, v)
 }
-func easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(in *jlexer.Lexer, out *Banner) {
+func easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(in *jlexer.Lexer, out *BannerList) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(BannerList, 0, 0)
+			} else {
+				*out = BannerList{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v1 Banner
+			(v1).UnmarshalEasyJSON(in)
+			*out = append(*out, v1)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(out *jwriter.Writer, in BannerList) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v2, v3 := range in {
+			if v2 > 0 {
+				out.RawByte(',')
+			}
+			(v3).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v BannerList) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v BannerList) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *BannerList) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *BannerList) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(l, v)
+}
+func easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels2(in *jlexer.Lexer, out *Banner) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -171,7 +237,7 @@ func easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(in *jlex
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(out *jwriter.Writer, in Banner) {
+func easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels2(out *jwriter.Writer, in Banner) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -231,23 +297,23 @@ func easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(out *jwr
 // MarshalJSON supports json.Marshaler interface
 func (v Banner) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(&w, v)
+	easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Banner) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels1(w, v)
+	easyjsonC80ae7adEncodeRetargetInternalBannerServiceEasyjsonModels2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Banner) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(&r, v)
+	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Banner) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels1(l, v)
+	easyjsonC80ae7adDecodeRetargetInternalBannerServiceEasyjsonModels2(l, v)
 }
