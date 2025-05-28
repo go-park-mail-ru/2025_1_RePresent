@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"retarget/internal/adv-service/entity/adv"
@@ -171,9 +172,7 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 	const query = `
 		SELECT
 			day,
-			round(
-				if(shown = 0, 0, clicks / shown), 4
-			) AS ctr
+			round(clicks / shown, 4) AS ctr
 		FROM (
 			SELECT
 				toDate(created_at) AS day,
@@ -181,8 +180,7 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 				countIf(actions = 'shown') AS shown
 			FROM adv.actions
 			WHERE slot_id = ?
-			AND created_at >= ?
-			AND created_at < ?
+			AND created_at >= ? AND created_at < ?
 			GROUP BY day
 		)
 		ORDER BY day
@@ -202,6 +200,9 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 
 		if err := rows.Scan(&date, &ctr); err != nil {
 			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+		if math.IsInf(ctr, 0) || math.IsNaN(ctr) {
+			ctr = 0
 		}
 
 		result[date.Format("2006-01-02")] = ctr
@@ -333,7 +334,7 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 	const query = `
 		SELECT
 			day,
-			round(if(shown = 0, 0, clicks / shown), 4) AS ctr
+			round(clicks / shown, 4) AS ctr
 		FROM (
 			SELECT
 				toDate(created_at) AS day,
@@ -361,6 +362,9 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 
 		if err := rows.Scan(&date, &ctr); err != nil {
 			return nil, fmt.Errorf("error when reading CTR rows")
+		}
+		if math.IsInf(ctr, 0) || math.IsNaN(ctr) {
+			ctr = 0
 		}
 
 		result[date.Format("2006-01-02")] = ctr
