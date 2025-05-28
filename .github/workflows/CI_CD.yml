@@ -39,7 +39,6 @@ jobs:
       - name: Run tests
         run: |
           go test ./... -v
-
       - name: Run linter
         run: |
           golangci-lint run ./...
@@ -68,7 +67,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: ".github/scripts/"
           target: "/home/ubuntu/scripts"
-          command_timeout: 5m
+          command_timeout: 10m
 
       - name: Deploy from script
         uses: appleboy/ssh-action@master
