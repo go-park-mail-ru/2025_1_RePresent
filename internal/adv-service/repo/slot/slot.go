@@ -15,6 +15,23 @@ var (
 	ErrSlotNotFound = errors.New("slot not found")
 )
 
+type Batch interface {
+	WithContext(ctx context.Context) Batch
+	Query(stmt string, values ...interface{})
+}
+
+type Iter interface {
+	Scan(dest ...interface{}) bool
+	Close() error
+}
+
+type Query interface {
+	WithContext(ctx context.Context) Query
+	Scan(dest ...interface{}) error
+	Iter() Iter
+	Exec() error
+}
+
 type SlotRepositoryInterface interface {
 	CreateSlot(ctx context.Context, userID int, s slot.Slot) (slot.Slot, error)
 	UpdateSlot(ctx context.Context, userID int, s slot.Slot) error

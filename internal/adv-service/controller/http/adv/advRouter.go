@@ -6,9 +6,24 @@ import (
 	usecaseAdv "retarget/internal/adv-service/usecase/adv"
 	usecaseSlot "retarget/internal/adv-service/usecase/slot"
 	authenticate "retarget/pkg/middleware/auth"
+	pb "retarget/pkg/proto/banner"
+	"time"
 
 	"github.com/gorilla/mux"
 )
+
+// AdvUsecaseInterface определяет интерфейс для случая использования рекламы
+type AdvUsecaseInterface interface {
+	WriteMetric(bannerID int, slotLink string, action string) error
+	GetIframe(secretLink string) (*pb.Banner, error)
+	GetSlotMetric(slotID string, activity string, userID int, from, to time.Time) (interface{}, error)
+	GetSlotCTR(slotID string, activity string, userID int, from, to time.Time) (interface{}, error)
+	GetSlotRevenue(slotID string, activity string, userID int, from, to time.Time) (interface{}, error)
+	GetSlotAVGPrice(slotID string, activity string, userID int, from, to time.Time) (interface{}, error)
+	GetBannerMetric(bannerID int, activity string, userID int, from, to time.Time) (interface{}, error)
+	GetBannerCTR(bannerID int, activity string, userID int, from, to time.Time) (interface{}, error)
+	GetBannerExpenses(bannerID int, activity string, userID int, from, to time.Time) (interface{}, error)
+}
 
 type AdvController struct {
 	advUsecase *usecaseAdv.AdvUsecase

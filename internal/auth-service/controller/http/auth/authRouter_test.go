@@ -15,7 +15,7 @@ func TestSetupAuthRoutes_LogoutMethodNotAllowed(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	router.ServeHTTP(w, req)
-	if w.Code != 401 {
+	if w.Code != 405 {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
 }

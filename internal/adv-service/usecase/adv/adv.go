@@ -27,6 +27,15 @@ type AdvUsecaseInterface interface {
 	GetBannerMetric(bannerID int, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error)
 	GetSlotMetric(slotLink, activity string, userID int, from, to time.Time) (map[string]int, error)
 	GetSlotCTR(slotLink, activity string, userID int, from, to time.Time) (map[string]entity.Decimal, error)
+	DeleteLink(link string) error
+}
+
+func (a *AdvUsecase) DeleteLink(link string) error {
+	err := a.advRepository.DeleteLink(link)
+	if err != nil {
+		return fmt.Errorf("failed to delete link: %w", err)
+	}
+	return nil
 }
 
 type AdvUsecase struct {
