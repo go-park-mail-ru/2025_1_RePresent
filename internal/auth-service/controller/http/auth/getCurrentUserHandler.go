@@ -30,6 +30,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
@@ -40,6 +41,7 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to get user"))
 		resp := entity.NewResponse(true, "Failed to get user")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -59,5 +61,6 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusOK)
 	//nolint:errcheck
 	resp := response
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }
