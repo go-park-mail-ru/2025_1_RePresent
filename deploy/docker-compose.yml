@@ -49,6 +49,7 @@ services:
       - retarget_network
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ../config/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./requests/postgre/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${PSQL_USER} -d ${PSQL_PASSWORD}" ]
