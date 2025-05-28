@@ -171,7 +171,9 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 	const query = `
 		SELECT
 			day,
-			round(clicks / shown, 4) AS ctr
+			round(
+				if(shown = 0, 0, clicks / shown), 4
+			) AS ctr
 		FROM (
 			SELECT
 				toDate(created_at) AS day,
@@ -179,7 +181,8 @@ func (u *AdvRepository) GetSlotCTR(slotID string, action string, from, to time.T
 				countIf(actions = 'shown') AS shown
 			FROM adv.actions
 			WHERE slot_id = ?
-			AND created_at >= ? AND created_at < ?
+			AND created_at >= ?
+			AND created_at < ?
 			GROUP BY day
 		)
 		ORDER BY day
@@ -330,7 +333,7 @@ func (u *AdvRepository) GetBannerCTR(bannerID int, action string, from, to time.
 	const query = `
 		SELECT
 			day,
-			round(clicks / shown, 4) AS ctr
+			round(if(shown = 0, 0, clicks / shown), 4) AS ctr
 		FROM (
 			SELECT
 				toDate(created_at) AS day,
