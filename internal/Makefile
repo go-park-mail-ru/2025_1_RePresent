@@ -1,3 +1,5 @@
+.PHONY: test
+
 test:
 	go test -coverprofile=coverage.out ./... | tee full.log && \
 	awk '/coverage:/ { \
@@ -11,7 +13,7 @@ test:
 			} \
 		} \
 	}' full.log > covered_pkgs.txt && \
-	echo "AEEEEEEEEEEEEEEEEEEEEEEEEEEE" && \
+	echo "Test cover was successful got" && \
 	xargs -a covered_pkgs.txt go test -cover -coverprofile=coverage_filtered.out && \
 	go tool cover -func=coverage_filtered.out | grep total
 
