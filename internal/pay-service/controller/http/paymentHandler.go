@@ -8,6 +8,7 @@ import (
 	response "retarget/pkg/entity"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 
 	"github.com/google/uuid"
 )
@@ -18,7 +19,9 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
+		resp := entity.NewResponse(true, "Invalid Cookie")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -26,7 +29,9 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	userID := userSession.UserID
@@ -35,10 +40,12 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(
-			true,
-			"Error fetching balance: "+err.Error(),
-		))
+		// json.NewEncoder(w).Encode(entity.NewResponse(
+		// 	true,
+		// 	"Error fetching balance: "+err.Error(),
+		// ))
+		resp := entity.NewResponse(true, "Error fetching balance: "+err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -52,10 +59,13 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 	if err := json.NewEncoder(w).Encode(responseData); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(
-			true,
-			"Error encoding response: "+err.Error(),
-		))
+		// json.NewEncoder(w).Encode(entity.NewResponse(
+		// 	true,
+		// 	"Error encoding response: "+err.Error(),
+		// ))
+
+		resp := entity.NewResponse(true, "Error encoding response: "+err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 	}
 }
 
@@ -65,7 +75,9 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	if err != nil || cookie.Value == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
+		resp := entity.NewResponse(true, "Invalid Cookie")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -73,7 +85,9 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
 
@@ -81,14 +95,19 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Request Body"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Request Body"))
+
+		resp := entity.NewResponse(true, "Invalid Request Body")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	if req.Amount <= 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Amount"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Amount"))
+		resp := entity.NewResponse(true, "Invalid Amount")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -96,7 +115,9 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		// handleTopUpError(w, err)
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -111,7 +132,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(responseData)
+	easyjson.MarshalToWriter(&responseData, w)
 
 }
 

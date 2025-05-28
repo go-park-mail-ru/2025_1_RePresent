@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
 	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
@@ -27,7 +27,8 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	var req model.RegisterRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	data, _ := io.ReadAll(r.Body)
+	err := req.UnmarshalJSON(data)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
