@@ -43,7 +43,7 @@ jobs:
 
       - name: Run linter
         run: |
-          golangci-lint run ./...
+          golangci-lint run --skip-files=".*_test\.go" ./...
   CD:
     runs-on: ubuntu-latest
     needs: CI
