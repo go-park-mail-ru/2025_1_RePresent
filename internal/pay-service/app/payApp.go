@@ -34,7 +34,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		logger.Fatal("failed to initialize NoticeRepository")
 	}
 	defer noticeRepository.Close()
-	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 24*time.Hour, cfg.AttemptRedis.Attempts)
+	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 1*time.Hour, cfg.AttemptRedis.Attempts)
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
