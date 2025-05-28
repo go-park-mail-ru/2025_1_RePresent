@@ -38,15 +38,12 @@ jobs:
 
       - name: Run tests
         run: |
-          go test ./... -v
+          cd internal/
+          make cover
+
       - name: Run linter
         run: |
           golangci-lint run ./...
-
-      - name: Check test cover
-        run: |
-          cd internal/
-          make test
   CD:
     runs-on: ubuntu-latest
     needs: CI
