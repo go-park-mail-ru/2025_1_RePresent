@@ -15,6 +15,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -25,6 +26,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -47,6 +49,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -55,5 +58,6 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Logout Successful"))
 	resp := entity.NewResponse(false, "Logout Successful")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }

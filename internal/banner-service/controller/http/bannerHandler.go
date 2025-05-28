@@ -21,6 +21,7 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		resp := response.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
@@ -31,6 +32,7 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error fetching banners: "+err.Error()))
 		resp := response.NewResponse(true, "Error fetching banners: "+err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -38,11 +40,13 @@ func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(banners); err != nil {
+	_, err = easyjson.MarshalToWriter(&banners, w)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error encoding banners: "+err.Error()))
 		resp := response.NewResponse(true, "Error encoding banners: "+err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 }
@@ -55,6 +59,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		resp := response.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
@@ -68,6 +73,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		resp := response.NewResponse(true, "invalid banner ID")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -78,6 +84,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -89,6 +96,7 @@ func (h *BannerController) ReadBanner(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "error encoding banners: "+err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 }
@@ -103,6 +111,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -113,6 +122,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
 		resp := response.NewResponse(true, validate_errors)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -123,6 +133,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		resp := response.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
@@ -143,6 +154,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -151,6 +163,7 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(response.NewResponse(false, "Banner created"))
 	resp := response.NewResponse(false, "Banner created")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }
 
@@ -163,6 +176,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -172,6 +186,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
 		resp := response.NewResponse(true, validate_errors)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -182,6 +197,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		resp := response.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
@@ -194,6 +210,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		resp := response.NewResponse(true, "Invalid banner ID")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -213,6 +230,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -221,6 +239,7 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(response.NewResponse(false, "Banner updated"))
 	resp := response.NewResponse(false, "Banner updated")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }
 
@@ -232,6 +251,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 		resp := response.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -245,6 +265,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		resp := response.NewResponse(true, "invalid banner ID")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -254,6 +275,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusBadRequest)
 		// _ = json.NewEncoder(w).Encode(response)
 		resp := response.NewResponse(true, "failed to delete banner")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -261,6 +283,7 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
 	resp := response.NewResponse(false, "banner deleted")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 
 }

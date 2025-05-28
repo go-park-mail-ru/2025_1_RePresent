@@ -22,6 +22,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		resp := entity.NewResponse(true, "Method Not Allowed")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -34,6 +35,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -43,6 +45,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, errors))
 		resp := entity.NewResponse(true, errors)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -53,6 +56,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -63,6 +67,7 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -82,5 +87,6 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Login Successful"))
 	resp := entity.NewResponse(false, "Login Succesful")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }

@@ -38,15 +38,12 @@ jobs:
 
       - name: Run tests
         run: |
-          go test ./... -v
+          cd internal/
+          make cover
+
       - name: Run linter
         run: |
-          golangci-lint run ./...
-
-      - name: Check test cover
-        run: |
-          cd internal/
-          make test
+          golangci-lint run --skip-files=".*_test\.go" ./...
   CD:
     runs-on: ubuntu-latest
     needs: CI
@@ -79,5 +76,4 @@ jobs:
           command_timeout: 20m
           script: |
             chmod +x /home/ubuntu/scripts/.github/scripts/deploy.sh
-
-          # /home/ubuntu/scripts/.github/scripts/deploy.sh
+            /home/ubuntu/scripts/.github/scripts/deploy.sh

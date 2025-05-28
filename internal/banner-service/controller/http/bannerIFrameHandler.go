@@ -77,6 +77,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
 		resp := response.NewResponse(false, "invalid banner ID")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -87,6 +88,7 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		resp := response.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}

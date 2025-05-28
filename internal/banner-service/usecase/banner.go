@@ -29,7 +29,7 @@ func NewBannerUsecase(bannerRepository *repo.BannerRepository) *BannerUsecase {
 	return &BannerUsecase{BannerRepository: bannerRepository, rng: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }
 
-func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) ([]model.Banner, error) {
+func (b *BannerUsecase) GetBannersByUserID(userID int, requestID string) (model.BannerList, error) {
 	banners, err := b.BannerRepository.GetBannersByUserId(userID, requestID)
 	if err != nil {
 		return nil, err
