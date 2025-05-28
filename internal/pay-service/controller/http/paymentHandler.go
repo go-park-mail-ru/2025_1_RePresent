@@ -21,6 +21,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
 		resp := entity.NewResponse(true, "Invalid Cookie")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -31,6 +32,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -45,6 +47,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 		// 	"Error fetching balance: "+err.Error(),
 		// ))
 		resp := entity.NewResponse(true, "Error fetching balance: "+err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -65,6 +68,7 @@ func (h *PaymentController) GetUserBalance(w http.ResponseWriter, r *http.Reques
 		// ))
 
 		resp := entity.NewResponse(true, "Error encoding response: "+err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 }
@@ -77,6 +81,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Cookie"))
 		resp := entity.NewResponse(true, "Invalid Cookie")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -87,6 +92,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
@@ -98,6 +104,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Request Body"))
 
 		resp := entity.NewResponse(true, "Invalid Request Body")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -107,6 +114,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid Amount"))
 		resp := entity.NewResponse(true, "Invalid Amount")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -117,6 +125,7 @@ func (h *PaymentController) TopUpAccount(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}

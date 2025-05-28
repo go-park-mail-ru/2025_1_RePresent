@@ -22,6 +22,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		resp := entity.NewResponse(true, "Method Not Allowed")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -34,6 +35,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -44,6 +46,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
 		resp := entity.NewResponse(true, validate_errors)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -56,6 +59,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -66,6 +70,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -85,5 +90,6 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(entity.NewResponse(false, "registration succesful"))
 	resp := entity.NewResponse(false, "registration succesful")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }

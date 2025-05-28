@@ -22,6 +22,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		resp := entity.NewResponse(true, "Method Not Allowed")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -33,6 +34,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
 		resp := entity.NewResponse(true, "Invalid request body")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -43,6 +45,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
 		resp := entity.NewResponse(true, errorMessages)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -54,6 +57,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 			//nolint:errcheck
 			// json.NewEncoder(w).Encode(entity.NewResponse(true, "Такой почты не существует"))
 			resp := entity.NewResponse(true, "Такой почты не существует")
+			//nolint:errcheck
 			easyjson.MarshalToWriter(&resp, w)
 			return
 		}
@@ -62,6 +66,7 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Ошибка, повторите отправку позже"))
 		resp := entity.NewResponse(true, "Ошибка, повторите отправку позже")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -70,5 +75,6 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Sent"))
 	resp := entity.NewResponse(false, "Sent")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }

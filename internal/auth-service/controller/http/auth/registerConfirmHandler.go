@@ -25,6 +25,7 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -35,6 +36,7 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
 		resp := entity.NewResponse(true, validate_errors)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}

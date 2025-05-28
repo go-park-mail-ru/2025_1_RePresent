@@ -17,6 +17,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
 		resp := response.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -27,6 +28,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
 		resp := response.NewResponse(true, "Invalid request"+err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -37,6 +39,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found in request"))
 		resp := response.NewResponse(true, "Image not found in request")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -49,6 +52,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image"))
 		resp := response.NewResponse(true, "Failed to read image")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -65,6 +69,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files"))
 		resp := response.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -75,6 +80,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		resp := response.NewResponse(true, "Failed to seek image")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -85,6 +91,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload image"))
 		resp := response.NewResponse(true, "Failed to upload image")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -93,6 +100,7 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(entity.NewResponse(false, link))
 	resp := response.NewResponse(false, link)
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }
 
@@ -106,6 +114,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
 		resp := response.NewResponse(true, "Image not found")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -122,6 +131,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
 		resp := response.NewResponse(true, "Failed to read image: "+err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -139,6 +149,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type"))
 		resp := response.NewResponse(true, "Unsupported file type")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -149,6 +160,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
 		resp := response.NewResponse(true, "Failed to seek image")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -160,6 +172,7 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
 		resp := response.NewResponse(true, "Failed to download image")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
