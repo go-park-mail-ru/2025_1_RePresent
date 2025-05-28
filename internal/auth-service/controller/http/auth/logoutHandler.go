@@ -1,32 +1,30 @@
 package auth
 
 import (
-	"encoding/json"
 	"net/http"
 	entity "retarget/pkg/entity"
 	"time"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
-
 	_, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -46,11 +44,15 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(entity.NewResponse(false, "Logout Successful"))
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Logout Successful"))
+	resp := entity.NewResponse(false, "Logout Successful")
+	easyjson.MarshalToWriter(&resp, w)
 }

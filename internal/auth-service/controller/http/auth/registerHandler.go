@@ -6,6 +6,8 @@ import (
 	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +15,9 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		resp := entity.NewResponse(true, "Method Not Allowed")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -22,7 +26,9 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -30,7 +36,9 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
+		resp := entity.NewResponse(true, validate_errors)
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -40,7 +48,9 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -48,7 +58,9 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -65,5 +77,7 @@ func (c *AuthController) RegisterHandler(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusCreated)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(entity.NewResponse(false, "registration succesful"))
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, "registration succesful"))
+	resp := entity.NewResponse(false, "registration succesful")
+	easyjson.MarshalToWriter(&resp, w)
 }

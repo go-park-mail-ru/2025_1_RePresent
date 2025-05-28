@@ -6,6 +6,8 @@ import (
 	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +23,9 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -29,7 +33,9 @@ func (c *AuthController) RegisterConfirmHandler(w http.ResponseWriter, r *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, validate_errors))
+		resp := entity.NewResponse(true, validate_errors)
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	// GetUserByEmail, если нет то отправляем код

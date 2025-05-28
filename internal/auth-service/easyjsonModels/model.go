@@ -2,7 +2,11 @@
 
 package model
 
-import "gopkg.in/inf.v0"
+import (
+	"retarget/pkg/entity"
+
+	"gopkg.in/inf.v0"
+)
 
 type RegisterRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=20"`
@@ -27,4 +31,12 @@ type UserResponse struct {
 	Email    string  `json:"email"`
 	Balance  inf.Dec `json:"balance"`
 	Role     int     `json:"role"`
+}
+type UserResponseWithErr struct {
+	Service entity.Response `json:"service"`
+	Body    UserResponse    `json:"body"`
+}
+
+type ErrorRequest struct {
+	ErrorText string `json:"error"`
 }

@@ -21,8 +21,8 @@ func SetupAuthRoutes(authenticator *authenticate.Authenticator, authUsecase *use
 	muxRouter := mux.NewRouter()
 	authController := NewAuthController(authUsecase)
 
-	muxRouter.Handle("/api/v1/auth/me", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler))))
-	muxRouter.Handle("/api/v1/auth/logout", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler))))
+	muxRouter.Handle("/api/v1/auth/me", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler)))).Methods("GET")
+	muxRouter.Handle("/api/v1/auth/logout", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler)))).Methods("POST")
 
 	muxRouter.Handle("/api/v1/auth/login", logger.LogMiddleware(http.HandlerFunc(authController.LoginHandler)))
 	// muxRouter.HandleFunc("/api/v1/auth/login/mail", authController.LoginConfirmHandler)

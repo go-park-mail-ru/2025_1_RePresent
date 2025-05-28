@@ -17,7 +17,80 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(in *jlexer.Lexer, out *UserResponse) {
+func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(in *jlexer.Lexer, out *UserResponseWithErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "service":
+			(out.Service).UnmarshalEasyJSON(in)
+		case "body":
+			(out.Body).UnmarshalEasyJSON(in)
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(out *jwriter.Writer, in UserResponseWithErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"service\":"
+		out.RawString(prefix[1:])
+		(in.Service).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"body\":"
+		out.RawString(prefix)
+		(in.Body).MarshalEasyJSON(out)
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v UserResponseWithErr) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v UserResponseWithErr) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *UserResponseWithErr) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *UserResponseWithErr) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(l, v)
+}
+func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(in *jlexer.Lexer, out *UserResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -56,7 +129,7 @@ func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(in *jlexer.
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(out *jwriter.Writer, in UserResponse) {
+func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(out *jwriter.Writer, in UserResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -86,27 +159,27 @@ func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(out *jwrite
 // MarshalJSON supports json.Marshaler interface
 func (v UserResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(&w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v UserResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels(w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *UserResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(&r, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *UserResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels(l, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(l, v)
 }
-func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(in *jlexer.Lexer, out *RegisterRequest) {
+func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(in *jlexer.Lexer, out *RegisterRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -143,7 +216,7 @@ func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(out *jwriter.Writer, in RegisterRequest) {
+func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(out *jwriter.Writer, in RegisterRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -173,27 +246,27 @@ func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v RegisterRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(&w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RegisterRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels1(w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RegisterRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(&r, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RegisterRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels1(l, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(l, v)
 }
-func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(in *jlexer.Lexer, out *RegisterConfirmRequest) {
+func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(in *jlexer.Lexer, out *RegisterConfirmRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -224,7 +297,7 @@ func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(out *jwriter.Writer, in RegisterConfirmRequest) {
+func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(out *jwriter.Writer, in RegisterConfirmRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -239,27 +312,27 @@ func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v RegisterConfirmRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(&w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RegisterConfirmRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels2(w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RegisterConfirmRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(&r, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RegisterConfirmRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels2(l, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(l, v)
 }
-func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(in *jlexer.Lexer, out *LoginRequest) {
+func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels4(in *jlexer.Lexer, out *LoginRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -294,7 +367,7 @@ func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(out *jwriter.Writer, in LoginRequest) {
+func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels4(out *jwriter.Writer, in LoginRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -319,23 +392,89 @@ func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v LoginRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(&w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v LoginRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels3(w, v)
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *LoginRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(&r, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *LoginRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels3(l, v)
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels4(l, v)
+}
+func easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels5(in *jlexer.Lexer, out *ErrorRequest) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "error":
+			out.ErrorText = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels5(out *jwriter.Writer, in ErrorRequest) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"error\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.ErrorText))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ErrorRequest) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels5(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ErrorRequest) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC80ae7adEncodeRetargetInternalAuthServiceEasyjsonModels5(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ErrorRequest) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels5(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ErrorRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC80ae7adDecodeRetargetInternalAuthServiceEasyjsonModels5(l, v)
 }

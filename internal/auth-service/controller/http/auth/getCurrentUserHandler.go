@@ -1,26 +1,23 @@
 package auth
 
 import (
-	"encoding/json"
 	"net/http"
 	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
 
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
 
@@ -28,7 +25,9 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to get user"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to get user"))
+		resp := entity.NewResponse(true, "Failed to get user")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -39,15 +38,13 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		Role:     user.Role,
 	}
 
-	response := struct {
-		Service entity.Response    `json:"service"`
-		Body    model.UserResponse `json:"body"`
-	}{
+	response := model.UserResponseWithErr{
 		Service: entity.NewResponse(false, "Sent"),
 		Body:    *userResponse,
 	}
 
 	w.WriteHeader(http.StatusOK)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(response)
+	resp := response
+	easyjson.MarshalToWriter(&resp, w)
 }
