@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gorilla/mux"
 )
 
@@ -20,6 +22,7 @@ func (b *linkBuilder) BannerImageURL(imageID string) (string, error) {
 	url, err := b.router.Get("download_image").URL("image_id", imageID)
 	url.Scheme = "https"
 	url.Host = "test.re-target.ru" // TODO: ОБЯЗАТЕЛЬНО УБРАТЬ
+	fmt.Println(url)
 	if err != nil {
 		return "", err
 	}
