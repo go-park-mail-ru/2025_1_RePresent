@@ -48,6 +48,11 @@ func NewAuthRepository(endPoint string, logger *zap.SugaredLogger) *AuthReposito
 	}
 }
 
+func NewAuthRepositoryWithDB(db *sql.DB, logger *zap.SugaredLogger) *AuthRepository {
+	asyncLogger := optiLog.NewAsyncLogger(logger, 1000, 100_000)
+	return &AuthRepository{db: db, asyncLogger: asyncLogger}
+}
+
 func withRetry(fn func() error) error {
 	var err error
 	for attempt := 0; attempt < 3; attempt++ {

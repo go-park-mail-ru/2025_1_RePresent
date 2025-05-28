@@ -11,7 +11,12 @@ import (
 )
 
 func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
+	var requestID string
+	if v := r.Context().Value(entity.СtxKeyRequestID{}); v != nil {
+		if id, ok := v.(string); ok {
+			requestID = id
+		}
+	}
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		//nolint:errcheck

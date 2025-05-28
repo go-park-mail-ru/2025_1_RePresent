@@ -134,21 +134,23 @@ func (uc *PaymentUsecase) TopUpBalance(userID int, amount float64, requestID str
 	}
 
 	go func() {
-		if err := uc.AttemptRepository.ResetAttemptsByUserID(userID); err != nil {
-			uc.logger.Errorw("failed to reset attempts after top up",
-				"user_id", userID,
-				"error", err)
+		if uc.AttemptRepository != nil {
+			if err := uc.AttemptRepository.ResetAttemptsByUserID(userID); err != nil {
+				uc.logger.Errorw("failed to reset attempts after top up",
+					"user_id", userID,
+					"error", err)
+			}
 		}
-
-		if err = uc.NoticeRepository.SendTopUpBalanceEvent(userID, float64(amount)); err != nil {
-			uc.logger.Errorw("failed to send topUp message after top up",
-				"user_id", userID,
-				"error", err)
+		if uc.NoticeRepository != nil {
+			if err = uc.NoticeRepository.SendTopUpBalanceEvent(userID, float64(amount)); err != nil {
+				uc.logger.Errorw("failed to send topUp message after top up",
+					"user_id", userID,
+					"error", err)
+			}
 		}
 	}()
 
 	return nil
-	// return uc.PaymentRepository.GetLastTransaction(userID)
 }
 
 func (uc *PaymentUsecase) GetTransactionByID(transactionID string, requestID string) (*entity.Transaction, error) {
@@ -196,6 +198,11 @@ func (uc *PaymentUsecase) offBannersByUserID(ctx context.Context, userID int) {
 }
 
 func (uc *PaymentUsecase) requireSend(userID int, message string) {
+	// пропускаем весь функционал, если нет репозиториев
+	if uc.AttemptRepository == nil || uc.NoticeRepository == nil {
+		return
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			uc.logger.Errorw("error/panic in sendRequired",

@@ -21,19 +21,28 @@ var (
 	ErrInvalidAmount = errors.New("invalid amount")
 )
 
-// func (t entity.Transaction) Error() string {
-// 	//TODO implement me
-// 	panic("implement me")
-// }
-
 type PaymentRepositoryInterface interface {
-	GetPaymentByUserId(id int) ([]*entity.Payment, error)
+	GetBalanceByUserId(id int, requestID string) (float64, error)
+	UpdateBalance(userID int, amount float64, requestID string) (float64, error)
+	CreateTransaction(trx entity.Transaction) error
+	GetLastTransaction(userID int, requestID string) (*entity.Transaction, error)
+	GetTransactionByID(transactionID string, requestID string) (*entity.Transaction, error)
+	RegUserActivity(user_banner_id, user_slot_id int, amount entity.Decimal) (int, int, error)
+	GetPendingTransactions(userID int) ([]entity.Transaction, error)
+	UpdateTransactionStatus(transactionID string, status int) error
 	DeactivateBannersByUserID(ctx context.Context, userID int) error
+	CloseConnection() error
+	GetDB() *sql.DB
+	GetLogger() *zap.SugaredLogger
 }
 
 type PaymentRepository struct {
 	db     *sql.DB
 	logger *zap.SugaredLogger
+}
+
+func NewPaymentRepositoryWithDB(db *sql.DB, logger *zap.SugaredLogger) *PaymentRepository {
+	return &PaymentRepository{db: db, logger: logger}
 }
 
 func NewPaymentRepository(username, password, dbname, host string, port int, sslmode string, logger *zap.SugaredLogger) *PaymentRepository {
@@ -245,7 +254,7 @@ func (r *PaymentRepository) GetPendingTransactions(userID int) ([]entity.Transac
 	}
 	defer rows.Close()
 
-	var list []entity.Transaction
+	list := make([]entity.Transaction, 0) // Initialize as empty slice
 	for rows.Next() {
 		var tx entity.Transaction
 		if err := rows.Scan(&tx.ID, &tx.TransactionID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt); err != nil {
@@ -253,7 +262,10 @@ func (r *PaymentRepository) GetPendingTransactions(userID int) ([]entity.Transac
 		}
 		list = append(list, tx)
 	}
-	return list, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 func (r *PaymentRepository) UpdateTransactionStatus(transactionID string, status int) error {
@@ -286,5 +298,8 @@ func (r *PaymentRepository) DeactivateBannersByUserID(ctx context.Context, userI
 }
 
 func (r *PaymentRepository) CloseConnection() error {
-	return r.db.Close()
+	if r.db != nil {
+		return r.db.Close()
+	}
+	return nil
 }

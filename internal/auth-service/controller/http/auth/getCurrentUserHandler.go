@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/json"
 	"net/http"
 	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
@@ -9,7 +10,19 @@ import (
 )
 
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
+	var requestID string
+	if v := r.Context().Value(entity.СtxKeyRequestID{}); v != nil {
+		if id, ok := v.(string); ok {
+			requestID = id
+		}
+	}
+
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
+		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		return
+	}
 
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {

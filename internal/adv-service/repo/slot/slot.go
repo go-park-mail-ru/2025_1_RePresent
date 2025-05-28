@@ -26,6 +26,13 @@ type SlotRepositoryInterface interface {
 	GetSlotInfoByLink(ctx context.Context, link string) (slot.Slot, error)
 }
 
+type SlotSession interface {
+	Query(stmt string, values ...interface{}) *gocql.Query
+	NewBatch(batchType gocql.BatchType) *gocql.Batch
+	ExecuteBatch(batch *gocql.Batch) error
+	Close()
+}
+
 type SlotRepository struct {
 	session *gocql.Session
 }

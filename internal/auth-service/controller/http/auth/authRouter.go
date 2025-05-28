@@ -1,13 +1,23 @@
 package auth
 
 import (
+	"context"
 	"net/http"
+	entityAuth "retarget/internal/auth-service/entity/auth"
 	usecaseAuth "retarget/internal/auth-service/usecase/auth"
 	logger "retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
 )
+
+type AuthUsecase interface {
+	Login(ctx context.Context, email, pass string, role int, reqID string) (*entityAuth.User, error)
+	AddSession(userID, role int) (*entityAuth.Session, error)
+	GetUser(ctx context.Context, id int, reqID string) (*entityAuth.User, error)
+	Logout(sessionID string) error
+	Register(ctx context.Context, username, email, password string, role int, reqID string) (*entityAuth.User, error)
+}
 
 type AuthController struct {
 	authUsecase *usecaseAuth.AuthUsecase

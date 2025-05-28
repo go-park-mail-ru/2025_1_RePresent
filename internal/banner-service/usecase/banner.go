@@ -11,6 +11,15 @@ import (
 	decimal "retarget/pkg/entity"
 )
 
+type BannerRepo interface {
+	GetBannersByUserId(int, string) ([]model.Banner, error)
+	GetBannerByID(int, string) (*model.Banner, error)
+	GetMaxPriceBanner(interface{}) *model.Banner
+	CreateNewBanner(model.Banner, string) error
+	UpdateBanner(model.Banner, string) error
+	DeleteBannerByID(int, int, string) error
+}
+
 type BannerUsecase struct {
 	BannerRepository *repo.BannerRepository
 	rng              *rand.Rand
