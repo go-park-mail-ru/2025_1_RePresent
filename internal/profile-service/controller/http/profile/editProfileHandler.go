@@ -17,6 +17,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		resp := entity.NewResponse(true, "Method Not Allowed")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -25,6 +26,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
 		_, err := easyjson.MarshalToWriter(&resp, w)
 		if err != nil {
 			http.Error(w, "Failed to write response", http.StatusInternalServerError)
@@ -40,6 +42,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
 		resp := entity.NewResponse(true, "Invalid request body")
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -50,6 +53,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
 		resp := entity.NewResponse(true, errorMessages)
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -59,6 +63,7 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 		//nolint:errcheck
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
 		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
@@ -66,5 +71,6 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	//nolint:errcheck
 	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Got and Saved"))
 	resp := entity.NewResponse(false, "Got and Saved")
+	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }

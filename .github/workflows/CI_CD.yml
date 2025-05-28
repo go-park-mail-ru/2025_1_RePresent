@@ -76,5 +76,4 @@ jobs:
           command_timeout: 20m
           script: |
             chmod +x /home/ubuntu/scripts/.github/scripts/deploy.sh
-
-          # /home/ubuntu/scripts/.github/scripts/deploy.sh
+            /home/ubuntu/scripts/.github/scripts/deploy.sh
