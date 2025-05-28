@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 func (h *BannerController) GetUserBanners(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +85,9 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		resp := response.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -92,7 +95,9 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
+		resp := response.NewResponse(true, validate_errors)
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -100,7 +105,9 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		resp := response.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
 
@@ -118,13 +125,17 @@ func (h *BannerController) CreateBanner(w http.ResponseWriter, r *http.Request) 
 	if err := h.BannerUsecase.BannerRepository.CreateNewBanner(banner, requestID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		resp := response.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner created"))
+	// json.NewEncoder(w).Encode(response.NewResponse(false, "Banner created"))
+	resp := response.NewResponse(false, "Banner created")
+	easyjson.MarshalToWriter(&resp, w)
 }
 
 func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) {
@@ -134,14 +145,18 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		resp := response.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	if validate_errors, err := validator.ValidateStruct(req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
+		resp := response.NewResponse(true, validate_errors)
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -149,7 +164,9 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		resp := response.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
 
@@ -159,7 +176,9 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		resp := response.NewResponse(true, "Invalid banner ID")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -176,13 +195,17 @@ func (h *BannerController) UpdateBanner(w http.ResponseWriter, r *http.Request) 
 	if err := h.BannerUsecase.UpdateBanner(userID, banner, requestID); err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		resp := response.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusAccepted)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner updated"))
+	// json.NewEncoder(w).Encode(response.NewResponse(false, "Banner updated"))
+	resp := response.NewResponse(false, "Banner updated")
+	easyjson.MarshalToWriter(&resp, w)
 }
 
 func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) {
@@ -191,7 +214,10 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
+		resp := response.NewResponse(true, "Error of authenticator")
+		easyjson.MarshalToWriter(&resp, w)
+		return
 	}
 	userID := userSession.UserID
 
@@ -201,18 +227,24 @@ func (h *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		resp := response.NewResponse(true, "invalid banner ID")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	if err := h.BannerUsecase.BannerRepository.DeleteBannerByID(userID, bannerID, requestID); err != nil {
-		response := response.NewResponse(true, "failed to delete banner")
+		// response := response.NewResponse(true, "failed to delete banner")
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(response)
+		// _ = json.NewEncoder(w).Encode(response)
+		resp := response.NewResponse(true, "failed to delete banner")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
+	// json.NewEncoder(w).Encode(response.NewResponse(false, "Banner deleted"))
+	resp := response.NewResponse(false, "banner deleted")
+	easyjson.MarshalToWriter(&resp, w)
 
 }

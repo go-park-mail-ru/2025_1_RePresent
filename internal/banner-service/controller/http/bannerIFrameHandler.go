@@ -11,6 +11,7 @@ import (
 	response "retarget/pkg/entity"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 type IFrame struct {
@@ -74,7 +75,9 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, "invalid banner ID"))
+		resp := response.NewResponse(false, "invalid banner ID")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -82,7 +85,9 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
+		resp := response.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	url, err := h.LinkBuilder.BannerImageURL(banner.Content)

@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
-	entity "retarget/pkg/entity"
+	response "retarget/pkg/entity"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +15,9 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if r.ContentLength > (maxFileSize) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
+		resp := response.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -23,7 +25,9 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"+err.Error()))
+		resp := response.NewResponse(true, "Invalid request"+err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -31,7 +35,9 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found in request"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found in request"))
+		resp := response.NewResponse(true, "Image not found in request")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	defer file.Close()
@@ -41,7 +47,9 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image"))
+		resp := response.NewResponse(true, "Failed to read image")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -55,7 +63,9 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if _, ok := allowedTypes[fileType]; !ok {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files"))
+		resp := response.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -63,7 +73,9 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
+		resp := response.NewResponse(true, "Failed to seek image")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -71,13 +83,17 @@ func (c *BannerController) UploadImageHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload image"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload image"))
+		resp := response.NewResponse(true, "Failed to upload image")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(entity.NewResponse(false, link))
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, link))
+	resp := response.NewResponse(false, link)
+	easyjson.MarshalToWriter(&resp, w)
 }
 
 func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +104,9 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Image not found"))
+		resp := response.NewResponse(true, "Image not found")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	defer func() {
@@ -102,7 +120,9 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	if err != nil && err != io.EOF {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read image: "+err.Error()))
+		resp := response.NewResponse(true, "Failed to read image: "+err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -117,7 +137,9 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	default:
 		w.WriteHeader(http.StatusUnsupportedMediaType)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type"))
+		resp := response.NewResponse(true, "Unsupported file type")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -125,7 +147,9 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek image"))
+		resp := response.NewResponse(true, "Failed to seek image")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -134,7 +158,9 @@ func (c *BannerController) DownloadImage(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download image"))
+		resp := response.NewResponse(true, "Failed to download image")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 }

@@ -16,6 +16,7 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 		resp := entity.NewResponse(true, "Error of authenticator")
 		easyjson.MarshalToWriter(&resp, w)
+		return
 	}
 
 	cookie, err := r.Cookie("session_id")
