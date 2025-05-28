@@ -6,6 +6,8 @@ import (
 	entityProfile "retarget/internal/profile-service/entity/profile"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,14 +15,18 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		resp := entity.NewResponse(true, "Method Not Allowed")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		if err := json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator")); err != nil {
+		resp := entity.NewResponse(true, "Error of authenticator")
+		_, err := easyjson.MarshalToWriter(&resp, w)
+		if err != nil {
 			http.Error(w, "Failed to write response", http.StatusInternalServerError)
 			return
 		}
@@ -32,7 +38,9 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
+		resp := entity.NewResponse(true, "Invalid request body")
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -40,17 +48,23 @@ func (c *ProfileController) EditProfileHandler(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
+		resp := entity.NewResponse(true, errorMessages)
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	err = c.profileUsecase.PutProfile(userID, profileRequest.Username, profileRequest.Description, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		//nolint:errcheck
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(entity.NewResponse(false, "Got and Saved"))
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Got and Saved"))
+	resp := entity.NewResponse(false, "Got and Saved")
+	easyjson.MarshalToWriter(&resp, w)
 }

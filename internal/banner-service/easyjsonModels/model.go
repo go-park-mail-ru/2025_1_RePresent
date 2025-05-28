@@ -25,3 +25,6 @@ type Banner struct {
 	Deleted     bool           `json:"deleted"`
 	MaxPrice    entity.Decimal `json:"max_price"`
 }
+
+//easyjson:json
+type BannerList []Banner
