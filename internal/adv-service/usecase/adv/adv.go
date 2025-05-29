@@ -97,10 +97,7 @@ func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
 	}
 	recomendReq := &protoRecommend.RecommendationRequest{PlatformId: 0, SlotName: "Имя Слота", BannerId: bannerIDs.BannerId}
 	banner, err := a.RecommendClient.GetBannerByMetaData(ctx, recomendReq)
-	fmt.Println(recomendReq)
-	fmt.Println(banner)
-	fmt.Println(err)
-	if err != nil {
+	if err != nil || banner == nil {
 		banner, err := a.bannerClient.GetRandomBanner(ctx, req)
 		if err != nil {
 			return defaultBanner, nil
