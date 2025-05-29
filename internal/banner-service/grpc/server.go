@@ -36,7 +36,6 @@ func (s *BannerServer) GetRandomBanner(
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get banner: %v", err)
 	}
-
 	return &bannerpb.Banner{
 		Title:       banner.Title,
 		Content:     banner.Content,
@@ -45,6 +44,21 @@ func (s *BannerServer) GetRandomBanner(
 		OwnerID:     strconv.Itoa(banner.OwnerID),
 		Id:          int64(banner.ID),
 		MaxPrice:    banner.MaxPrice.String(),
+	}, nil
+}
+
+func (s *BannerServer) GetSuitableBanners(
+	ctx context.Context,
+	req *bannerpb.BannerWithMinPrice,
+) (*bannerpb.ActiveBanners, error) {
+	dec, _ := entity.NewDec(req.MinPrice)
+	bannerIDs, err := s.bannerUC.GetSuitableBannersForADV(dec)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get banner: %v", err)
+	}
+
+	return &bannerpb.ActiveBanners{
+		BannerId: bannerIDs,
 	}, nil
 }
 

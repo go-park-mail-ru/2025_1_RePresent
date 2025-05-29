@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package bannerpb;
 
-option go_package = "retarget/pkg/proto/banner;bannerpb";
+option go_package = "pkg/proto/banner;bannerpb";
 
 message Banner {
   string title = 1;
@@ -16,13 +16,19 @@ message Banner {
 
 message BannerWithMinPrice {
   string min_price = 1;
+  int64 code = 2;
 }
 
 message BannerRequest {
   int64 id = 1;
 }
 
+message ActiveBanners {
+  repeated int64 banner_id = 1;
+}
+
 service BannerService {
   rpc GetRandomBanner(BannerWithMinPrice) returns (Banner);
+  rpc GetSuitableBanners(BannerWithMinPrice) returns (ActiveBanners);
   rpc GetBannerByID(BannerRequest) returns (Banner);
 }

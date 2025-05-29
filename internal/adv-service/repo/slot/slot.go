@@ -220,11 +220,12 @@ func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (sl
 	var s slot.Slot
 
 	err := r.session.Query(
-		`SELECT link, slot_name, format_code, min_price, is_active, created_at 
+		`SELECT link, user_id, slot_name, format_code, min_price, is_active, created_at 
 		FROM slots WHERE link = ? LIMIT 1`,
 		link,
 	).WithContext(ctx).Scan(
 		&s.Link,
+		&s.UserID,
 		&s.SlotName,
 		&s.FormatCode,
 		&s.MinPrice,

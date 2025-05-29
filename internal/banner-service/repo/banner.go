@@ -20,6 +20,7 @@ type BannerRepositoryInterface interface {
 	UpdateBanner(banner model.Banner)
 	GetBannerByID(id int) (*model.Banner, error)
 	DeleteBannerByID(owner, id int) error
+	GetSuitableBanners(floor *decimal.Decimal) ([]int64, error)
 }
 
 type BannerRepository struct {
@@ -36,6 +37,41 @@ func NewBannerRepository(endPoint string, logger *zap.SugaredLogger) *BannerRepo
 	bannerRepo.db = db
 	bannerRepo.logger = logger
 	return bannerRepo
+}
+
+func (r *BannerRepository) GetSuitableBanners(floor *decimal.Decimal) ([]int64, error) {
+	r.logger.Debugw("Executing SQL query GetSuitableBanners", "floor", floor.String())
+
+	query := `
+        SELECT b.id
+        FROM banner b
+        JOIN auth_user u ON b.owner_id = u.id
+        WHERE b.status = 1
+          AND u.balance > 0
+          AND b.max_price >= $1
+          AND u.balance >= b.max_price
+    `
+
+	rows, err := r.db.Query(query, floor)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+
+	if len(ids) == 0 {
+		return []int64{-1}, nil
+	}
+
+	return ids, nil
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]model.Banner, error) {

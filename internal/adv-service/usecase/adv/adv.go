@@ -12,6 +12,7 @@ import (
 	entity "retarget/pkg/entity"
 	pb "retarget/pkg/proto/banner"
 	protoPayment "retarget/pkg/proto/payment"
+	protoRecommend "retarget/pkg/proto/recommend"
 	"strconv"
 	"time"
 
@@ -42,13 +43,15 @@ type AdvUsecase struct {
 	SlotsRepository repoSlots.SlotRepositoryInterface
 	advRepository   repoAdv.AdvRepositoryInterface
 	bannerClient    pb.BannerServiceClient
+	RecommendClient protoRecommend.RecommendServiceClient
 	PaymentClient   protoPayment.PaymentServiceClient
 }
 
-func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface, bannerClient pb.BannerServiceClient, paymentClient protoPayment.PaymentServiceClient, slotsRepository repoSlots.SlotRepositoryInterface) *AdvUsecase {
+func NewAdvUsecase(advRepo repoAdv.AdvRepositoryInterface, bannerClient pb.BannerServiceClient, recommendClient protoRecommend.RecommendServiceClient, paymentClient protoPayment.PaymentServiceClient, slotsRepository repoSlots.SlotRepositoryInterface) *AdvUsecase {
 	return &AdvUsecase{
 		advRepository:   advRepo,
 		bannerClient:    bannerClient,
+		RecommendClient: recommendClient,
 		PaymentClient:   paymentClient,
 		SlotsRepository: slotsRepository,
 	}
@@ -82,11 +85,24 @@ func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
 	if err != nil {
 		return defaultBanner, nil
 	}
-	req := &pb.BannerWithMinPrice{MinPrice: slot.MinPrice.String()}
-	ctx := context.Background() // однажды мы прокинем нормально контекст, но не сегодня
-	banner, err := a.bannerClient.GetRandomBanner(ctx, req)
-	if err != nil {
+	req := &pb.BannerWithMinPrice{MinPrice: slot.MinPrice.String(), Code: 1} // Однажды тут будут поддерживаться размеры
+	ctx := context.Background()                                              // Однажды мы прокинем нормально контекст, но не сегодня
+	bannerIDs, err := a.bannerClient.GetSuitableBanners(ctx, req)
+	if err != nil || len(bannerIDs.BannerId) <= 1 {
+		if len(bannerIDs.BannerId) == 1 && bannerIDs.BannerId[0] == -1 {
+			return defaultBanner, nil
+		}
+		fmt.Errorf("Banners is nil")
 		return defaultBanner, nil
+	}
+	recomendReq := &protoRecommend.RecommendationRequest{PlatformId: 0, SlotName: "Имя Слота", BannerId: bannerIDs.BannerId}
+	banner, err := a.RecommendClient.GetBannerByMetaData(ctx, recomendReq)
+	if err != nil {
+		banner, err := a.bannerClient.GetRandomBanner(ctx, req)
+		if err != nil {
+			return defaultBanner, nil
+		}
+		return banner, nil
 	}
 	return banner, nil
 }

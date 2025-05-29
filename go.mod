@@ -19,6 +19,7 @@ require (
 	github.com/mailru/easyjson v0.9.0
 	github.com/minio/minio-go/v7 v7.0.90
 	github.com/redis/go-redis/v9 v9.7.3
+	github.com/shopspring/decimal v1.4.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
@@ -70,7 +71,6 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect

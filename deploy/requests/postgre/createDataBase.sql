@@ -66,3 +66,10 @@ CREATE TRIGGER update_user_updated_at
 BEFORE UPDATE ON auth_user
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+
+CREATE INDEX IF NOT EXISTS idx_banner_status ON banner(status);
+CREATE INDEX IF NOT EXISTS idx_banner_owner_id ON banner(owner_id);
+CREATE INDEX IF NOT EXISTS idx_banner_max_price ON banner(max_price);
+
+CREATE INDEX IF NOT EXISTS idx_user_id ON auth_user(id);
+CREATE INDEX IF NOT EXISTS idx_user_balance ON auth_user(balance);

@@ -76,6 +76,17 @@ func (b *BannerUsecase) GetRandomBannerForADV(userID int, requestID string, floo
 	return banner, nil
 }
 
+func (b *BannerUsecase) GetSuitableBannersForADV(floor *decimal.Decimal) ([]int64, error) {
+	bannerIDs, err := b.BannerRepository.GetSuitableBanners(floor)
+	if err != nil {
+		return []int64{-1}, nil
+	}
+	if len(bannerIDs) == 1 && bannerIDs[0] == -1 {
+		return []int64{-1}, nil
+	}
+	return bannerIDs, nil
+}
+
 func (b *BannerUsecase) CreateBanner(userID int, banner model.Banner, requestID string) error {
 	err := b.BannerRepository.CreateNewBanner(banner, requestID)
 	return err
