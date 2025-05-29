@@ -9,8 +9,8 @@ package recommendpb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	banner "pkg/proto/banner"
 	reflect "reflect"
+	banner "retarget/pkg/proto/banner"
 	sync "sync"
 	unsafe "unsafe"
 )

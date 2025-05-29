@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package recommendpb;
 
-option go_package = "retarget/pkg/proto/recommend;recommendpb";
+option go_package = "pkg/proto/recommend;recommendpb";
 
 import "pkg/proto/banner/banner.proto";
 
