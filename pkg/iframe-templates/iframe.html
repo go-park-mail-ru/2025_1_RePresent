@@ -4,166 +4,126 @@
 <head>
   <meta charset="UTF-8">
   <style>
+    :root {
+      --font-small: 16px;
+      --light: #f0f0f0;
+      --light-gray: #ccc;
+      --dark-gray: #777;
+      --dark: #1a1a1a;
+    }
+
+    html,
     body {
-      background: #f0f0f0;
+      background-color: transparent;
+    }
+
+    body {
       font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-size: var(--font-small);
+      width: 100vw;
       height: 100vh;
-      margin: 0;
     }
 
     .card {
-      width: 300px;
-      height: 300px;
-      background: #ffffff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      font-size: 14px;
-    }
-
-    .card-header {
-      padding: 8px;
-      font-size: 10px;
-      color: gray;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      background-color: var(--light);
+      border-radius: 0.5rem;
+      overflow: hidden;
     }
 
     .card-image {
-      background: #fff;
-      width: 100%;
-      position: relative;
-      padding-top: 56.25%;
-      overflow: hidden;
-    }
-
-    .card-image img {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
     .card-body {
-      background: #1a1a1a;
-      color: white;
-      padding: 16px;
-      flex: 1;
+      padding: 2rem 1rem;
+      color: var(--dark);
+      background-color: var(--light);
     }
 
-    .card-body a {
-      color: #aaa;
-      font-size: 12px;
-      text-decoration: none;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    .card-body h2,
-    .card-body p {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .card-body * {
       margin: 0;
     }
 
-    .card-footer {
-      padding: 16px;
-      background: #ffffff;
+    .card-link {
+      margin-bottom: 1rem;
+      color: var(--dark-gray);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
-    .card-footer button {
-      width: 100%;
-      background: #2f80ed;
-      color: white;
-      border: none;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
+    .card-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
     }
 
-    .card-footer button:hover {
-      background: #1c60c7;
-    }
+    @media (prefers-color-scheme: dark) {
+      .card-body {
+        color: var(--light);
+        background-color: var(--dark);
+      }
 
-    .button-link {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: #2f80ed;
-      color: white;
-      text-decoration: none;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .button-link:hover {
-      background: #1c60c7;
+      .card-link {
+        margin-bottom: 1rem;
+        color: var(--light-gray);
+      }
     }
   </style>
 </head>
 
 <body>
-  <a href="{{.Link}}" class="card-link" target="_blank">
+  <a href="{{.Link}}" target="_blank">
     <div class="card" id="ad-banner">
-      <div class="card-image">
-        <img src="{{.ImageSrc}}" alt={{.Title}}>
-      </div>
+      <img class="card-image" src="{{.ImageSrc}}" alt={{.Title}}>
       <div class="card-body">
-        <a>{{.Link}}</a>
-        <h2>{{.Title}}</h2>
-        <p>{{.Description}}</p>
+        <p class="card-link">{{.Link}}</p>
+        <h1 class="card-title">{{.Title}}</h1>
+        <p class="card-description">{{.Description}}</p>
       </div>
     </div>
   </a>
-</body>
-<script>
-  const ad = document.getElementById('ad-banner');
 
-  let hasSentShown = false;
-  let hasSentClick = false;
+  <script>
+    const ad = document.getElementById('ad-banner');
 
-  const isDebug = new URLSearchParams(window.location.search).get('debug') === 'true';
+    let hasSentShown = false;
+    let hasSentClick = false;
 
-  function sendEvent(action) {
-    if (isDebug) return;
+    const isDebug = new URLSearchParams(window.location.search).get('debug') === 'true';
 
-    if (action === 'shown' && !hasSentShown) {
-      hasSentShown = true;
-    } else if (action === 'click' && !hasSentClick) {
-      hasSentClick = true;
-    } else {
-      return;
+    function sendEvent(action) {
+      if (isDebug) return;
+
+      if (action === 'shown' && !hasSentShown) {
+        hasSentShown = true;
+      } else if (action === 'click' && !hasSentClick) {
+        hasSentClick = true;
+      } else {
+        return;
+      }
+
+      fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.Banner}}&slot={{.Slot}}&action=${action}&`, {
+        method: 'GET',
+        mode: 'no-cors'
+      });
     }
 
-    fetch(`https://re-target.ru/api/v1/adv/metrics/?banner={{.Banner}}&slot={{.Slot}}&action=${action}&`, {
-      method: 'GET',
-      mode: 'no-cors'
+    // 1. Таймер на просмотр (5 секунд после показа)
+    const viewTimer = setTimeout(() => {
+      sendEvent('shown');
+    }, 5000);
+
+    // 2. Отправка по клику
+    ad.addEventListener('click', () => {
+      sendEvent('click');
     });
-  }
-
-  // 1. Таймер на просмотр (5 секунд после показа)
-  const viewTimer = setTimeout(() => {
-    sendEvent('shown');
-  }, 5000);
-
-  // 2. Отправка по клику
-  ad.addEventListener('click', () => {
-    sendEvent('click');
-  });
-</script>
-
+  </script>
+</body>
 
 </html>
