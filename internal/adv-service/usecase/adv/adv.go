@@ -88,8 +88,6 @@ func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
 	req := &pb.BannerWithMinPrice{MinPrice: slot.MinPrice.String(), Code: 1} // Однажды тут будут поддерживаться размеры
 	ctx := context.Background()                                              // Однажды мы прокинем нормально контекст, но не сегодня
 	bannerIDs, err := a.bannerClient.GetSuitableBanners(ctx, req)
-	fmt.Println(bannerIDs)
-	fmt.Println(err)
 	if err != nil || len(bannerIDs.BannerId) <= 1 {
 		if len(bannerIDs.BannerId) == 1 && bannerIDs.BannerId[0] == -1 {
 			return defaultBanner, nil
@@ -99,6 +97,9 @@ func (a *AdvUsecase) GetIframe(key string) (*pb.Banner, error) {
 	}
 	recomendReq := &protoRecommend.RecommendationRequest{PlatformId: 0, SlotName: "Имя Слота", BannerId: bannerIDs.BannerId}
 	banner, err := a.RecommendClient.GetBannerByMetaData(ctx, recomendReq)
+	fmt.Println(recomendReq)
+	fmt.Println(banner)
+	fmt.Println(err)
 	if err != nil {
 		banner, err := a.bannerClient.GetRandomBanner(ctx, req)
 		if err != nil {
