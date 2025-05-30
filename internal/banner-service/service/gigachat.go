@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -25,7 +26,7 @@ type GigaChatService struct {
 
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
+	ExpiresAt   int64  `json:"expires_at"`
 	TokenType   string `json:"token_type"`
 }
 
@@ -66,6 +67,7 @@ func (g *GigaChatService) GetToken() (string, error) {
 	g.logger.Debugw("Getting new token from GigaChat API")
 
 	data := url.Values{}
+	data.Set("grant_type", "client_credentials")
 	data.Set("scope", "GIGACHAT_API_PERS")
 
 	req, err := http.NewRequest("POST", g.baseURL+"/api/v2/oauth", strings.NewReader(data.Encode()))
@@ -75,9 +77,12 @@ func (g *GigaChatService) GetToken() (string, error) {
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("RqUID", fmt.Sprintf("%d", time.Now().UnixNano()))
-	// вместо голого ключа добавляем префикс Basic
-	req.Header.Set("Authorization", "Basic "+g.authKey)
+	req.Header.Set("RqUID", uuid.New().String())
+	authHeader := g.authKey
+	if !strings.HasPrefix(strings.TrimSpace(authHeader), "Basic ") {
+		authHeader = "Basic " + authHeader
+	}
+	req.Header.Set("Authorization", authHeader)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
@@ -95,8 +100,8 @@ func (g *GigaChatService) GetToken() (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&trsp); err != nil {
 		return "", err
 	}
+	g.tokenExpiration = time.Unix(trsp.ExpiresAt, 0)
 	g.token = trsp.AccessToken
-	g.tokenExpiration = time.Now().Add(time.Duration(trsp.ExpiresIn) * time.Second)
 	return g.token, nil
 }
 
