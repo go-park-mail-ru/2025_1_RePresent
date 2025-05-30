@@ -1,21 +1,32 @@
-import logging
 import signal
 import sys
 import os
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-sys.path.append(PROJECT_ROOT)
+from loguru import logger
 
-from internal.recommend_service.recommendApp import serve
+logger.remove()
+logger.add(
+    sys.stdout, level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "..", "..", "internal", "recommend_service"
+        )
+    )
+)
+
+from internal.recommend_service.app.recommendApp import serve
 
 
 def handle_sigterm(*_):
-    logging.info("Recommend Server stopped")
+    logger.info("Recommend Server stopped")
     os._exit(0)
 
 
 if __name__ == "__main__":
-    logging.info("gRPC Recommend Server Starting on 50055 Port...")
+    logger.info("gRPC Recommend Server Starting on 50055 Port...")
 
     signal.signal(signal.SIGINT, handle_sigterm)
     signal.signal(signal.SIGTERM, handle_sigterm)

@@ -13,7 +13,7 @@ init: python -m venv venv
 НА ЛИНУКСЕ source venv/bin/activate
 python -m pip install --upgrade pip
 библы: 
-pip install grpcio grpcio-tools protobuf
+pip install grpcio grpcio-tools protobuf psycopg2-binary redis loguru
 
 Запуск:
 python -m cmd.recommend_service.main (если переименовать cmd/... и __init__ сделать)
