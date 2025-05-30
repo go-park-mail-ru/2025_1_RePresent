@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -19,6 +20,7 @@ type GigaChatService struct {
 	token           string
 	tokenExpiration time.Time
 	baseURL         string
+	httpClient      *http.Client
 }
 
 type TokenResponse struct {
@@ -44,10 +46,16 @@ type ChatResponse struct {
 }
 
 func NewGigaChatService(logger *zap.SugaredLogger, authKey string) *GigaChatService {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
 	return &GigaChatService{
-		logger:  logger,
-		authKey: authKey,
-		baseURL: "https://ngw.devices.sberbank.ru:9443",
+		logger:     logger,
+		authKey:    authKey,
+		baseURL:    "https://ngw.devices.sberbank.ru:9443",
+		httpClient: client,
 	}
 }
 
@@ -55,7 +63,6 @@ func (g *GigaChatService) GetToken() (string, error) {
 	if g.token != "" && g.tokenExpiration.After(time.Now()) {
 		return g.token, nil
 	}
-
 	g.logger.Debugw("Getting new token from GigaChat API")
 
 	data := url.Values{}
@@ -66,97 +73,73 @@ func (g *GigaChatService) GetToken() (string, error) {
 		g.logger.Errorw("Failed to create auth request", "error", err)
 		return "", err
 	}
-
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("RqUID", fmt.Sprintf("%d", time.Now().UnixNano()))
 	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", g.authKey))
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		g.logger.Errorw("Failed to execute auth request", "error", err)
+		g.logger.Errorw("Auth request failed", "error", err)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
-		g.logger.Errorw("Failed to get token", "status", resp.Status, "body", string(body))
-		return "", fmt.Errorf("failed to get token: %s", resp.Status)
+		return "", fmt.Errorf("failed to get token: %s (%s)", resp.Status, string(body))
 	}
 
-	var tokenResp TokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		g.logger.Errorw("Failed to decode token response", "error", err)
+	var trsp TokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&trsp); err != nil {
 		return "", err
 	}
-
-	g.token = tokenResp.AccessToken
-	g.tokenExpiration = time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
-
-	g.logger.Debugw("Successfully got token from GigaChat API", "expires_in", tokenResp.ExpiresIn)
-
+	g.token = trsp.AccessToken
+	g.tokenExpiration = time.Now().Add(time.Duration(trsp.ExpiresIn) * time.Second)
 	return g.token, nil
 }
 
-func (g *GigaChatService) GenerateDescription(bannerTitle string, bannerContent string) (string, error) {
+func (g *GigaChatService) GenerateDescription(bannerTitle, bannerContent string) (string, error) {
 	token, err := g.GetToken()
 	if err != nil {
 		return "", err
 	}
 
-	prompt := fmt.Sprintf("Создай краткое и привлекательное описание для баннера с названием '%s' и содержанием '%s'. Описание должно быть не более 200 символов и мотивировать пользователя кликнуть по баннеру.", bannerTitle, bannerContent)
+	prompt := fmt.Sprintf(
+		"Создай краткое привлекательное описание для баннера '%s': %s",
+		bannerTitle, bannerContent,
+	)
 
-	chatRequest := ChatRequest{
-		Model: "GigaChat",
-		Messages: []ChatMessage{
-			{
-				Role:    "user",
-				Content: prompt,
-			},
-		},
-	}
+	reqBody, _ := json.Marshal(ChatRequest{
+		Model:    "GigaChat",
+		Messages: []ChatMessage{{Role: "user", Content: prompt}},
+	})
 
-	jsonData, err := json.Marshal(chatRequest)
+	req, err := http.NewRequest("POST", g.baseURL+"/api/v2/chat/completions", bytes.NewBuffer(reqBody))
 	if err != nil {
-		g.logger.Errorw("Failed to marshal chat request", "error", err)
 		return "", err
 	}
-
-	req, err := http.NewRequest("POST", g.baseURL+"/api/v2/chat/completions", bytes.NewBuffer(jsonData))
-	if err != nil {
-		g.logger.Errorw("Failed to create completion request", "error", err)
-		return "", err
-	}
-
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		g.logger.Errorw("Failed to execute completion request", "error", err)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
-		g.logger.Errorw("Failed to get completion", "status", resp.Status, "body", string(body))
-		return "", fmt.Errorf("failed to get completion: %s", resp.Status)
+		return "", fmt.Errorf("chat completion failed: %s (%s)", resp.Status, string(body))
 	}
 
-	var chatResponse ChatResponse
-	if err := json.NewDecoder(resp.Body).Decode(&chatResponse); err != nil {
-		g.logger.Errorw("Failed to decode completion response", "error", err)
+	var chResp ChatResponse
+	if err := json.NewDecoder(resp.Body).Decode(&chResp); err != nil {
 		return "", err
 	}
-
-	if len(chatResponse.Choices) == 0 {
-		return "", fmt.Errorf("no completion choices returned")
+	if len(chResp.Choices) == 0 {
+		return "", fmt.Errorf("no completion returned")
 	}
-
-	return chatResponse.Choices[0].Message.Content, nil
+	return chResp.Choices[0].Message.Content, nil
 }
