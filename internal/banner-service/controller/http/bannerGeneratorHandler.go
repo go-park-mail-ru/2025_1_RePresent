@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	response "retarget/pkg/entity"
 	"strconv"
@@ -54,7 +55,7 @@ func (h *BannerController) GenerateImage(w http.ResponseWriter, r *http.Request)
 	userCtx, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		easyjson.MarshalToWriter(response.NewResponse(true, "auth error"), w)
+		easyjson.MarshalToWriter(response.NewResponse(true, "Ошибка аутентификации"), w)
 		return
 	}
 	userID := userCtx.UserID
@@ -62,15 +63,23 @@ func (h *BannerController) GenerateImage(w http.ResponseWriter, r *http.Request)
 	id, err := strconv.Atoi(mux.Vars(r)["banner_id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		easyjson.MarshalToWriter(response.NewResponse(true, "invalid banner ID"), w)
+		easyjson.MarshalToWriter(response.NewResponse(true, "Некорректный ID баннера"), w)
 		return
 	}
-	imgB64, err := h.BannerUsecase.GenerateBannerImage(userID, id, requestID)
+
+	imgBytes, err := h.BannerUsecase.GenerateBannerImage(userID, id, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		easyjson.MarshalToWriter(response.NewResponse(true, err.Error()), w)
 		return
 	}
+
+	contentType := http.DetectContentType(imgBytes)
+
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(imgBytes)))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=banner-%d.png", id))
 	w.WriteHeader(http.StatusOK)
-	easyjson.MarshalToWriter(response.NewResponse(false, imgB64), w)
+
+	w.Write(imgBytes)
 }

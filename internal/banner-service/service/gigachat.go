@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -154,10 +153,11 @@ func (g *GigaChatService) GenerateDescription(title, _ string) (string, error) {
 	return g.Chat([]ChatMessage{{Role: "user", Content: prompt}})
 }
 
-func (g *GigaChatService) GenerateImage(title, description string) (string, error) {
+// GenerateImage генерирует изображение баннера и возвращает его в бинарном виде
+func (g *GigaChatService) GenerateImage(title, description string) ([]byte, error) {
 	token, err := g.GetToken()
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	reqBody := struct {
@@ -168,20 +168,21 @@ func (g *GigaChatService) GenerateImage(title, description string) (string, erro
 	}{
 		Model: "GigaChat",
 		Messages: []ChatMessage{
-			{Role: "system", Content: "Ты — опытный дизайнер баннеров"},
-			{Role: "user", Content: fmt.Sprintf("Нарисуй красивый рекламный баннер размером 512x512 для '%s'. %s", title, description)},
+			{Role: "system", Content: "Ты — профессиональный графический дизайнер баннеров"},
+			{Role: "user", Content: fmt.Sprintf("Создай красивый рекламный баннер размером 512x512 для '%s'. %s", title, description)},
 		},
 		FunctionCall: map[string]string{"name": "text2image"},
 		Functions:    []FunctionDef{{Name: "text2image"}},
 	}
 
 	data, _ := json.Marshal(reqBody)
-	g.logger.Debugw("Sending image generation request", "request", string(data))
+	g.logger.Debugw("Отправка запроса на генерацию изображения", "запрос", string(data))
 
 	req, err := http.NewRequest("POST", g.chatURL+"/chat/completions", bytes.NewReader(data))
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -191,84 +192,89 @@ func (g *GigaChatService) GenerateImage(title, description string) (string, erro
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	g.logger.Debugw("Image generation response", "status", resp.Status, "body", string(body))
+	g.logger.Debugw("Получен ответ на запрос изображения",
+		"статус", resp.Status,
+		"тело", string(body))
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("image generation failed: %s (%s)", resp.Status, string(body))
+		return nil, fmt.Errorf("image generation failed: %s (%s)", resp.Status, string(body))
 	}
 
 	var response struct {
 		Choices []struct {
 			Message struct {
-				Content string `json:"content"`
-				Role    string `json:"role"`
+				Content          string `json:"content"`
+				Role             string `json:"role"`
+				FunctionsStateID string `json:"functions_state_id"`
 			} `json:"message"`
 		} `json:"choices"`
 	}
 
 	if err := json.Unmarshal(body, &response); err != nil {
-		return "", fmt.Errorf("failed to parse response: %w", err)
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	if len(response.Choices) == 0 || response.Choices[0].Message.Content == "" {
-		return "", fmt.Errorf("no image content in response")
+		return nil, fmt.Errorf("no image content in response")
 	}
 
 	content := response.Choices[0].Message.Content
-	g.logger.Debugw("Parsing image content", "content", content)
+	g.logger.Debugw("Парсинг конте��та изображения", "контент", content)
 
 	imgIDStart := strings.Index(content, "<img src=\"")
 	if imgIDStart == -1 {
-		return "", fmt.Errorf("image ID not found in response")
+		return nil, fmt.Errorf("image ID not found in response")
 	}
 	imgIDStart += 10
 
 	imgIDEnd := strings.Index(content[imgIDStart:], "\"")
 	if imgIDEnd == -1 {
-		return "", fmt.Errorf("malformed image ID in response")
+		return nil, fmt.Errorf("malformed image ID in response")
 	}
 
 	imageID := content[imgIDStart : imgIDStart+imgIDEnd]
-	g.logger.Debugw("Extracted image ID", "imageID", imageID)
+	g.logger.Debugw("Извлечен ID изображения", "imageID", imageID)
 
 	return g.GetImageByID(imageID)
 }
 
-func (g *GigaChatService) GetImageByID(imageID string) (string, error) {
+func (g *GigaChatService) GetImageByID(imageID string) ([]byte, error) {
 	token, err := g.GetToken()
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/files/%s", g.chatURL, imageID)
+	g.logger.Debugw("Запрос изображения по ID", "url", url, "imageID", imageID)
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to create image request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json")
+
+	req.Header.Set("Accept", "image/*")
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("x-client-id", g.clientID)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to fetch image: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
-		return "", fmt.Errorf("failed to get image: %s (%s)", resp.Status, string(body))
+		return nil, fmt.Errorf("failed to get image: %s (%s)", resp.Status, string(body))
 	}
 
-	image, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
+	g.logger.Debugw("Получено изображение",
+		"content-type", resp.Header.Get("Content-Type"),
+		"content-length", resp.Header.Get("Content-Length"))
 
-	return base64.StdEncoding.EncodeToString(image), nil
+	return ioutil.ReadAll(resp.Body)
 }

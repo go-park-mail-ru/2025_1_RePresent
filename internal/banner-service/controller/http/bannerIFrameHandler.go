@@ -95,7 +95,6 @@ func (h *BannerController) RandomIFrame(w http.ResponseWriter, r *http.Request) 
 	url, err := h.LinkBuilder.BannerImageURL(banner.Content)
 	if err != nil {
 		log.Println("Обработка ошибки")
-		// обработка ошибки
 	}
 	data := IFrame{
 		ImageSrc:    url,
