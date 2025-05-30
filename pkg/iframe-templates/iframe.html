@@ -6,7 +6,7 @@
   <style>
     :root {
       --font-small: 16px;
-      --light: #f0f0f0;
+      --light: #fcfcfc;
       --light-gray: #ccc;
       --dark-gray: #777;
       --dark: #1a1a1a;
@@ -14,6 +14,7 @@
 
     html,
     body {
+      margin: 0;
       background-color: transparent;
     }
 
@@ -22,6 +23,10 @@
       font-size: var(--font-small);
       width: 100vw;
       height: 100vh;
+    }
+
+    .redirect-link {
+      text-decoration: none;
     }
 
     .card {
@@ -41,7 +46,7 @@
     }
 
     .card-body {
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
       color: var(--dark);
       background-color: var(--light);
     }
@@ -59,7 +64,7 @@
     }
 
     .card-title {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       margin-bottom: 0.5rem;
     }
 
@@ -78,7 +83,7 @@
 </head>
 
 <body>
-  <a href="{{.Link}}" target="_blank">
+  <a class="redirect-link" href="{{.Link}}" target="_blank">
     <div class="card" id="ad-banner">
       <img class="card-image" src="{{.ImageSrc}}" alt={{.Title}}>
       <div class="card-body">
