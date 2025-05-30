@@ -50,6 +50,7 @@ func (r *BannerRepository) GetSuitableBanners(floor *decimal.Decimal) ([]int64, 
           AND u.balance > 0
           AND b.max_price >= $1
           AND u.balance >= b.max_price
+		  AND b.deleted = FALSE
     `
 
 	rows, err := r.db.Query(query, floor)
@@ -120,6 +121,7 @@ func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *model.Bann
               JOIN auth_user u2 ON b2.owner_id = u2.id
               WHERE b2.status = 1 AND u2.balance > 0 AND b2.max_price > $1
           )
+		  AND b.deleted = FALSE
         ORDER BY RANDOM()
         LIMIT 1;
     `
