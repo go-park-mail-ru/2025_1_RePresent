@@ -48,3 +48,29 @@ func (h *BannerController) GenerateDescription(w http.ResponseWriter, r *http.Re
 	//nolint:errcheck
 	easyjson.MarshalToWriter(&resp, w)
 }
+
+func (h *BannerController) GenerateImage(w http.ResponseWriter, r *http.Request) {
+	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
+	userCtx, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		easyjson.MarshalToWriter(response.NewResponse(true, "auth error"), w)
+		return
+	}
+	userID := userCtx.UserID
+
+	id, err := strconv.Atoi(mux.Vars(r)["banner_id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		easyjson.MarshalToWriter(response.NewResponse(true, "invalid banner ID"), w)
+		return
+	}
+	imgB64, err := h.BannerUsecase.GenerateBannerImage(userID, id, requestID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		easyjson.MarshalToWriter(response.NewResponse(true, err.Error()), w)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	easyjson.MarshalToWriter(response.NewResponse(false, imgB64), w)
+}

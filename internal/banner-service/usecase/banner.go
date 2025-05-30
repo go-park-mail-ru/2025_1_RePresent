@@ -132,3 +132,14 @@ func (b *BannerUsecase) GenerateBannerDescription(userID, bannerID int, requestI
 
 	return description, nil
 }
+
+func (b *BannerUsecase) GenerateBannerImage(userID, bannerID int, requestID string) (string, error) {
+	banner, err := b.BannerRepository.GetBannerByID(bannerID, requestID)
+	if err != nil {
+		return "", err
+	}
+	if banner.OwnerID != userID || banner.Deleted {
+		return "", errors.New("banner not found or access denied")
+	}
+	return b.BannerRepository.GenerateBannerImage(bannerID, requestID)
+}

@@ -48,6 +48,11 @@ type ChatResponse struct {
 	} `json:"choices"`
 }
 
+// FunctionDef описывает функцию для вызова в GigaChat
+type FunctionDef struct {
+	Name string `json:"name"`
+}
+
 func NewGigaChatService(logger *zap.SugaredLogger, authKey, clientID string) *GigaChatService {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -147,4 +152,59 @@ func (g *GigaChatService) GenerateDescription(title, _ string) (string, error) {
 		"Создай краткое привлекательное описание для баннера '%s', не более 60 символов.",
 		title)
 	return g.Chat([]ChatMessage{{Role: "user", Content: prompt}})
+}
+
+func (g *GigaChatService) GenerateImage(title, description string) (string, error) {
+	token, err := g.GetToken()
+	if err != nil {
+		return "", err
+	}
+
+	reqBody := struct {
+		Model        string        `json:"model"`
+		Messages     []ChatMessage `json:"messages"`
+		FunctionCall string        `json:"function_call"`
+		Functions    []FunctionDef `json:"functions"`
+	}{
+		Model: "GigaChat",
+		Messages: []ChatMessage{
+			{Role: "system", Content: "Ты — Василий Кандинский"},
+			{Role: "user", Content: fmt.Sprintf("Нарисуй баннер '%s' с описанием '%s' размером 512x512 PNG.", title, description)},
+		},
+		FunctionCall: "auto",
+		Functions:    []FunctionDef{{Name: "text2image"}},
+	}
+
+	data, _ := json.Marshal(reqBody)
+	req, err := http.NewRequest("POST", g.chatURL+"/chat/completions", bytes.NewReader(data))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("x-client-id", g.clientID)
+	req.Header.Set("x-request-id", uuid.New().String())
+	req.Header.Set("x-session-id", uuid.New().String())
+
+	resp, err := g.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("chat completion failed: %s (%s)", resp.Status, string(body))
+	}
+
+	var ch ChatResponse
+	if err := json.Unmarshal(body, &ch); err != nil {
+		return "", err
+	}
+	if len(ch.Choices) == 0 {
+		return "", fmt.Errorf("no chat choices returned")
+	}
+
+	return ch.Choices[0].Message.Content, nil
 }

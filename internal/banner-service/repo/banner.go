@@ -374,6 +374,20 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) err
 	return nil
 }
 
+// GenerateBannerImage генерирует изображение через GigaChatService
+func (r *BannerRepository) GenerateBannerImage(bannerID int, requestID string) (string, error) {
+	// получаем title и description
+	var title, desc string
+	err := r.Db.QueryRow(
+		"SELECT title, description FROM banner WHERE id=$1 AND deleted=FALSE", bannerID,
+	).Scan(&title, &desc)
+	if err != nil {
+		return "", err
+	}
+	// вызываем сервис
+	return r.gigaChatService.GenerateImage(title, desc)
+}
+
 func (r *BannerRepository) CloseConnection() error {
 	return r.Db.Close()
 }
