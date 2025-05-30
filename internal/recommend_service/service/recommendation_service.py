@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from model.banner import Banner
+from model.banner import Banner, ProtoBanner
 from repository.user_repo import UserRepository
 from repository.banner_repo import BannerRepository
 from repository.banner_cache_repo import BannerCacheRepository
@@ -38,7 +38,7 @@ class RecommendationService:
         return cached
 
     @with_timeout(seconds=1.0)
-    def recommend_banner(self, banner_ids: List[int]) -> Banner:
+    def recommend_banner(self, banner_ids: List[int]) -> int:
         if not banner_ids:
             logger.warning("banner_id is EMPTY")
             raise ValueError("banner_id LIST is EMPTY")
@@ -50,5 +50,11 @@ class RecommendationService:
             raise ValueError("Haven`t Banners for recommend")
 
         best_id = max(banners.keys(), key=lambda bid: banners[bid].max_price)
-        logger.info(f"Выбран баннер с максимальной ценой: {best_id}")
+        logger.info(f"Select banner by max price: {best_id}")
         return best_id
+
+    def get_proto_banner_by_id(self, banner_id: int) -> ProtoBanner:
+        banner = self.banner_repo.get_proto_banner_by_id(banner_id)
+        if banner is None:
+            raise ValueError(f"Banner {banner_id} not found")
+        return banner

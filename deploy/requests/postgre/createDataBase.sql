@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_id ON auth_user(id);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_user_balance ON auth_user(balance);
+CREATE INDEX IF NOT EXISTS idx_user_balance ON auth_user(balance);
 CREATE UNIQUE INDEX IF NOT EXISTS auth_user_username_key ON auth_user (username);
 CREATE UNIQUE INDEX IF NOT EXISTS auth_user_email_key ON auth_user (email);
 

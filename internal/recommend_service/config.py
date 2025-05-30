@@ -12,6 +12,7 @@ class Config:
     db_sslmode: str
     redis_host: str
     redis_port: int
+    redis_password: str
 
     def __post_init__(self):
         self.dsn = (
@@ -19,7 +20,7 @@ class Config:
             f"user='{self.db_user}' "
             f"password='{self.db_password}' "
             f"host='{self.db_host}' "
-            f"port='{self.db_port}' "
+            f"port={self.db_port} "
             f"sslmode='{self.db_sslmode}'"
         )
 
@@ -27,11 +28,12 @@ class Config:
 def load_config():
     return Config(
         db_host=os.getenv("DB_HOST", "localhost"),
-        db_port=int(os.getenv("DB_PORT", "5432")),
-        db_user=os.getenv("DB_USER", "postgres"),
-        db_password=os.getenv("DB_PASSWORD", "123456"),
-        db_name=os.getenv("DB_NAME", "test_db"),
-        db_sslmode=os.getenv("DB_SSLMODE", "disable"),
+        db_port=int(os.getenv("DB_PORT", "8081")),
+        db_user=os.getenv("PSQL_USER", "postgres"),
+        db_password=os.getenv("PSQL_PASSWORD", "123456"),
+        db_name=os.getenv("PSQL_DB_NAME", "test_db"),
+        db_sslmode=os.getenv("PSQL_SSLMODE", "disable"),
         redis_host=os.getenv("REDIS_HOST", "localhost"),
         redis_port=int(os.getenv("REDIS_PORT", "6379")),
+        redis_password=os.getenv("REDIS_PASSWORD", None),
     )

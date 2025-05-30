@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pkg.proto.recommend.recommend_pb2 as recommend_pb2
 import pkg.proto.recommend.recommend_pb2_grpc as recommend_pb2_grpc
 import pkg.proto.banner.banner_pb2 as banner_pb2
+from db.connection import PostgresConnectionPool
 from controller.grpc.recommend_handler import GrpcRecommendationServer
 from service.recommendation_service import RecommendationService
 from repository.user_repo import UserRepository
@@ -18,23 +19,17 @@ def serve(config=None):
     if config is None:
         config = load_config()
 
-    dsn = (
-        f"dbname='{config.db_name}' "
-        f"user='{config.db_user}' "
-        f"password='{config.db_password}' "
-        f"host='{config.db_host}' "
-        f"port='{config.db_port}' "
-        f"sslmode='{config.db_sslmode}'"
-    )
+    connection_pool = PostgresConnectionPool(dsn=config.dsn, minconn=1, maxconn=5)
 
-    user_repo = UserRepository(dsn)
-    banner_repo = BannerRepository(dsn)
-    banner_cache = BannerCacheRepository(config.redis_host, config.redis_port)
+    user_repo = UserRepository(connection_pool)
+    banner_repo = BannerRepository(connection_pool)
+    banner_cache = BannerCacheRepository(
+        config.redis_host, config.redis_port, password=config.redis_password
+    )
 
     recommendation_service = RecommendationService(user_repo, banner_repo, banner_cache)
 
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
-
     recommend_pb2_grpc.add_RecommendServiceServicer_to_server(
         GrpcRecommendationServer(recommendation_service), server
     )

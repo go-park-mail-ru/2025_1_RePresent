@@ -7,8 +7,11 @@ import redis
 
 
 class BannerCacheRepository:
-    def __init__(self, host: str, port: int):
-        self.client = redis.Redis(host=host, port=port)
+    def __init__(self, host: str, port: int, password: Optional[str] = None):
+        self.client = redis.Redis(
+            host=host, port=port, password=password, decode_responses=False
+        )
+        self.ttl_seconds = 3 * 60  # 3 минуты в секундах
 
     def _cache_key(self, banner_id: int) -> str:
         return f"banner:{banner_id}"
@@ -43,16 +46,19 @@ class BannerCacheRepository:
 
     def set_banner(self, banner: Banner):
         key = self._cache_key(banner.id)
-        self.client.set(key, pickle.dumps(banner))
-        logger.debug(f"Saved banner {banner.id} to cache")
+        self.client.setex(key, self.ttl_seconds, pickle.dumps(banner))
+        logger.debug(f"Saved banner {banner.id} to cache with TTL={self.ttl_seconds}s")
 
     def set_banners(self, banners: list[Banner]):
         pipeline = self.client.pipeline()
         for banner in banners:
             key = self._cache_key(banner.id)
-            pipeline.set(key, pickle.dumps(banner))
+            pipeline.setex(key, self.ttl_seconds, pickle.dumps(banner))
+
         pipeline.execute()
-        logger.debug(f"Saved {len(banners)} banners to cache")
+        logger.debug(
+            f"Saved {len(banners)} banners to cache with TTL={self.ttl_seconds}s"
+        )
 
     def delete_banner(self, banner_id: int):
         self.client.delete(self._cache_key(banner_id))

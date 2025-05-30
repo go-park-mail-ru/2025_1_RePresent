@@ -17,9 +17,9 @@ class GrpcRecommendationServer(recommend_pb2_grpc.RecommendServiceServicer):
         )
 
         banner_ids = list(request.banner_id)
-        best_id = 1
         try:
             best_id = self.service.recommend_banner(banner_ids)
+            banner = self.service.get_proto_banner_by_id(best_id)
         except TimeoutError as e:
             logger.error(f"Timeout error during recommendation: {e}")
             context.set_details("Recommendation timed out")
@@ -32,11 +32,11 @@ class GrpcRecommendationServer(recommend_pb2_grpc.RecommendServiceServicer):
             return banner_pb2.Banner()
 
         return banner_pb2.Banner(
-            title="Рекламный баннер",
-            content="Купи слона!",
-            description="Это тестовый баннер для рекомендаций",
-            link="https://example.com",
-            ownerID="owner_12345",
-            max_price="100.50",
+            title=banner.title,
+            content=banner.content,
+            description=banner.description,
+            link=banner.link,
+            ownerID=banner.owner_id,
+            max_price=banner.max_price,
             id=best_id,
         )
