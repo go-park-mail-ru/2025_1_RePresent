@@ -50,7 +50,7 @@ func (r *BannerRepository) GetSuitableBanners(floor *decimal.Decimal) ([]int64, 
           AND u.balance > 0
           AND b.max_price >= $1
           AND u.balance >= b.max_price
-		  AND b.deleted = FALSE
+		  AND NOT b.deleted
     `
 
 	rows, err := r.db.Query(query, floor)
@@ -76,7 +76,7 @@ func (r *BannerRepository) GetSuitableBanners(floor *decimal.Decimal) ([]int64, 
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]model.Banner, error) {
-	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND deleted = FALSE;"
+	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND NOT b.deleted;"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", id)
 	startTime := time.Now()
 	rows, err := r.db.Query(query, id)
@@ -121,7 +121,7 @@ func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *model.Bann
               JOIN auth_user u2 ON b2.owner_id = u2.id
               WHERE b2.status = 1 AND u2.balance > 0 AND b2.max_price > $1
           )
-		  AND b.deleted = FALSE
+		  AND NOT b.deleted
         ORDER BY RANDOM()
         LIMIT 1;
     `
