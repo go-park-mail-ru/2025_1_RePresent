@@ -79,7 +79,7 @@ func (r *BannerRepository) GetSuitableBanners(floor *decimal.Decimal) ([]int64, 
 }
 
 func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]model.Banner, error) {
-	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND NOT b.deleted;"
+	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND NOT deleted;"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", id)
 	startTime := time.Now()
 	rows, err := r.Db.Query(query, id)
