@@ -153,7 +153,6 @@ func (g *GigaChatService) GenerateDescription(title, _ string) (string, error) {
 	return g.Chat([]ChatMessage{{Role: "user", Content: prompt}})
 }
 
-// GenerateImage генерирует изображение баннера и возвращает его в бинарном виде
 func (g *GigaChatService) GenerateImage(title, description string) ([]byte, error) {
 	token, err := g.GetToken()
 	if err != nil {
@@ -224,7 +223,7 @@ func (g *GigaChatService) GenerateImage(title, description string) ([]byte, erro
 	}
 
 	content := response.Choices[0].Message.Content
-	g.logger.Debugw("Парсинг конте��та изображения", "контент", content)
+	g.logger.Debugw("Парсинг контента изображения", "контент", content)
 
 	imgIDStart := strings.Index(content, "<img src=\"")
 	if imgIDStart == -1 {
@@ -249,8 +248,8 @@ func (g *GigaChatService) GetImageByID(imageID string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	url := fmt.Sprintf("%s/files/%s", g.chatURL, imageID)
-	g.logger.Debugw("Запрос изображения по ID", "url", url, "imageID", imageID)
+	url := fmt.Sprintf("%s/files/%s/content", g.chatURL, imageID)
+	g.logger.Debugw("Запрос бинарного изображения по ID", "url", url, "imageID", imageID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
