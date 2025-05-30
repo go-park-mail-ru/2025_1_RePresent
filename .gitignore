@@ -40,3 +40,4 @@ perf_test/signup_targets.json
 
 # for python
 venv
+catboost_info

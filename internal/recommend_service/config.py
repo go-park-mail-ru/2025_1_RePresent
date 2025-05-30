@@ -27,8 +27,8 @@ class Config:
 
 def load_config():
     return Config(
-        db_host=os.getenv("DB_HOST", "localhost"),
-        db_port=int(os.getenv("DB_PORT", "8081")),
+        db_host=os.getenv("PSQL_HOST", "localhost"),
+        db_port=int(os.getenv("PSQL_INSIDE_PORT", "8081")),
         db_user=os.getenv("PSQL_USER", "postgres"),
         db_password=os.getenv("PSQL_PASSWORD", "123456"),
         db_name=os.getenv("PSQL_DB_NAME", "test_db"),

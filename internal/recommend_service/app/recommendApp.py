@@ -7,9 +7,12 @@ import pkg.proto.banner.banner_pb2 as banner_pb2
 from db.connection import PostgresConnectionPool
 from controller.grpc.recommend_handler import GrpcRecommendationServer
 from service.recommendation_service import RecommendationService
+from service.deta_prepare_service import DataPrepareService
+
 from repository.user_repo import UserRepository
 from repository.banner_repo import BannerRepository
 from repository.banner_cache_repo import BannerCacheRepository
+from repository.embedding_cache_repo import EmbeddingCacheRepository
 from config import load_config
 
 from loguru import logger
@@ -26,12 +29,17 @@ def serve(config=None):
     banner_cache = BannerCacheRepository(
         config.redis_host, config.redis_port, password=config.redis_password
     )
+    embedding_cache = EmbeddingCacheRepository(
+        config.redis_host, config.redis_port, password=config.redis_password
+    )
 
-    recommendation_service = RecommendationService(user_repo, banner_repo, banner_cache)
+    data_prepare_service = DataPrepareService(user_repo, banner_repo, banner_cache)
+    recommendation_service = RecommendationService(embedding_cache)
 
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
+
     recommend_pb2_grpc.add_RecommendServiceServicer_to_server(
-        GrpcRecommendationServer(recommendation_service), server
+        GrpcRecommendationServer(recommendation_service, data_prepare_service), server
     )
 
     server.add_insecure_port("[::]:50055")

@@ -9,9 +9,14 @@ import redis
 class BannerCacheRepository:
     def __init__(self, host: str, port: int, password: Optional[str] = None):
         self.client = redis.Redis(
-            host=host, port=port, password=password, decode_responses=False
+            host=host,
+            port=port,
+            password=None,  # Нада пофиксить будет
+            decode_responses=False,
         )
         self.ttl_seconds = 3 * 60  # 3 минуты в секундах
+        if self.client.ping():
+            logger.info("Redis connection established for banners")
 
     def _cache_key(self, banner_id: int) -> str:
         return f"banner:{banner_id}"
@@ -46,24 +51,15 @@ class BannerCacheRepository:
 
     def set_banner(self, banner: Banner):
         key = self._cache_key(banner.id)
-        self.client.setex(key, self.ttl_seconds, pickle.dumps(banner))
+        self.client.setex(key, self.ttl_seconds, pickle.dumps(banner.to_dict()))
         logger.debug(f"Saved banner {banner.id} to cache with TTL={self.ttl_seconds}s")
 
-    def set_banners(self, banners: list[Banner]):
+    def set_banners(self, banners: List[Banner]):
         pipeline = self.client.pipeline()
         for banner in banners:
             key = self._cache_key(banner.id)
-            pipeline.setex(key, self.ttl_seconds, pickle.dumps(banner))
-
+            pipeline.setex(key, self.ttl_seconds, pickle.dumps(banner.__getstate__()))
         pipeline.execute()
         logger.debug(
             f"Saved {len(banners)} banners to cache with TTL={self.ttl_seconds}s"
         )
-
-    def delete_banner(self, banner_id: int):
-        self.client.delete(self._cache_key(banner_id))
-        logger.debug(f"Deleted banner {banner_id} from cache")
-
-    def clear_cache(self):
-        self.client.flushdb()
-        logger.debug("Redis cache cleared")

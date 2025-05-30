@@ -8,8 +8,9 @@ import pkg.proto.banner.banner_pb2 as banner_pb2
 
 
 class GrpcRecommendationServer(recommend_pb2_grpc.RecommendServiceServicer):
-    def __init__(self, recommendation_service):
-        self.service = recommendation_service
+    def __init__(self, recommendation_service, data_prepare_service):
+        self.recommendation_service = recommendation_service
+        self.data_prepare_serivice = data_prepare_service
 
     def GetBannerByMetaData(self, request, context):
         logger.debug(
@@ -17,9 +18,26 @@ class GrpcRecommendationServer(recommend_pb2_grpc.RecommendServiceServicer):
         )
 
         banner_ids = list(request.banner_id)
+
         try:
-            best_id = self.service.recommend_banner(banner_ids)
-            banner = self.service.get_proto_banner_by_id(best_id)
+            platform = self.data_prepare_serivice.get_platform_by_id(
+                request.platform_id
+            )
+            if platform == None:
+                context.set_code(grpc.StatusCode.PERMISSION_DENIED)
+                return banner_pb2.Banner()
+
+            banners = self.data_prepare_serivice.get_banners(banner_ids)
+            if banners == None:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                return banner_pb2.Banner()
+
+            best_id = self.recommendation_service.recommend_banner(
+                request.slot_name, platform.username, platform.description, banners
+            )
+
+            banner = self.data_prepare_serivice.get_proto_banner_by_id(best_id)
+
         except TimeoutError as e:
             logger.error(f"Timeout error during recommendation: {e}")
             context.set_details("Recommendation timed out")

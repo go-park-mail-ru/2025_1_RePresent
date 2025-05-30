@@ -13,7 +13,7 @@ def run():
     with grpc.insecure_channel("localhost:50055") as channel:
         stub = recommend_pb2_grpc.RecommendServiceStub(channel)
         request = recommend_pb2.RecommendationRequest(
-            platform_id=1, slot_name="SideBar", banner_id=[1, 2, 3, 4]
+            platform_id=100, slot_name="Хомяки", banner_id=[1, 2, 3, 4]
         )
         print("📤 Отправляем запрос...")
         try:

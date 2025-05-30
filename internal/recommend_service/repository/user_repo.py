@@ -17,7 +17,7 @@ class UserRepository:
                     """
                     SELECT id, username, description, role
                     FROM auth_user
-                    WHERE id = %s AND NOT deleted
+                    WHERE id = %s
                     """,
                     (user_id,),
                 )

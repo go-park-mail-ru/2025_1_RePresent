@@ -263,6 +263,19 @@ services:
     networks:
       - retarget_network
 
+  recommend-service:
+    build:
+      context: ../
+      dockerfile: deploy/recommend.Dockerfile
+    container_name: ReTargetApiRecommend
+    ports:
+      - "50055:50055"
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - redis0
+      - postgresdb
+
 volumes:
   pg_data:
   clickhouse_data:
