@@ -6,6 +6,7 @@ import (
 	"log"
 	model "retarget/internal/banner-service/easyjsonModels"
 	"retarget/internal/banner-service/entity"
+	"retarget/internal/banner-service/service"
 
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
@@ -24,18 +25,20 @@ type BannerRepositoryInterface interface {
 }
 
 type BannerRepository struct {
-	db     *sql.DB
-	logger *zap.SugaredLogger
+	Db              *sql.DB
+	logger          *zap.SugaredLogger
+	gigaChatService *service.GigaChatService
 }
 
-func NewBannerRepository(endPoint string, logger *zap.SugaredLogger) *BannerRepository {
+func NewBannerRepository(endPoint string, logger *zap.SugaredLogger, gigaChatService *service.GigaChatService) *BannerRepository {
 	bannerRepo := &BannerRepository{}
 	db, err := sql.Open("postgres", endPoint)
 	if err != nil {
 		log.Fatal(err)
 	}
-	bannerRepo.db = db
+	bannerRepo.Db = db
 	bannerRepo.logger = logger
+	bannerRepo.gigaChatService = gigaChatService
 	return bannerRepo
 }
 
@@ -53,7 +56,7 @@ func (r *BannerRepository) GetSuitableBanners(floor *decimal.Decimal) ([]int64, 
 		  AND NOT b.deleted
     `
 
-	rows, err := r.db.Query(query, floor)
+	rows, err := r.Db.Query(query, floor)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +82,7 @@ func (r *BannerRepository) GetBannersByUserId(id int, requestID string) ([]model
 	query := "SELECT id, owner_id, title, description, content, status, link, max_price FROM banner WHERE owner_id = $1 AND NOT deleted;"
 	r.logger.Debugw("Executing SQL query GetProfileByID", "request_id", requestID, "query", query, "userID", id)
 	startTime := time.Now()
-	rows, err := r.db.Query(query, id)
+	rows, err := r.Db.Query(query, id)
 	duration := time.Since(startTime)
 	if err != nil {
 		r.logger.Debugw("SQL Error", "request_id", requestID, "userID", id, "duration", duration, "error", err)
@@ -129,7 +132,7 @@ func (r *BannerRepository) GetMaxPriceBanner(floor *decimal.Decimal) *model.Bann
 	var banner model.Banner
 	startTime := time.Now()
 
-	err := r.db.QueryRow(query, floor).Scan(
+	err := r.Db.QueryRow(query, floor).Scan(
 		&banner.ID,
 		&banner.Title,
 		&banner.Content,
@@ -156,7 +159,7 @@ func (r *BannerRepository) CreateNewBanner(banner model.Banner, requestID string
 		// "status", banner.Status,
 		"link", banner.Link,
 	)
-	stmt, err := r.db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link, max_price) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;")
+	stmt, err := r.Db.Prepare("INSERT INTO banner (owner_id, title, description, content, status, balance, link, max_price) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;")
 	startTime := time.Now()
 
 	if err != nil {
@@ -188,7 +191,7 @@ func (r *BannerRepository) UpdateBanner(banner model.Banner, requestID string) e
 		"bannerID", banner.ID,
 		"query", query,
 	)
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		r.logger.Debugw("Failed to prepare SQL statement for banner update",
 			"request_id", requestID,
@@ -229,7 +232,7 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*model.Banne
 		"bannerID", id, "query", query,
 	)
 
-	row := r.db.QueryRow(query, id)
+	row := r.Db.QueryRow(query, id)
 
 	banner := &model.Banner{}
 	err := row.Scan(
@@ -260,15 +263,51 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*model.Banne
 	return banner, nil
 }
 
-// func (r *BannerRepository) GetRandomBanner(id int) (*model.Banner, error) {
-//      row := r.db.QueryRow("SELECT owner_id, title, description, content, status, balance, link FROM banner WHERE id = $1 AND deleted = FALSE;", id)
-//      banner := &model.Banner{}
-//      err := row.Scan(&banner.OwnerID, &banner.Title, &banner.Description, &banner.Content, &banner.Status, &banner.Balance, &banner.Link)
-//      if err != nil {
-//              return nil, err
-//      }
-//      return banner, nil
-// }
+func (r *BannerRepository) GenerateBannerDescription(bannerID int, requestID string) (string, error) {
+	startTime := time.Now()
+
+	r.logger.Debugw("Starting to fetch banner for description generation",
+		"request_id", requestID,
+		"bannerID", bannerID,
+	)
+
+	query := `
+		SELECT title, content
+		FROM banner
+		WHERE id = $1 AND deleted = FALSE;
+	`
+
+	var title, content string
+	err := r.Db.QueryRow(query, bannerID).Scan(&title, &content)
+	if err != nil {
+		r.logger.Errorw("Failed to fetch banner data for description generation",
+			"request_id", requestID,
+			"bannerID", bannerID,
+			"error", err,
+			"timeTaken", time.Since(startTime).String(),
+		)
+		return "", err
+	}
+
+	description, err := r.gigaChatService.GenerateDescription(title, content)
+	if err != nil {
+		r.logger.Errorw("Failed to generate description using GigaChat",
+			"request_id", requestID,
+			"bannerID", bannerID,
+			"error", err,
+			"timeTaken", time.Since(startTime).String(),
+		)
+		return "", err
+	}
+
+	r.logger.Infow("Successfully generated description for banner",
+		"request_id", requestID,
+		"bannerID", bannerID,
+		"timeTaken", time.Since(startTime).String(),
+	)
+
+	return description, nil
+}
 
 func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) error {
 	startTime := time.Now()
@@ -280,7 +319,7 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) err
 	)
 
 	var deleted bool
-	err := r.db.QueryRow(
+	err := r.Db.QueryRow(
 		"SELECT deleted FROM banner WHERE id = $1 AND owner_id = $2",
 		id, owner,
 	).Scan(&deleted)
@@ -315,7 +354,7 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) err
 		return errors.New("banner not found")
 	}
 	// Выполнение удаления
-	_, err = r.db.Exec("UPDATE banner SET deleted = TRUE WHERE id = $1", id)
+	_, err = r.Db.Exec("UPDATE banner SET deleted = TRUE WHERE id = $1", id)
 	if err != nil {
 		r.logger.Debugw("Failed to delete banner",
 			"request_id", requestID,
@@ -336,5 +375,5 @@ func (r *BannerRepository) DeleteBannerByID(owner, id int, requestID string) err
 }
 
 func (r *BannerRepository) CloseConnection() error {
-	return r.db.Close()
+	return r.Db.Close()
 }
