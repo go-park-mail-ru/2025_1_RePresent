@@ -61,6 +61,10 @@ type YooConfig struct {
 	SecretKey string
 }
 
+type GigaChatConfig struct {
+	AuthKey string
+}
+
 type Config struct {
 	Database     DatabaseConfig
 	Email        MailConfig
@@ -69,6 +73,7 @@ type Config struct {
 	Minio        MinioConfig
 	Scylla       ScyllaConfig
 	Yoo          YooConfig
+	GigaChat     GigaChatConfig
 }
 
 func LoadConfigs() (*Config, error) {
@@ -124,6 +129,9 @@ func LoadConfigs() (*Config, error) {
 		Yoo: YooConfig{
 			ShopID:    os.Getenv("YOO_SHOP_ID"),
 			SecretKey: os.Getenv("YOO_SECRET_KEY"),
+		},
+		GigaChat: GigaChatConfig{
+			AuthKey: os.Getenv("GIGACHAT_AUTH_KEY"),
 		},
 	}
 	return &config, nil

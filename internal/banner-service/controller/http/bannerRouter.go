@@ -37,5 +37,11 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 	muxRouter.Handle("/api/v1/banner/upload", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.UploadImageHandler)))).Methods("PUT")
 	// Рандомный айфрейм юзера
 	muxRouter.Handle("/api/v1/banner/uniq_link/{uniq_link}", logger.LogMiddleware(http.HandlerFunc(bannerController.RandomIFrame))).Methods("GET")
+
+	// Маршрут для генерации описания
+	muxRouter.Handle("/api/v1/banner/generate/description/{banner_id:[0-9]+}",
+		logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(bannerController.GenerateDescription)))).
+		Methods("POST")
+
 	return muxRouter
 }
