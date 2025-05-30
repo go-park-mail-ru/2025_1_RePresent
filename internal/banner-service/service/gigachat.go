@@ -168,7 +168,7 @@ func (g *GigaChatService) GenerateImage(title, description string) ([]byte, erro
 		Model: "GigaChat",
 		Messages: []ChatMessage{
 			{Role: "system", Content: "Ты — профессиональный графический дизайнер баннеров"},
-			{Role: "user", Content: fmt.Sprintf("Создай красивый рекламный баннер размером 512x512 для '%s'. %s", title, description)},
+			{Role: "user", Content: fmt.Sprintf("Создай красивый рекламный баннер без текста размером 512x512 для '%s'. %s", title, description)},
 		},
 		FunctionCall: map[string]string{"name": "text2image"},
 		Functions:    []FunctionDef{{Name: "text2image"}},
