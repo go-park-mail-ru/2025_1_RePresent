@@ -18,9 +18,11 @@ import (
 type GigaChatService struct {
 	logger          *zap.SugaredLogger
 	authKey         string
+	clientID        string
 	token           string
 	tokenExpiration time.Time
 	baseURL         string
+	chatURL         string
 	httpClient      *http.Client
 }
 
@@ -46,16 +48,17 @@ type ChatResponse struct {
 	} `json:"choices"`
 }
 
-func NewGigaChatService(logger *zap.SugaredLogger, authKey string) *GigaChatService {
+func NewGigaChatService(logger *zap.SugaredLogger, authKey, clientID string) *GigaChatService {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	client := &http.Client{Transport: tr}
-
+	client := &http.Client{Transport: tr, Timeout: 30 * time.Second}
 	return &GigaChatService{
 		logger:     logger,
 		authKey:    authKey,
+		clientID:   clientID,
 		baseURL:    "https://ngw.devices.sberbank.ru:9443",
+		chatURL:    "https://gigachat.devices.sberbank.ru/api/v1",
 		httpClient: client,
 	}
 }
@@ -64,88 +67,83 @@ func (g *GigaChatService) GetToken() (string, error) {
 	if g.token != "" && g.tokenExpiration.After(time.Now()) {
 		return g.token, nil
 	}
-	g.logger.Debugw("Getting new token from GigaChat API")
-
 	data := url.Values{}
 	data.Set("grant_type", "client_credentials")
 	data.Set("scope", "GIGACHAT_API_PERS")
 
 	req, err := http.NewRequest("POST", g.baseURL+"/api/v2/oauth", strings.NewReader(data.Encode()))
 	if err != nil {
-		g.logger.Errorw("Failed to create auth request", "error", err)
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("RqUID", uuid.New().String())
-	authHeader := g.authKey
-	if !strings.HasPrefix(strings.TrimSpace(authHeader), "Basic ") {
-		authHeader = "Basic " + authHeader
+	auth := strings.TrimSpace(g.authKey)
+	if !strings.HasPrefix(auth, "Basic ") {
+		auth = "Basic " + auth
 	}
-	req.Header.Set("Authorization", authHeader)
+	req.Header.Set("Authorization", auth)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		g.logger.Errorw("Auth request failed", "error", err)
 		return "", err
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
 		return "", fmt.Errorf("failed to get token: %s (%s)", resp.Status, string(body))
 	}
 
-	var trsp TokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&trsp); err != nil {
+	var tr TokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tr); err != nil {
 		return "", err
 	}
-	g.tokenExpiration = time.Unix(trsp.ExpiresAt, 0)
-	g.token = trsp.AccessToken
+	g.token = tr.AccessToken
+	g.tokenExpiration = time.Unix(tr.ExpiresAt, 0)
 	return g.token, nil
 }
 
-func (g *GigaChatService) GenerateDescription(bannerTitle, bannerContent string) (string, error) {
+func (g *GigaChatService) Chat(messages []ChatMessage) (string, error) {
 	token, err := g.GetToken()
 	if err != nil {
 		return "", err
 	}
+	reqBody := ChatRequest{Model: "GigaChat", Messages: messages}
+	data, _ := json.Marshal(reqBody)
 
-	prompt := fmt.Sprintf(
-		"Создай краткое привлекательное описание для баннера '%s': %s",
-		bannerTitle, bannerContent,
-	)
-
-	reqBody, _ := json.Marshal(ChatRequest{
-		Model:    "GigaChat",
-		Messages: []ChatMessage{{Role: "user", Content: prompt}},
-	})
-
-	req, err := http.NewRequest("POST", g.baseURL+"/api/v2/chat/completions", bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", g.chatURL+"/chat/completions", bytes.NewReader(data))
 	if err != nil {
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("x-client-id", g.clientID)
+	req.Header.Set("x-request-id", uuid.New().String())
+	req.Header.Set("x-session-id", uuid.New().String())
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
 		return "", fmt.Errorf("chat completion failed: %s (%s)", resp.Status, string(body))
 	}
 
-	var chResp ChatResponse
-	if err := json.NewDecoder(resp.Body).Decode(&chResp); err != nil {
+	var ch ChatResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ch); err != nil {
 		return "", err
 	}
-	if len(chResp.Choices) == 0 {
-		return "", fmt.Errorf("no completion returned")
+	if len(ch.Choices) == 0 {
+		return "", fmt.Errorf("no chat choices returned")
 	}
-	return chResp.Choices[0].Message.Content, nil
+	return ch.Choices[0].Message.Content, nil
+}
+
+func (g *GigaChatService) GenerateDescription(title, content string) (string, error) {
+	return g.Chat([]ChatMessage{{Role: "user", Content: fmt.Sprintf(
+		"Создай краткое привлекательное описание для баннера '%s': %s", title, content,
+	)}})
 }

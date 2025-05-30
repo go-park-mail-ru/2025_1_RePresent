@@ -23,7 +23,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		log.Fatal(err.Error())
 	}
 
-	gigaChatService := service.NewGigaChatService(logger, cfg.GigaChat.AuthKey)
+	gigaChatService := service.NewGigaChatService(logger, cfg.GigaChat.AuthKey, cfg.GigaChat.ClientID)
 	imageRepository := repo.NewBannerImageRepository(cfg.Minio.EndPoint, cfg.Minio.AccessKeyID, cfg.Minio.SecretAccesKey, cfg.Minio.Token, false, "image")
 	bannerRepository := repo.NewBannerRepository(cfg.Database.ConnectionString("d"), logger, gigaChatService)
 	defer func() {

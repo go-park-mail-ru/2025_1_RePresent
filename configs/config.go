@@ -62,7 +62,8 @@ type YooConfig struct {
 }
 
 type GigaChatConfig struct {
-	AuthKey string
+	AuthKey  string
+	ClientID string
 }
 
 type Config struct {
@@ -131,7 +132,8 @@ func LoadConfigs() (*Config, error) {
 			SecretKey: os.Getenv("YOO_SECRET_KEY"),
 		},
 		GigaChat: GigaChatConfig{
-			AuthKey: os.Getenv("GIGACHAT_AUTH_KEY"),
+			AuthKey:  os.Getenv("GIGACHAT_AUTH_KEY"),
+			ClientID: os.Getenv("GIGACHAT_CLIENT_ID"),
 		},
 	}
 	return &config, nil
