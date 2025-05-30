@@ -1,10 +1,14 @@
-grpcio
-grpcio-tools
-protobuf
-psycopg2-binary
-redis
-loguru
-faiss-cpu
-sentence-transformers
-catboost
-numpy
+# Базовые зависимости (быстрые зеркала)
+grpcio==1.60.0 --index-url https://mirrors.aliyun.com/pypi/simple
+grpcio-tools==1.60.0 --index-url https://mirrors.aliyun.com/pypi/simple
+protobuf==4.25.1 --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+psycopg2-binary==2.9.9
+redis==5.0.1
+loguru==0.7.2
+
+# ML-зависимости (спецзеркала)
+torch==2.2.0 --index-url https://download.pytorch.org/whl/cpu
+faiss-cpu==1.8.0
+sentence-transformers==2.7.0
+catboost==1.2.2 --index-url https://pypi.yandexcloud.io/simple
+numpy==1.26.0 --index-url https://pypi.tuna.tsinghua.edu.cn/simple
