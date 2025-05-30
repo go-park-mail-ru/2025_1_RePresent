@@ -142,8 +142,7 @@ func (g *GigaChatService) Chat(messages []ChatMessage) (string, error) {
 	return ch.Choices[0].Message.Content, nil
 }
 
-func (g *GigaChatService) GenerateDescription(title, content string) (string, error) {
-	return g.Chat([]ChatMessage{{Role: "user", Content: fmt.Sprintf(
-		"Создай краткое привлекательное описание для баннера '%s': %s", title, content,
-	)}})
+func (g *GigaChatService) GenerateDescription(title, _ string) (string, error) {
+	prompt := fmt.Sprintf("Создай краткое привлекательное описание для баннера '%s'.", title)
+	return g.Chat([]ChatMessage{{Role: "user", Content: prompt}})
 }
