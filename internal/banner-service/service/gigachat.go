@@ -76,7 +76,8 @@ func (g *GigaChatService) GetToken() (string, error) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("RqUID", fmt.Sprintf("%d", time.Now().UnixNano()))
-	req.Header.Set("Authorization", g.authKey)
+	// вместо голого ключа добавляем префикс Basic
+	req.Header.Set("Authorization", "Basic "+g.authKey)
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
