@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -48,7 +49,6 @@ type ChatResponse struct {
 	} `json:"choices"`
 }
 
-// FunctionDef описывает функцию для вызова в GigaChat
 type FunctionDef struct {
 	Name string `json:"name"`
 }
@@ -161,21 +161,23 @@ func (g *GigaChatService) GenerateImage(title, description string) (string, erro
 	}
 
 	reqBody := struct {
-		Model        string        `json:"model"`
-		Messages     []ChatMessage `json:"messages"`
-		FunctionCall string        `json:"function_call"`
-		Functions    []FunctionDef `json:"functions"`
+		Model        string            `json:"model"`
+		Messages     []ChatMessage     `json:"messages"`
+		FunctionCall map[string]string `json:"function_call"`
+		Functions    []FunctionDef     `json:"functions"`
 	}{
 		Model: "GigaChat",
 		Messages: []ChatMessage{
-			{Role: "system", Content: "Ты — Василий Кандинский"},
-			{Role: "user", Content: fmt.Sprintf("Нарисуй баннер '%s' с описанием '%s' размером 512x512 PNG.", title, description)},
+			{Role: "system", Content: "Ты — опытный дизайнер баннеров"},
+			{Role: "user", Content: fmt.Sprintf("Нарисуй красивый рекламный баннер размером 512x512 для '%s'. %s", title, description)},
 		},
-		FunctionCall: "auto",
+		FunctionCall: map[string]string{"name": "text2image"},
 		Functions:    []FunctionDef{{Name: "text2image"}},
 	}
 
 	data, _ := json.Marshal(reqBody)
+	g.logger.Debugw("Sending image generation request", "request", string(data))
+
 	req, err := http.NewRequest("POST", g.chatURL+"/chat/completions", bytes.NewReader(data))
 	if err != nil {
 		return "", err
@@ -194,17 +196,79 @@ func (g *GigaChatService) GenerateImage(title, description string) (string, erro
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
+	g.logger.Debugw("Image generation response", "status", resp.Status, "body", string(body))
+
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("chat completion failed: %s (%s)", resp.Status, string(body))
+		return "", fmt.Errorf("image generation failed: %s (%s)", resp.Status, string(body))
 	}
 
-	var ch ChatResponse
-	if err := json.Unmarshal(body, &ch); err != nil {
+	var response struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+				Role    string `json:"role"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	if err := json.Unmarshal(body, &response); err != nil {
+		return "", fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(response.Choices) == 0 || response.Choices[0].Message.Content == "" {
+		return "", fmt.Errorf("no image content in response")
+	}
+
+	content := response.Choices[0].Message.Content
+	g.logger.Debugw("Parsing image content", "content", content)
+
+	imgIDStart := strings.Index(content, "<img src=\"")
+	if imgIDStart == -1 {
+		return "", fmt.Errorf("image ID not found in response")
+	}
+	imgIDStart += 10
+
+	imgIDEnd := strings.Index(content[imgIDStart:], "\"")
+	if imgIDEnd == -1 {
+		return "", fmt.Errorf("malformed image ID in response")
+	}
+
+	imageID := content[imgIDStart : imgIDStart+imgIDEnd]
+	g.logger.Debugw("Extracted image ID", "imageID", imageID)
+
+	return g.GetImageByID(imageID)
+}
+
+func (g *GigaChatService) GetImageByID(imageID string) (string, error) {
+	token, err := g.GetToken()
+	if err != nil {
 		return "", err
 	}
-	if len(ch.Choices) == 0 {
-		return "", fmt.Errorf("no chat choices returned")
+
+	url := fmt.Sprintf("%s/files/%s", g.chatURL, imageID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("x-client-id", g.clientID)
+
+	resp, err := g.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return "", fmt.Errorf("failed to get image: %s (%s)", resp.Status, string(body))
 	}
 
-	return ch.Choices[0].Message.Content, nil
+	image, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(image), nil
 }
