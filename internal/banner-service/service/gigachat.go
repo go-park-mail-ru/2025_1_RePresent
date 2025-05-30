@@ -68,13 +68,9 @@ func NewGigaChatService(logger *zap.SugaredLogger, authKey, clientID string) *Gi
 }
 
 func (g *GigaChatService) GetToken() (string, error) {
-	bufferTime := 30 * time.Second
-	if g.token != "" && g.tokenExpiration.After(time.Now().Add(bufferTime)) {
+	if g.token != "" && g.tokenExpiration.After(time.Now()) {
 		return g.token, nil
 	}
-
-	g.token = ""
-
 	data := url.Values{}
 	data.Set("grant_type", "client_credentials")
 	data.Set("scope", "GIGACHAT_API_PERS")
@@ -135,35 +131,6 @@ func (g *GigaChatService) Chat(messages []ChatMessage) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusUnauthorized {
-		body, _ := ioutil.ReadAll(resp.Body)
-		g.logger.Warnw("Unauthorized error received, trying to refresh token", "response", string(body))
-
-		g.token = ""
-		newToken, err := g.GetToken()
-		if err != nil {
-			return "", fmt.Errorf("failed to refresh token: %w", err)
-		}
-
-		newReq, err := http.NewRequest("POST", g.chatURL+"/chat/completions", bytes.NewReader(data))
-		if err != nil {
-			return "", err
-		}
-		newReq.Header.Set("Content-Type", "application/json")
-		newReq.Header.Set("Accept", "application/json")
-		newReq.Header.Set("Authorization", "Bearer "+newToken)
-		newReq.Header.Set("x-client-id", g.clientID)
-		newReq.Header.Set("x-request-id", uuid.New().String())
-		newReq.Header.Set("x-session-id", uuid.New().String())
-
-		resp, err = g.httpClient.Do(newReq)
-		if err != nil {
-			return "", err
-		}
-		defer resp.Body.Close()
-	}
-
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
 		return "", fmt.Errorf("chat completion failed: %s (%s)", resp.Status, string(body))
@@ -228,36 +195,12 @@ func (g *GigaChatService) GenerateImage(title, description string) ([]byte, erro
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		body, _ := ioutil.ReadAll(resp.Body)
-		g.logger.Warnw("Unauthorized error received in image generation, trying to refresh token", "response", string(body))
-
-		g.token = ""
-		newToken, err := g.GetToken()
-		if err != nil {
-			return nil, fmt.Errorf("failed to refresh token: %w", err)
-		}
-
-		newReq, err := http.NewRequest("POST", g.chatURL+"/chat/completions", bytes.NewReader(data))
-		if err != nil {
-			return nil, err
-		}
-		newReq.Header.Set("Content-Type", "application/json")
-		newReq.Header.Set("Accept", "application/json")
-		newReq.Header.Set("Authorization", "Bearer "+newToken)
-		newReq.Header.Set("x-client-id", g.clientID)
-		newReq.Header.Set("x-request-id", uuid.New().String())
-		newReq.Header.Set("x-session-id", uuid.New().String())
-
-		resp, err = g.httpClient.Do(newReq)
-		if err != nil {
-			return nil, fmt.Errorf("failed to send request with new token: %w", err)
-		}
-		defer resp.Body.Close()
-	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	g.logger.Debugw("Получен ответ на запрос изображения",
+		"статус", resp.Status,
+		"тело", string(body))
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
 		return nil, fmt.Errorf("image generation failed: %s (%s)", resp.Status, string(body))
 	}
 
@@ -269,6 +212,10 @@ func (g *GigaChatService) GenerateImage(title, description string) ([]byte, erro
 				FunctionsStateID string `json:"functions_state_id"`
 			} `json:"message"`
 		} `json:"choices"`
+	}
+
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	if len(response.Choices) == 0 || response.Choices[0].Message.Content == "" {
@@ -318,31 +265,6 @@ func (g *GigaChatService) GetImageByID(imageID string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to fetch image: %w", err)
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusUnauthorized {
-		body, _ := ioutil.ReadAll(resp.Body)
-		g.logger.Warnw("Unauthorized error received when getting image, trying to refresh token", "response", string(body))
-
-		g.token = ""
-		newToken, err := g.GetToken()
-		if err != nil {
-			return nil, fmt.Errorf("failed to refresh token: %w", err)
-		}
-
-		newReq, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			return nil, err
-		}
-		newReq.Header.Set("Accept", "image/*")
-		newReq.Header.Set("Authorization", "Bearer "+newToken)
-		newReq.Header.Set("x-client-id", g.clientID)
-
-		resp, err = g.httpClient.Do(newReq)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch image with new token: %w", err)
-		}
-		defer resp.Body.Close()
-	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
