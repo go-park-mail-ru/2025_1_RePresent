@@ -154,14 +154,8 @@ class RecommendationService:
             preds = self.ranker.predict(pool)
             best_idx = int(np.argmax(preds))
 
-        for bid, score in zip(feature_ids, preds):
-            banner = banners[bid]
-            logger.info(
-                f"Banner {bid} | Score: {score:.3f} | Price: {banner.max_price} | Sim: {features[bid]['similarity']:.3f}"
-            )
-
-        # 1 %
-        tolerance = 0.01
+        # 10 %
+        tolerance = 0.1
         best_score = preds[best_idx]
 
         candidates_within_range = [
