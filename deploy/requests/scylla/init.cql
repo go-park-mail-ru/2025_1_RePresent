@@ -35,3 +35,4 @@ CREATE TABLE IF NOT EXISTS formats (
 INSERT INTO formats (code, height, width, description) VALUES (1, 300, 300, 'Квадратный формат');
 INSERT INTO formats (code, height, width, description) VALUES (2, 600, 300, 'Прямоугольный формат');
 INSERT INTO formats (code, height, width, description) VALUES (3, 300, 600, 'Высокий формат');
+ 

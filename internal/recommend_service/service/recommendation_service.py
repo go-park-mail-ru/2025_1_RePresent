@@ -50,6 +50,7 @@ class RecommendationService:
         combined_text = (
             f"{slot_name} " * 5 + f"{platform_description} " * 4 + platform_title
         )
+        print(combined_text)
         return self._create_text_embedding(combined_text, None, local_cache)
 
     def _prepare_candidate_features(
