@@ -263,49 +263,16 @@ func (r *BannerRepository) GetBannerByID(id int, requestID string) (*model.Banne
 	return banner, nil
 }
 
-func (r *BannerRepository) GenerateBannerDescription(bannerID int, requestID string) (string, error) {
+func (r *BannerRepository) GenerateBannerDescription(title string) (string, error) {
 	startTime := time.Now()
 
-	r.logger.Debugw("Starting to fetch banner for description generation",
-		"request_id", requestID,
-		"bannerID", bannerID,
-	)
-
-	query := `
-		SELECT title, content
-		FROM banner
-		WHERE id = $1 AND deleted = FALSE;
-	`
-
-	var title, content string
-	err := r.Db.QueryRow(query, bannerID).Scan(&title, &content)
-	if err != nil {
-		r.logger.Errorw("Failed to fetch banner data for description generation",
-			"request_id", requestID,
-			"bannerID", bannerID,
-			"error", err,
-			"timeTaken", time.Since(startTime).String(),
-		)
-		return "", err
-	}
-
-	description, err := r.GigaChatService.GenerateDescription(title, content)
+	description, err := r.GigaChatService.GenerateDescription(title, "")
 	if err != nil {
 		r.logger.Errorw("Failed to generate description using GigaChat",
-			"request_id", requestID,
-			"bannerID", bannerID,
-			"error", err,
 			"timeTaken", time.Since(startTime).String(),
 		)
 		return "", err
 	}
-
-	r.logger.Infow("Successfully generated description for banner",
-		"request_id", requestID,
-		"bannerID", bannerID,
-		"timeTaken", time.Since(startTime).String(),
-	)
-
 	return description, nil
 }
 

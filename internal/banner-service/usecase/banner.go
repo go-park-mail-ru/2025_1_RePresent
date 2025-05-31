@@ -109,23 +109,8 @@ func (b *BannerUsecase) DeleteBannerByID(userID, bannerID int, requestID string)
 	return err
 }
 
-func (b *BannerUsecase) GenerateBannerDescription(userID, bannerID int, requestID string) (string, error) {
-	banner, err := b.BannerRepository.GetBannerByID(bannerID, requestID)
-	if err != nil {
-		return "", err
-	}
-
-	if banner.OwnerID != userID || banner.Deleted {
-		return "", errors.New("banner not found or access denied")
-	}
-
-	description, err := b.BannerRepository.GenerateBannerDescription(bannerID, requestID)
-	if err != nil {
-		return "", err
-	}
-
-	banner.Description = description
-	err = b.BannerRepository.UpdateBanner(*banner, requestID)
+func (b *BannerUsecase) GenerateBannerDescription(title string) (string, error) {
+	description, err := b.BannerRepository.GenerateBannerDescription(title)
 	if err != nil {
 		return "", err
 	}
