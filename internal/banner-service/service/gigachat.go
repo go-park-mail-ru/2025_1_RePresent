@@ -57,13 +57,30 @@ func NewGigaChatService(logger *zap.SugaredLogger, authKey, clientID string) *Gi
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr, Timeout: 30 * time.Second}
-	return &GigaChatService{
+	svc := &GigaChatService{
 		logger:     logger,
 		authKey:    authKey,
 		clientID:   clientID,
 		baseURL:    "https://ngw.devices.sberbank.ru:9443",
 		chatURL:    "https://gigachat.devices.sberbank.ru/api/v1",
 		httpClient: client,
+	}
+
+	if _, err := svc.GetToken(); err != nil {
+		svc.logger.Errorf("initial token fetch failed: %v", err)
+	}
+	go svc.startTokenRefresher()
+	return svc
+}
+
+func (g *GigaChatService) startTokenRefresher() {
+	ticker := time.NewTicker(30 * time.Minute)
+	for range ticker.C {
+		if _, err := g.GetToken(); err != nil {
+			g.logger.Errorf("token refresh error: %v", err)
+		} else {
+			g.logger.Debug("GigaChat token refreshed")
+		}
 	}
 }
 
