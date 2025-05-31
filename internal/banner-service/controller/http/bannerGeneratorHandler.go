@@ -51,23 +51,26 @@ func (h *BannerController) GenerateDescription(w http.ResponseWriter, r *http.Re
 }
 
 func (h *BannerController) GenerateImage(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
-	userCtx, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		easyjson.MarshalToWriter(response.NewResponse(true, "Ошибка аутентификации"), w)
-		return
-	}
-	userID := userCtx.UserID
+	//requestID := r.Context().Value(response.СtxKeyRequestID{}).(string)
+	//userCtx, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
+	//if !ok {
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	easyjson.MarshalToWriter(response.NewResponse(true, "Ошибка аутентификации"), w)
+	//	return
+	//}
 
-	id, err := strconv.Atoi(mux.Vars(r)["banner_id"])
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		easyjson.MarshalToWriter(response.NewResponse(true, "Некорректный ID баннера"), w)
-		return
-	}
+	query := r.URL.Query()
+	title := query.Get("title")
+	// userID := userCtx.UserID
 
-	imgBytes, err := h.BannerUsecase.GenerateBannerImage(userID, id, requestID)
+	//id, err := strconv.Atoi(mux.Vars(r)["banner_id"])
+	//if err != nil {
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	easyjson.MarshalToWriter(response.NewResponse(true, "Некорректный ID баннера"), w)
+	//	return
+	//}
+
+	imgBytes, err := h.BannerUsecase.GenerateBannerImage(title)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		easyjson.MarshalToWriter(response.NewResponse(true, err.Error()), w)
@@ -78,7 +81,7 @@ func (h *BannerController) GenerateImage(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(imgBytes)))
-	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=banner-%d.png", id))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=banner-%d.png"))
 	w.WriteHeader(http.StatusOK)
 
 	w.Write(imgBytes)

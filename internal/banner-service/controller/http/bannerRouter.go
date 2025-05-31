@@ -45,7 +45,7 @@ func SetupBannerRoutes(authenticator *authenticate.Authenticator, bannerUsecase 
 
 	// Ручка генерации картинки
 	muxRouter.Handle(
-		"/api/v1/banner/generate/image/{banner_id:[0-9]+}",
+		"/api/v1/banner/generate/image",
 		logger.LogMiddleware(
 			authenticate.AuthMiddleware(authenticator)(
 				http.HandlerFunc(bannerController.GenerateImage),

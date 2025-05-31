@@ -27,10 +27,10 @@ type BannerRepositoryInterface interface {
 type BannerRepository struct {
 	Db              *sql.DB
 	logger          *zap.SugaredLogger
-	gigaChatService *service.GigaChatService
+	GigaChatService *service.GigaChatService
 }
 
-func NewBannerRepository(endPoint string, logger *zap.SugaredLogger, gigaChatService *service.GigaChatService) *BannerRepository {
+func NewBannerRepository(endPoint string, logger *zap.SugaredLogger, GigaChatService *service.GigaChatService) *BannerRepository {
 	bannerRepo := &BannerRepository{}
 	db, err := sql.Open("postgres", endPoint)
 	if err != nil {
@@ -38,7 +38,7 @@ func NewBannerRepository(endPoint string, logger *zap.SugaredLogger, gigaChatSer
 	}
 	bannerRepo.Db = db
 	bannerRepo.logger = logger
-	bannerRepo.gigaChatService = gigaChatService
+	bannerRepo.GigaChatService = GigaChatService
 	return bannerRepo
 }
 
@@ -289,7 +289,7 @@ func (r *BannerRepository) GenerateBannerDescription(bannerID int, requestID str
 		return "", err
 	}
 
-	description, err := r.gigaChatService.GenerateDescription(title, content)
+	description, err := r.GigaChatService.GenerateDescription(title, content)
 	if err != nil {
 		r.logger.Errorw("Failed to generate description using GigaChat",
 			"request_id", requestID,
@@ -393,7 +393,7 @@ func (r *BannerRepository) GenerateBannerImage(bannerID int, requestID string) (
 		return nil, err
 	}
 
-	imageBytes, err := r.gigaChatService.GenerateImage(title, desc)
+	imageBytes, err := r.GigaChatService.GenerateImage(title)
 	if err != nil {
 		r.logger.Errorw("Ошибка при генерации изображения",
 			"request_id", requestID,
