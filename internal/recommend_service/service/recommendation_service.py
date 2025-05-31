@@ -156,6 +156,8 @@ class RecommendationService:
 
         tolerance = 0.1
         best_score = preds[best_idx]
+        logger.info(best_idx)
+        logger.info(best_score)
         candidates_within_range = [
             idx
             for idx, score in enumerate(preds)
