@@ -130,7 +130,7 @@ class RecommendationService:
         )
 
         temp_index, banner_ids = self._build_temporary_index(banners, local_cache)
-        TOP_K = min(20, len(banners))
+        TOP_K = min(5, len(banners))
         D, I = temp_index.search(np.expand_dims(query_emb, axis=0), k=TOP_K)
         candidate_indices = I[0]
         candidate_ids = [banner_ids[i] for i in candidate_indices]
