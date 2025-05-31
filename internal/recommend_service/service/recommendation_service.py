@@ -157,6 +157,7 @@ class RecommendationService:
         # 10 %
         tolerance = 0.1
         best_score = preds[best_idx]
+        logger.info(preds)
 
         candidates_within_range = [
             idx
