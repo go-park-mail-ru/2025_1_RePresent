@@ -6,6 +6,7 @@ import (
 	"net"
 	"strconv"
 
+	entity "retarget/internal/pay-service/entity"
 	usecase "retarget/internal/pay-service/usecase" // Импорт usecase
 	paymentpb "retarget/pkg/proto/payment"          // Импорт сгенерированного gRPC-кода
 
@@ -42,7 +43,11 @@ func RunGRPCServer(paymentUC usecase.PaymentUsecase) {
 }
 
 func (s *PaymentServer) RegUserActivity(ctx context.Context, req *paymentpb.PaymentRequest) (*paymentpb.PaymentResponse, error) {
-	err := s.paymentUC.RegUserActivity(int(req.GetToUserId()), int(req.GetFromUserId()), int(req.GetAmount()))
+	amount := entity.Decimal{}
+	if err := amount.ParseFromString(req.GetAmount()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "failed to parse amount: %v", err)
+	}
+	err := s.paymentUC.RegUserActivity(int(req.GetToUserId()), int(req.GetFromUserId()), amount)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to process payment: %v", err)
 	}

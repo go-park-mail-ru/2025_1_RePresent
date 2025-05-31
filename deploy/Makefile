@@ -15,9 +15,7 @@ drop_all:
 
 copy_sensitive:
         cp -r ./sensitive/requests ./backend_2025_1_RePresent/deploy/requests && \
-        cp ./sensitive/configs/database.yml ./backend_2025_1_RePresent/configs/database.yml && \
-        cp ./sensitive/configs/mail.yml ./backend_2025_1_RePresent/configs/mail.yml && \
-        cp ./sensitive/configs/auth-redis.yml ./backend_2025_1_RePresent/configs/auth-redis.yml
+        cp ./sensitive/configs/.env ./backend_2025_1_RePresent/configs/.env
         exit 0
 
 deploy_frontend:
@@ -36,9 +34,6 @@ deploy_backend:
         git switch dev && \
         cd .. && \
         make copy_sensitive && \
-        cd backend_2025_1_RePresent/deploy && \
-        python3 -m venv ./venv && \
-        ./venv/bin/python3 ./start.py && \
         docker compose up -d
         exit 0
 

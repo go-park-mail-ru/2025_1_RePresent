@@ -13,14 +13,25 @@ func AuthMiddleware(authenticator AuthenticatorInterface) func(http.Handler) htt
 			cookie, err := r.Cookie("session_id")
 			if err != nil || cookie.Value == "" {
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+
+				if errEncode := json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error())); errEncode != nil {
+					http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+					return
+				}
+
 				return
 			}
 
 			userID, role, err := authenticator.Authenticate(cookie.Value)
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+
+				encodeErr := json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+				if encodeErr != nil {
+					http.Error(w, "Failed to write response", http.StatusInternalServerError)
+					return
+				}
+
 				return
 			}
 

@@ -11,13 +11,17 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		if err := json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed")); err != nil {
+			http.Error(w, "Failed to write response", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
 	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := user.UserID
@@ -25,6 +29,7 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	object, err := c.avatarUsecase.DownloadAvatar(userID, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found"))
 		return
 	}
@@ -37,7 +42,8 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	buf := make([]byte, 512)
 	_, err = object.Read(buf)
 	if err != nil && err != io.EOF {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusNotFound)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read avatar: "+err.Error()))
 		return
 	}
@@ -52,6 +58,7 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 		w.Header().Set("Content-Type", "image/gif")
 	default:
 		w.WriteHeader(http.StatusUnsupportedMediaType)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type"))
 		return
 	}
@@ -59,6 +66,7 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	_, err = object.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek avatar"))
 		return
 	}
@@ -67,6 +75,7 @@ func (c *AvatarController) DownloadAvatarHandler(w http.ResponseWriter, r *http.
 	_, err = io.Copy(w, object)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to download avatar"))
 		return
 	}

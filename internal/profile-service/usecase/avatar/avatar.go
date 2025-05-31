@@ -31,11 +31,6 @@ func (r *AvatarUsecase) generateAvatarName(id int) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (r *AvatarUsecase) DownloadAvatar(userID int, requestID string) (*minio.Object, error) {
-	objectName := r.generateAvatarName(userID)
-	return r.avatarRepository.DownloadFile(objectName, requestID)
-}
-
 func (r *AvatarUsecase) UploadAvatar(userID int, file multipart.File, requestID string) error {
 	if file == nil {
 		return errors.New("Uploaded file is nil")
@@ -46,4 +41,9 @@ func (r *AvatarUsecase) UploadAvatar(userID int, file multipart.File, requestID 
 		return err
 	}
 	return nil
+}
+
+func (r *AvatarUsecase) DownloadAvatar(userID int, requestID string) (*minio.Object, error) {
+	objectName := r.generateAvatarName(userID)
+	return r.avatarRepository.DownloadFile(objectName, requestID)
 }

@@ -22,6 +22,7 @@ func (c *CsatController) SendReview(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
@@ -29,6 +30,7 @@ func (c *CsatController) SendReview(w http.ResponseWriter, r *http.Request) {
 	validate_errors, err := validator.ValidateStruct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, validate_errors))
 		return
 	}
@@ -36,6 +38,7 @@ func (c *CsatController) SendReview(w http.ResponseWriter, r *http.Request) {
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
@@ -51,10 +54,12 @@ func (c *CsatController) SendReview(w http.ResponseWriter, r *http.Request) {
 
 	if err := c.csatUsecase.CreateReview(review); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, err.Error()))
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(response.NewResponse(false, "Thanks for your review"))
 }

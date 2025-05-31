@@ -1,29 +1,33 @@
 package auth
 
 import (
-	"encoding/json"
 	"net/http"
 	entity "retarget/pkg/entity"
 	"time"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
-		return
-	}
-
 	_, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
+		return
 	}
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -42,10 +46,18 @@ func (c *AuthController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = c.authUsecase.Logout(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(entity.NewResponse(false, "Logout Successful"))
+	//nolint:errcheck
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Logout Successful"))
+	resp := entity.NewResponse(false, "Logout Successful")
+	//nolint:errcheck
+	easyjson.MarshalToWriter(&resp, w)
 }

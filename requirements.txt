@@ -1,0 +1,10 @@
+grpcio
+grpcio-tools
+protobuf
+psycopg2-binary
+redis
+loguru
+faiss-cpu
+sentence-transformers
+catboost
+numpy

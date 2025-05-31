@@ -1,53 +1,49 @@
 package adv
 
 import (
-	"context"
 	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
+	model "retarget/internal/adv-service/easyjsonModels"
 	entity "retarget/pkg/entity"
-	protoPayment "retarget/pkg/proto/payment"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
-type IFrame struct {
-	ImageSrc    string
-	Link        string
-	Title       string
-	Description string
-}
-
 func (c *AdvController) IframeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	query := r.URL.Query()
+	debug := query.Get("debug")
 	secret_link := vars["link"]
 	banner, err := c.advUsecase.GetIframe(secret_link)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		if encodeErr := json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error())); encodeErr != nil {
+			http.Error(w, "Failed to write response", http.StatusInternalServerError)
+			return
+		}
+		return
 	}
 	tmpl := template.Must(template.ParseFiles(filepath.Join("templates", "iframe.html")))
-	data := IFrame{
-		ImageSrc:    "http://re-target.ru/api/v1/banner/image/" + banner.Content,
+	bannerID := banner.Id
+	if debug != "" {
+		secret_link = ""
+		bannerID = -1
+	}
+	data := model.IFrame{
+		ImageSrc:    "https://re-target.ru/api/v1/banner/image/" + banner.Content,
 		Link:        banner.Link,
 		Title:       banner.Title,
 		Description: banner.Description,
+		Banner:      bannerID,
+		Slot:        secret_link,
 	}
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Println("template execute error:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
-	log.Println("Начинаю работать с Толей")
-	ctx := context.Background()
-	owner, _ := strconv.Atoi(banner.OwnerID)
-	log.Println("строка в овнера перегналась", banner.OwnerID)
-	userID, _, _ := c.advUsecase.SlotsRepository.GetUserByLink(ctx, secret_link)
-	log.Println("взяли юзера по строке: ", userID)
-	request := protoPayment.PaymentRequest{FromUserId: int32(owner), ToUserId: int32(userID), Amount: int32(1)}
-	log.Println("реквест: ", request)
-	a, _ := c.advUsecase.PaymentClient.RegUserActivity(ctx, &request)
-	log.Println("всё хорошо: ", a)
+
 }

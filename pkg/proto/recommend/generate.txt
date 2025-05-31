@@ -1,0 +1,21 @@
+Генерация
+for golang:
+protoc --go_out=. --go-grpc_out=. pkg/proto/banner/banner.proto
+protoc --go_out=. --go-grpc_out=. pkg/proto/recommend/recommend.proto
+for python:
+python -m grpc_tools.protoc -I. --python_out=. pkg/proto/banner/banner.proto
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. pkg/proto/recommend/recommend.proto
+
+Виртуальное окружение:
+init: python -m venv venv 
+Активация: 
+.\venv\Scripts\Activate.ps1
+НА ЛИНУКСЕ source venv/bin/activate
+python -m pip install --upgrade pip
+библы: 
+pip install grpcio grpcio-tools protobuf psycopg2-binary redis loguru faiss-cpu sentence-transformers catboost numpy
+
+Запуск:
+python -m cmd.recommend_service.main (если переименовать cmd/... и __init__ сделать)
+cd .\cmd\recommend-service\ 
+python main.py

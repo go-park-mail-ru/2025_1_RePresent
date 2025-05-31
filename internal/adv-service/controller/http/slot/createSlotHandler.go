@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"retarget/internal/adv-service/dto"
+	model "retarget/internal/adv-service/easyjsonModels"
 	"retarget/pkg/entity"
 	response "retarget/pkg/entity"
+
+	"github.com/mailru/easyjson"
 )
 
 func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,6 +18,7 @@ func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Reques
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response := entity.NewResponseWithBody(true, "Invalid request body", nil)
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -23,26 +26,22 @@ func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Reques
 	userSession, ok := r.Context().Value(response.UserContextKey).(response.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response.NewResponse(true, "Error of authenticator"))
 	}
 	userID := userSession.UserID
 
 	createdSlot, err := c.slotUsecase.CreateSlot(context.Background(), req, userID)
 	if err != nil {
+		//nolint:errcheck
 		response := entity.NewResponseWithBody(true, err.Error(), nil)
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	responseSlot := struct {
-		Link       string    `json:"link"`
-		SlotName   string    `json:"slot_name"`
-		FormatCode int       `json:"format_code"`
-		MinPrice   string    `json:"min_price"`
-		IsActive   bool      `json:"is_active"`
-		CreatedAt  time.Time `json:"created_at"`
-	}{
+	responseSlot := model.CreateSlotResponse{
 		Link:       createdSlot.Link,
 		SlotName:   createdSlot.SlotName,
 		FormatCode: createdSlot.FormatCode,
@@ -50,8 +49,16 @@ func (c *SlotController) CreateSlotHandler(w http.ResponseWriter, r *http.Reques
 		IsActive:   createdSlot.IsActive,
 		CreatedAt:  createdSlot.CreatedAt,
 	}
-
-	response := entity.NewResponseWithBody(false, "Slot created successfully", responseSlot)
+	s := "Slot created successfully"
+	serv := entity.ServiceResponse{
+		Success: &s,
+	}
+	response := model.ResponseWithSlot{
+		Service: serv,
+		Body:    responseSlot,
+	}
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	//nolint:errcheck
+	// json.NewEncoder(w).Encode(response)
+	easyjson.MarshalToWriter(&response, w)
 }

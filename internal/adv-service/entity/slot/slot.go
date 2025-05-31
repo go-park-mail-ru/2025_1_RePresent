@@ -8,6 +8,7 @@ import (
 
 type Slot struct {
 	Link       string    `json:"link"`
+	UserID     int       `json:"user_id,omitempty"`
 	SlotName   string    `json:"slot_name" validate:"required,min=1,max=100"`
 	FormatCode int       `json:"format_code" validate:"required,min=1"`
 	MinPrice   inf.Dec   `json:"min_price" validate:"required,min=0"`

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	cfg, err := configs.LoadConfigs("configs/auth-redis.yml")
+	cfg, err := configs.LoadConfigs()
 	if err != nil {
 		log.Fatal(err)
 	}
