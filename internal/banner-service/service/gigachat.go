@@ -170,7 +170,7 @@ func (g *GigaChatService) GenerateDescription(title, _ string) (string, error) {
 	return g.Chat([]ChatMessage{{Role: "user", Content: prompt}})
 }
 
-func (g *GigaChatService) GenerateImage(title, description string) ([]byte, error) {
+func (g *GigaChatService) GenerateImage(title string) ([]byte, error) {
 	token, err := g.GetToken()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
@@ -185,7 +185,7 @@ func (g *GigaChatService) GenerateImage(title, description string) ([]byte, erro
 		Model: "GigaChat",
 		Messages: []ChatMessage{
 			{Role: "system", Content: "Ты — профессиональный графический дизайнер баннеров"},
-			{Role: "user", Content: fmt.Sprintf("Создай красивый рекламный баннер без текста размером 512x512 для '%s'. %s", title, description)},
+			{Role: "user", Content: fmt.Sprintf("Создай красивый рекламный баннер без текста размером 512x512 для '%s'.", title)},
 		},
 		FunctionCall: map[string]string{"name": "text2image"},
 		Functions:    []FunctionDef{{Name: "text2image"}},
