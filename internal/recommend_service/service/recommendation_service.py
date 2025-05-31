@@ -50,7 +50,6 @@ class RecommendationService:
         combined_text = (
             f"{slot_name} " * 5 + f"{platform_description} " * 4 + platform_title
         )
-        print(combined_text)
         return self._create_text_embedding(combined_text, None, local_cache)
 
     def _prepare_candidate_features(
@@ -81,7 +80,7 @@ class RecommendationService:
                 new_embeddings[key] = banner_emb
 
             similarity = float(np.dot(query_emb, banner_emb))
-            price_weighted_sim = similarity * 0.3 + banner.max_price * 0.7
+            price_weighted_sim = similarity * 0.45 + banner.max_price * 0.55
 
             features.append(
                 {
@@ -155,8 +154,7 @@ class RecommendationService:
             preds = self.ranker.predict(pool)
             best_idx = int(np.argmax(preds))
 
-        # 10 %
-        tolerance = 0.1
+        tolerance = 0.01
         best_score = preds[best_idx]
 
         candidates_within_range = [
