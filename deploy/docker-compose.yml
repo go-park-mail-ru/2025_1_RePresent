@@ -263,7 +263,7 @@ services:
     networks:
       - retarget_network
 
-  recommend:
+  recommend-service:
     build:
       context: ../
       dockerfile: deploy/recommend.Dockerfile
@@ -275,6 +275,8 @@ services:
     depends_on:
       - redis0
       - postgresdb
+    networks:
+      - retarget_network
 
 volumes:
   pg_data:
