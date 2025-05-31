@@ -123,7 +123,7 @@ class RecommendationService:
     ) -> int:
         if not banners:
             raise ValueError("Empty banners for recommend")
-        logger.info(banners)
+
         local_cache = {}
 
         query_emb = self._build_query_embedding(
