@@ -44,7 +44,7 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 	}
 	defer connPayment.Close()
 
-	connRecommend, err := grpc.NewClient("ReTargetApiPayment:50055", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	connRecommend, err := grpc.NewClient("ReTargetApiRecommend:50055", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
