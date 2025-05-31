@@ -263,7 +263,7 @@ services:
     networks:
       - retarget_network
 
-  recommend-service:
+  recommend:
     build:
       context: ../
       dockerfile: deploy/recommend.Dockerfile
