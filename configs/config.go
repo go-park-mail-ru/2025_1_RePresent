@@ -57,8 +57,10 @@ type MinioConfig struct {
 }
 
 type YooConfig struct {
-	ShopID    string
-	SecretKey string
+	ShopID        string
+	SecretKey     string
+	UUID          string // Добавим UUID для идентификации мерчанта в запросах выплат
+	AccountNumber string // номер кошелька для автоматических выплат
 }
 
 type GigaChatConfig struct {
@@ -128,8 +130,10 @@ func LoadConfigs() (*Config, error) {
 			SlotKeyspace: os.Getenv("SCYLLA_SLOT_KEYSPACE"),
 		},
 		Yoo: YooConfig{
-			ShopID:    os.Getenv("YOO_SHOP_ID"),
-			SecretKey: os.Getenv("YOO_SECRET_KEY"),
+			ShopID:        os.Getenv("YOO_SHOP_ID"),
+			SecretKey:     os.Getenv("YOO_SECRET_KEY"),
+			UUID:          os.Getenv("YOO_UUID"),
+			AccountNumber: os.Getenv("YOO_ACCOUNT_NUMBER"), // добавили кошелёк для выплат
 		},
 		GigaChat: GigaChatConfig{
 			AuthKey:  os.Getenv("GIGACHAT_AUTH_KEY"),

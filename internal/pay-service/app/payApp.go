@@ -34,11 +34,11 @@ func Run(cfg *configs.Config, logger *zap.SugaredLogger) {
 		logger.Fatal("failed to initialize NoticeRepository")
 	}
 	defer noticeRepository.Close()
-	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 1*time.Hour, cfg.AttemptRedis.Attempts)
+	attemptRepository := repoAttempt.NewAttemptRepository(cfg.AttemptRedis.EndPoint, cfg.AttemptRedis.Password, cfg.AttemptRedis.Database, 24*time.Hour, cfg.AttemptRedis.Attempts)
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
-	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository, cfg.Yoo.ShopID, cfg.Yoo.SecretKey, httpClient)
+	payUsecase := usecasePay.NewPayUsecase(logger, payRepository, noticeRepository, attemptRepository, cfg.Yoo.ShopID, cfg.Yoo.SecretKey, cfg.Yoo.UUID, cfg.Yoo.AccountNumber, httpClient)
 
 	go func() {
 		log.Println("Starting gRPC server...")

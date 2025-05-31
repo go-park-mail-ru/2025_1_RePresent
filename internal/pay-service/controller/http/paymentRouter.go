@@ -28,6 +28,8 @@ func SetupPaymentRoutes(authenticator *authenticate.Authenticator, PaymentUsecas
 
 	muxRouter.Handle("/api/v1/payment/transactions/{transactionid}", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.GetTransactionByID))))
 	muxRouter.Handle("/api/v1/payment/transactions", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.CreateTransaction)))).Methods("POST")
+	muxRouter.Handle("/api/v1/payment/withdraw", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.WithdrawFunds)))).Methods("POST")
+	muxRouter.Handle("/api/v1/payment/withdraw/redirect", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(PaymentController.WithdrawFundsRedirect)))).Methods("POST")
 
 	return muxRouter
 }

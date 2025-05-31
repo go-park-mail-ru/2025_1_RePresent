@@ -254,7 +254,7 @@ func (r *PaymentRepository) GetPendingTransactions(userID int) ([]entity.Transac
 	}
 	defer rows.Close()
 
-	list := make([]entity.Transaction, 0) // Initialize as empty slice
+	list := make([]entity.Transaction, 0)
 	for rows.Next() {
 		var tx entity.Transaction
 		if err := rows.Scan(&tx.ID, &tx.TransactionID, &tx.UserID, &tx.Amount, &tx.Type, &tx.Status, &tx.CreatedAt); err != nil {
