@@ -1,0 +1,76 @@
+name: Run Tests & Linter
+
+on:
+  push:
+    branches:
+      - main
+      - RE-59-add-sql-logs
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check current branch
+        run: |
+          echo "CI started in branch: $GITHUB_REF_NAME"
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.24"
+
+      - name: Run go mod tidy (install dependencies)
+        run: |
+          go mod tidy
+      - name: Create .env files
+        run: |
+          echo "Create env..."
+      - name: Install golangci-lint (latest)
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          golangci-lint --version
+
+      - name: Run tests
+        run: |
+          cd internal/
+          make cover
+
+      - name: Run linter
+        run: |
+          golangci-lint run --skip-files=".*_test\.go" ./...
+  CD:
+    runs-on: ubuntu-latest
+    # needs: CI
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check current branch
+        run: |
+          echo "CD started in branch: $GITHUB_REF_NAME"
+
+      - name: Copy scripts
+        uses: appleboy/scp-action@master
+        with:
+          host: 193.33.153.154
+          port: 51275
+          username: "ubuntu"
+          key: ${{ secrets.SSH_KEY }}
+          source: ".github/scripts/"
+          target: "/home/ubuntu/scripts"
+          command_timeout: 10m
+
+      - name: Deploy from script
+        uses: appleboy/ssh-action@master
+        with:
+          host: 193.33.153.154
+          port: 51275
+          username: "ubuntu"
+          key: ${{ secrets.SSH_KEY }}
+          command_timeout: 20m
+          script: |
+            chmod +x /home/ubuntu/scripts/.github/scripts/deploy.sh
+          # /home/ubuntu/scripts/.github/scripts/deploy.sh

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -16,9 +17,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("не удалось инициализировать логгер: %v", err)
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to sync logger: %v\n", err)
+		}
+	}()
 	sugar := logger.Sugar()
-	cfg, err := configs.LoadConfigs("configs/database.yml", "configs/mail.yml", "configs/auth-redis.yml", "configs/minio.yml")
+	cfg, err := configs.LoadConfigs()
 	if err != nil {
 		sugar.Error(err)
 	}
