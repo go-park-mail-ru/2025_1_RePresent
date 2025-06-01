@@ -9,12 +9,28 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
-	"gopkg.in/inf.v0"
 )
 
 var (
 	ErrSlotNotFound = errors.New("slot not found")
 )
+
+type Batch interface {
+	WithContext(ctx context.Context) Batch
+	Query(stmt string, values ...interface{})
+}
+
+type Iter interface {
+	Scan(dest ...interface{}) bool
+	Close() error
+}
+
+type Query interface {
+	WithContext(ctx context.Context) Query
+	Scan(dest ...interface{}) error
+	Iter() Iter
+	Exec() error
+}
 
 type SlotRepositoryInterface interface {
 	CreateSlot(ctx context.Context, userID int, s slot.Slot) (slot.Slot, error)
@@ -25,6 +41,13 @@ type SlotRepositoryInterface interface {
 	GetUserByLink(ctx context.Context, link string) (int, time.Time, error)
 	HealthCheck(ctx context.Context) error
 	GetSlotInfoByLink(ctx context.Context, link string) (slot.Slot, error)
+}
+
+type SlotSession interface {
+	Query(stmt string, values ...interface{}) *gocql.Query
+	NewBatch(batchType gocql.BatchType) *gocql.Batch
+	ExecuteBatch(batch *gocql.Batch) error
+	Close()
 }
 
 type SlotRepository struct {
@@ -195,17 +218,17 @@ func (r *SlotRepository) GetUserByLink(ctx context.Context, link string) (int, t
 
 func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (slot.Slot, error) {
 	var s slot.Slot
-	var minPriceDecimal string
 
 	err := r.session.Query(
-		`SELECT link, slot_name, format_code, min_price, is_active, created_at 
+		`SELECT link, user_id, slot_name, format_code, min_price, is_active, created_at 
 		FROM slots WHERE link = ? LIMIT 1`,
 		link,
 	).WithContext(ctx).Scan(
 		&s.Link,
+		&s.UserID,
 		&s.SlotName,
 		&s.FormatCode,
-		&minPriceDecimal,
+		&s.MinPrice,
 		&s.IsActive,
 		&s.CreatedAt,
 	)
@@ -215,11 +238,6 @@ func (r *SlotRepository) GetSlotInfoByLink(ctx context.Context, link string) (sl
 			return slot.Slot{}, ErrSlotNotFound
 		}
 		return slot.Slot{}, err
-	}
-
-	s.MinPrice = *inf.NewDec(0, 0)
-	if _, ok := s.MinPrice.SetString(minPriceDecimal); !ok {
-		return slot.Slot{}, errors.New("failed to parse min_price")
 	}
 
 	return s, nil

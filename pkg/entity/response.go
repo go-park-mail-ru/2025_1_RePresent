@@ -1,10 +1,12 @@
 package entity
 
+//easyjson:json
 type ServiceResponse struct {
 	Error   *string `json:"error,omitempty"`   // Может быть null или отсутствовать
 	Success *string `json:"success,omitempty"` // Может быть null или отсутствовать
 }
 
+//easyjson:json
 type Response struct {
 	Service ServiceResponse `json:"service"`
 }

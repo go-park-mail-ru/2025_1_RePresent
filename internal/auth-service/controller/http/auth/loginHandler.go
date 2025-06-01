@@ -1,52 +1,74 @@
 package auth
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
+	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
+
+	"github.com/mailru/easyjson"
 )
 
-type LoginRequest struct {
-	Email    string `json:"email" validate:"email,required"`
-	Password string `json:"password" validate:"required,min=8"`
-	Role     int    `json:"role" validate:"required,gte=1,lte=2"`
-}
-
 func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
+	var requestID string
+	if v := r.Context().Value(entity.СtxKeyRequestID{}); v != nil {
+		if id, ok := v.(string); ok {
+			requestID = id
+		}
+	}
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		resp := entity.NewResponse(true, "Method Not Allowed")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
-	var req LoginRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	var req model.LoginRequest
+	data, _ := io.ReadAll(r.Body)
+	err := req.UnmarshalJSON(data)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 	errors, err := validator.ValidateStruct(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, errors))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, errors))
+		resp := entity.NewResponse(true, errors)
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
-	user, err := c.authUsecase.Login(req.Email, req.Password, req.Role, requestID)
-
+	user, err := c.authUsecase.Login(r.Context(), req.Email, req.Password, req.Role, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	session, err := c.authUsecase.AddSession(user.ID, user.Role)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
+		resp := entity.NewResponse(true, err.Error())
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -62,5 +84,9 @@ func (c *AuthController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(entity.NewResponse(false, "Login Successful"))
+	//nolint:errcheck
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Login Successful"))
+	resp := entity.NewResponse(false, "Login Succesful")
+	//nolint:errcheck
+	easyjson.MarshalToWriter(&resp, w)
 }

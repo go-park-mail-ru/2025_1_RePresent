@@ -13,6 +13,7 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -20,6 +21,7 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := user.UserID
@@ -28,10 +30,12 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 	if profile == nil {
 		if errors.Is(err, entityProfile.ErrProfileNotFound) {
 			w.WriteHeader(http.StatusNotFound)
+			//nolint:errcheck
 			json.NewEncoder(w).Encode(entity.NewResponse(true, "Profile not found"))
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, err.Error()))
 		return
 	}
@@ -46,5 +50,6 @@ func (c *ProfileController) GetProfileHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(response)
 }

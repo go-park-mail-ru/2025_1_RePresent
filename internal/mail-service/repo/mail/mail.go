@@ -2,33 +2,69 @@ package mail
 
 import (
 	"crypto/tls"
+	"errors"
 	"log"
+	"net"
 	"net/smtp"
+	"strings"
+	"time"
+)
+
+var (
+	ErrInvalidEmail           = errors.New("invalid email address")
+	ErrNoMXRecords            = errors.New("no MX records found")
+	ErrSMTPConnect            = errors.New("failed to connect to SMTP server")
+	ErrEmailNotExists         = errors.New("email address does not exist")
+	ErrSMTPCommand            = errors.New("SMTP command failed")
+	ErrDialMX                 = errors.New("failed to dial MX server")
+	ErrSMTPClientCreate       = errors.New("failed to create SMTP client for verification")
+	ErrVerificationMailFailed = errors.New("MAIL FROM command failed during verification")
+	ErrVerificationRcptFailed = errors.New("RCPT TO command failed during verification")
 )
 
 type MailRepositoryInterface interface {
 	Send(to, msg string) error
+	VerifyEmail(email string) (bool, error)
 
-	OpenConnection(smtpServer, smtpPort, username, password string) (*smtp.Client, error)
+	OpenConnection() (*smtp.Client, error)
 	CloseConnection() error
 }
 
 type MailRepository struct {
-	smtpClient  *smtp.Client
+	smtpClient *smtp.Client
+
 	from_sender string
+	smtpServer  string
+	smtpPort    string
+	username    string
+	password    string
 }
 
 func NewMailRepository(smtpServer, smtpPort, username, password, from_sender string) *MailRepository {
-	mailRepo := &MailRepository{from_sender: from_sender}
-	smtpClient, err := mailRepo.OpenConnection(smtpServer, smtpPort, username, password)
-	if err != nil {
-		log.Fatal(err)
+	mailRepo := &MailRepository{
+		from_sender: from_sender,
+		smtpServer:  smtpServer,
+		smtpPort:    smtpPort,
+		username:    username,
+		password:    password,
 	}
-	mailRepo.smtpClient = smtpClient
+
+	if err := mailRepo.ensureConnected(); err != nil {
+		log.Fatalf("Failed to connect to SMTP server: %v", err)
+	}
+
 	return mailRepo
 }
 
 func (r *MailRepository) Send(to, msg string) error {
+	if err := r.ensureConnected(); err != nil {
+		return err
+	}
+
+	isExist, err := r.VerifyEmail(to)
+	if !isExist || err != nil {
+		return err
+	}
 	if err := r.smtpClient.Mail(r.from_sender); err != nil {
 		return err
 	}
@@ -51,31 +87,90 @@ func (r *MailRepository) Send(to, msg string) error {
 	return nil
 }
 
-func (r *MailRepository) OpenConnection(smtpServer, smtpPort, username, password string) (*smtp.Client, error) {
-	var smtpClient *smtp.Client
+func (r *MailRepository) VerifyEmail(email string) (bool, error) {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return false, ErrInvalidEmail
+	}
+	domain := parts[1]
 
+	mxRecords, err := net.LookupMX(domain)
+	if err != nil || len(mxRecords) == 0 {
+		return false, ErrNoMXRecords
+	}
+
+	host := mxRecords[0].Host
+
+	conn, err := net.DialTimeout("tcp", host+":25", 10*time.Second)
+	if err != nil {
+		return false, ErrDialMX
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, host)
+	if err != nil {
+		return false, ErrSMTPClientCreate
+	}
+	defer func() {
+		if err := client.Quit(); err != nil {
+			log.Printf("Error quitting verification client: %v", err)
+		}
+	}()
+
+	if err := client.Mail(r.from_sender); err != nil {
+		return false, ErrVerificationMailFailed
+	}
+	if err := client.Rcpt(email); err != nil {
+		return false, ErrVerificationRcptFailed
+	}
+
+	return true, nil
+}
+
+func (r *MailRepository) OpenConnection() (*smtp.Client, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
-		ServerName:         smtpServer,
+		ServerName:         r.smtpServer,
 	}
 
-	email_connect, err := tls.Dial("tcp", smtpServer+":"+smtpPort, tlsConfig)
+	conn, err := tls.Dial("tcp", r.smtpServer+":"+r.smtpPort, tlsConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	smtpClient, err = smtp.NewClient(email_connect, smtpServer)
+	smtpClient, err := smtp.NewClient(conn, r.smtpServer)
 	if err != nil {
 		return nil, err
 	}
 
-	err = smtpClient.Auth(smtp.PlainAuth("", username, password, smtpServer))
+	err = smtpClient.Auth(smtp.PlainAuth("", r.username, r.password, r.smtpServer))
 	if err != nil {
 		return nil, err
 	}
+
 	return smtpClient, nil
 }
 
 func (r *MailRepository) CloseConnection() error {
 	return r.smtpClient.Quit()
+}
+
+func (r *MailRepository) ensureConnected() error {
+	if r.smtpClient != nil {
+		if err := r.smtpClient.Noop(); err == nil {
+			return nil
+		}
+
+		if err := r.smtpClient.Quit(); err != nil {
+			log.Printf("Error closing old SMTP connection: %v", err)
+		}
+		r.smtpClient = nil
+	}
+
+	client, err := r.OpenConnection()
+	if err != nil {
+		return err
+	}
+	r.smtpClient = client
+	return nil
 }

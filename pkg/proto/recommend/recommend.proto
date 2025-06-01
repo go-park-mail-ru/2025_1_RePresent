@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package recommendpb;
+
+option go_package = "pkg/proto/recommend;recommendpb";
+
+import "pkg/proto/banner/banner.proto";
+
+message RecommendationRequest {
+  int64 platform_id = 1;
+  string slot_name = 2;
+  repeated int64 banner_id = 3;
+}
+
+service RecommendService {
+  rpc GetBannerByMetaData(RecommendationRequest) returns (bannerpb.Banner);
+}

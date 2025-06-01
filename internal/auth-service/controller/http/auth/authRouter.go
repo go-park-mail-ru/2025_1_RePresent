@@ -1,13 +1,23 @@
 package auth
 
 import (
+	"context"
 	"net/http"
+	entityAuth "retarget/internal/auth-service/entity/auth"
 	usecaseAuth "retarget/internal/auth-service/usecase/auth"
 	logger "retarget/pkg/middleware"
 	authenticate "retarget/pkg/middleware/auth"
 
 	"github.com/gorilla/mux"
 )
+
+type AuthUsecase interface {
+	Login(ctx context.Context, email, pass string, role int, reqID string) (*entityAuth.User, error)
+	AddSession(userID, role int) (*entityAuth.Session, error)
+	GetUser(ctx context.Context, id int, reqID string) (*entityAuth.User, error)
+	Logout(sessionID string) error
+	Register(ctx context.Context, username, email, password string, role int, reqID string) (*entityAuth.User, error)
+}
 
 type AuthController struct {
 	authUsecase *usecaseAuth.AuthUsecase
@@ -21,8 +31,8 @@ func SetupAuthRoutes(authenticator *authenticate.Authenticator, authUsecase *use
 	muxRouter := mux.NewRouter()
 	authController := NewAuthController(authUsecase)
 
-	muxRouter.Handle("/api/v1/auth/me", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler))))
-	muxRouter.Handle("/api/v1/auth/logout", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler))))
+	muxRouter.Handle("/api/v1/auth/me", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.GetCurrentUserHandler)))).Methods("GET")
+	muxRouter.Handle("/api/v1/auth/logout", logger.LogMiddleware(authenticate.AuthMiddleware(authenticator)(http.HandlerFunc(authController.LogoutHandler)))).Methods("POST")
 
 	muxRouter.Handle("/api/v1/auth/login", logger.LogMiddleware(http.HandlerFunc(authController.LoginHandler)))
 	// muxRouter.HandleFunc("/api/v1/auth/login/mail", authController.LoginConfirmHandler)

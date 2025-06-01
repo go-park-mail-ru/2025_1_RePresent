@@ -3,22 +3,23 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	model "retarget/internal/auth-service/easyjsonModels"
 	entity "retarget/pkg/entity"
 
-	"gopkg.in/inf.v0"
+	"github.com/mailru/easyjson"
 )
 
-type UserResponse struct {
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
-	Balance  inf.Dec `json:"balance"`
-	Role     int     `json:"role"`
-}
-
 func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
+	var requestID string
+	if v := r.Context().Value(entity.СtxKeyRequestID{}); v != nil {
+		if id, ok := v.(string); ok {
+			requestID = id
+		}
+	}
+
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -26,30 +27,40 @@ func (c *AuthController) GetCurrentUserHandler(w http.ResponseWriter, r *http.Re
 	userSession, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
+		resp := entity.NewResponse(true, "Error of authenticator")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 	}
 	userID := userSession.UserID
 
-	user, err := c.authUsecase.GetUser(userID, requestID)
+	user, err := c.authUsecase.GetUser(r.Context(), userID, requestID)
 	if err != nil {
-		panic("UNIMPLIMENTED")
+		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to get user"))
+		resp := entity.NewResponse(true, "Failed to get user")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
+		return
 	}
 
-	userResponse := &UserResponse{
+	userResponse := &model.UserResponse{
 		Username: user.Username,
 		Email:    user.Email,
 		Balance:  *user.Balance.Dec,
 		Role:     user.Role,
 	}
 
-	response := struct {
-		Service entity.Response `json:"service"`
-		Body    UserResponse    `json:"body"`
-	}{
+	response := model.UserResponseWithErr{
 		Service: entity.NewResponse(false, "Sent"),
 		Body:    *userResponse,
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	//nolint:errcheck
+	resp := response
+	//nolint:errcheck
+	easyjson.MarshalToWriter(&resp, w)
 }

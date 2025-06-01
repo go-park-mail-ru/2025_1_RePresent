@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   redis0:
     image: redis:alpine
@@ -13,9 +11,9 @@ services:
     networks:
       - retarget_network
     volumes:
-      - ./auth-data:/data
+      - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
+      test: [ "CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -24,29 +22,36 @@ services:
     image: postgres:17
     container_name: ReTargetDataBase
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASSWORD}
+      POSTGRES_DB: ${PSQL_DB_NAME}
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     ports:
-      - "${PORT}:5432"
-    command: [
-      "postgres",
-      "-c", "password_encryption=scram-sha-256",
-      "-c", "max_connections=200",
-      "-c", "log_statement=all", # или dll
-      "-c", "ssl=off",
-      "-c", "shared_buffers=256MB",
-      "-c", "work_mem=16MB"
-    ]
+      - "${PSQL_PORT}:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "password_encryption=scram-sha-256"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=512MB"
+      - "-c"
+      - "work_mem=64MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "checkpoint_timeout=30min"
+      - "-c"
+      - "log_statement=ddl" # для тестов all можно
     networks:
       - retarget_network
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./requests/postgre/createDataBase.sql:/docker-entrypoint-initdb.d/createDataBase.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${PSQL_USER} -d ${PSQL_PASSWORD}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -62,12 +67,12 @@ services:
     ports:
       - "9000:9000"
     environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY_ID}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_ACCESS_KEY}
     networks:
       - retarget_network
     volumes:
-      - ./minio-data:/data
+      - minio_data:/data
     command: server /data
 
   auth:
@@ -96,6 +101,7 @@ services:
     depends_on:
       - postgresdb
       - redis0
+      - minio
     networks:
       - retarget_network
 
@@ -110,6 +116,7 @@ services:
     depends_on:
       - postgresdb
       - redis0
+      - minio
     networks:
       - retarget_network
 
@@ -125,6 +132,8 @@ services:
     depends_on:
       - postgresdb
       - redis0
+      - banner
+      - kafka
     networks:
       - retarget_network
 
@@ -162,8 +171,8 @@ services:
     image: yandex/clickhouse-server:latest
     container_name: ReTargetClickHouse
     ports:
-      - "8124:8124"  # HTTP
-      - "9124:9124"  # TCP
+      - "8123:8123" # HTTP
+      - "9124:9000" # TCP
 
     volumes:
       - clickhouse_data:/var/lib/clickhouse
@@ -192,7 +201,7 @@ services:
     networks:
       - retarget_network
 
-# OR IF IN scylla_scripts: docker exec ReTargetScylla cqlsh -f /scylla_scripts/init.cql
+  # OR IF IN scylla_scripts: docker exec ReTargetScylla cqlsh -f /scylla_scripts/init.cql
   scylla:
     image: scylladb/scylla
     container_name: ReTargetScylla
@@ -202,14 +211,70 @@ services:
       - scylla_data:/var/lib/scylla
       - ./requests/scylla/init.cql:/scylla_scripts/init.cql
     environment:
-      CASSANDRA_PASSWORD: 12345678
+      CASSANDRA_PASSWORD: ${SCYLLA_PASSWORD}
       SCYLLA_LOGLEVEL: "error"
       SCYLLA_LOGMODE: "none"
-    command: [
-      "--developer-mode=1",
-      "--overprovisioned=0",
-      "--default-log-level", "error",
-    ]
+    command: [ "--developer-mode=1", "--overprovisioned=0", "--default-log-level", "error" ]
+    networks:
+      - retarget_network
+
+  # docker exec -it ReTargetKafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --topic balance_notification_topic --partitions 3 --replication-factor 1
+  kafka:
+    image: apache/kafka:latest
+    container_name: ReTargetKafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_KRAFT_CLUSTER_ID: Lf7k9sXqTgGJYhM8bNcDvw
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list > /dev/null 2>&1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - retarget_network
+
+  mail:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+      target: mail-service
+    container_name: ReTargetApiMail
+    ports:
+      - "8036:8036"
+    depends_on:
+      - clickhouse
+      - scylla
+      - redis0
+    networks:
+      - retarget_network
+
+  recommend:
+    build:
+      context: ../
+      dockerfile: deploy/recommend.Dockerfile
+    container_name: ReTargetApiRecommend
+    ports:
+      - "50055:50055"
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - redis0
+      - postgresdb
     networks:
       - retarget_network
 
@@ -218,7 +283,11 @@ volumes:
   clickhouse_data:
   grafana_data:
   scylla_data:
+  minio_data:
+  redis_data:
+
 
 networks:
   retarget_network:
-    external: true
+    driver: bridge
+    name: retarget_network

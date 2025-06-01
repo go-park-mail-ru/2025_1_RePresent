@@ -12,11 +12,11 @@ type Payment struct {
 }
 
 type Transaction struct {
-	ID            int       `json:"id"`
-	TransactionID string    `json:"transactionId"`
-	UserID        int       `json:"user_id"`
-	Amount        int64     `json:"amount"`
-	Type          string    `json:"type"`
-	Status        string    `json:"status"`
-	CreatedAt     time.Time `json:"created_at"`
+	ID            int       `db:"id"`
+	TransactionID string    `db:"transaction_id"`
+	UserID        int       `db:"user_id"`
+	Amount        float64   `db:"amount"`
+	Type          string    `db:"type"`
+	Status        int       `db:"status"`
+	CreatedAt     time.Time `db:"created_at"`
 }

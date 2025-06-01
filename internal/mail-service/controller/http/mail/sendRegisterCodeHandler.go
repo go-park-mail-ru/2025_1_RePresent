@@ -7,6 +7,8 @@ import (
 	entity "retarget/pkg/entity"
 	"retarget/pkg/utils/validator"
 	"strings"
+
+	"github.com/mailru/easyjson"
 )
 
 type RegisterCodeRequest struct {
@@ -17,7 +19,11 @@ type RegisterCodeRequest struct {
 func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
+		resp := entity.NewResponse(true, "Method Not Allowed")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -25,14 +31,22 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 	err := json.NewDecoder(r.Body).Decode(&registerCodeRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request body"))
+		resp := entity.NewResponse(true, "Invalid request body")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	errorMessages, err := validator.ValidateStruct(registerCodeRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, errorMessages))
+		resp := entity.NewResponse(true, errorMessages)
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
@@ -40,15 +54,27 @@ func (c *MailController) SendRegisterCodeHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "5") {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(entity.NewResponse(true, "Такой почты не существует"))
+			//nolint:errcheck
+			// json.NewEncoder(w).Encode(entity.NewResponse(true, "Такой почты не существует"))
+			resp := entity.NewResponse(true, "Такой почты не существует")
+			//nolint:errcheck
+			easyjson.MarshalToWriter(&resp, w)
 			return
 		}
 
 		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(entity.NewResponse(true, "Ошибка, повторите отправку позже"))
+		//nolint:errcheck
+		// json.NewEncoder(w).Encode(entity.NewResponse(true, "Ошибка, повторите отправку позже"))
+		resp := entity.NewResponse(true, "Ошибка, повторите отправку позже")
+		//nolint:errcheck
+		easyjson.MarshalToWriter(&resp, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(entity.NewResponse(false, "Sent"))
+	//nolint:errcheck
+	// json.NewEncoder(w).Encode(entity.NewResponse(false, "Sent"))
+	resp := entity.NewResponse(false, "Sent")
+	//nolint:errcheck
+	easyjson.MarshalToWriter(&resp, w)
 }

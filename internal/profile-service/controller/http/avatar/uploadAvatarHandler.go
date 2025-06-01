@@ -11,6 +11,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	requestID := r.Context().Value(entity.СtxKeyRequestID{}).(string)
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Method Not Allowed"))
 		return
 	}
@@ -18,12 +19,14 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	user, ok := r.Context().Value(entity.UserContextKey).(entity.UserContext)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Error of authenticator"))
 	}
 	userID := user.UserID
 
 	if r.ContentLength > (10 << 20) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file size(max size 10MB): size your file is too large"))
 		return
 	}
@@ -31,6 +34,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Invalid request"))
 		return
 	}
@@ -38,6 +42,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	file, _, err := r.FormFile("avatar")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Avatar not found in request"))
 		return
 	}
@@ -47,6 +52,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	_, err = file.Read(buf)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to read avatar"))
 		return
 	}
@@ -60,6 +66,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	}
 	if _, ok := allowedTypes[fileType]; !ok {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Unsupported file type: upload only .png, .jpg, .jpeg or .gif files"))
 		return
 	}
@@ -67,6 +74,7 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to seek avatar"))
 		return
 	}
@@ -74,11 +82,13 @@ func (c *AvatarController) UploadAvatarHandler(w http.ResponseWriter, r *http.Re
 	err = c.avatarUsecase.UploadAvatar(userID, file, requestID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
 		json.NewEncoder(w).Encode(entity.NewResponse(true, "Failed to upload avatar"))
 		c.logger.Errorw("Failed to upload avatar", "err", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	json.NewEncoder(w).Encode(entity.NewResponse(false, "Got and Saved"))
 }

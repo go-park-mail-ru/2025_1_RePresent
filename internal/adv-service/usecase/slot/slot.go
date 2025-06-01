@@ -25,6 +25,7 @@ type SlotUsecaseInterface interface {
 	CreateSlot(ctx context.Context, req dto.CreateRequest, userID int) (slot.Slot, error)
 	UpdateSlot(ctx context.Context, req dto.UpdateRequest, userID int) (slot.Slot, error)
 	DeleteSlot(ctx context.Context, link string, userID int) error
+	CheckLink(link string) error
 	GetUserSlots(ctx context.Context, userID int) ([]slot.Slot, error)
 	GetFormats(ctx context.Context) ([]slot.Format, error)
 }
@@ -51,6 +52,12 @@ func (uc *SlotUsecase) CreateSlot(ctx context.Context, req dto.CreateRequest, us
 		CreatedAt:  time.Now().UTC(),
 	}
 	return uc.repo.CreateSlot(ctx, userID, s)
+}
+
+func (uc *SlotUsecase) CheckLink(link string) error {
+	ctx := context.Background()
+	_, _, err := uc.repo.GetUserByLink(ctx, link)
+	return err
 }
 
 func (uc *SlotUsecase) UpdateSlot(ctx context.Context, req dto.UpdateRequest, userID int) (slot.Slot, error) {
